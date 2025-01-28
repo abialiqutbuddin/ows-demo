@@ -64,7 +64,7 @@ class ProfilePDFScreenState extends State<ProfilePDFScreen> {
     try {
       // Fetch the PDF from the backend
       final response =
-      await http.get(Uri.parse('http://localhost:3001/fetch-pdf1'));
+      await http.get(Uri.parse('http://localhost:3002/fetch-pdf1'));
 
       if (response.statusCode == 200) {
         final pdfData = response.bodyBytes;

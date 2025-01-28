@@ -171,7 +171,7 @@ class FamilyScreenMState extends State<FamilyScreenM> {
                                       borderRadius: BorderRadius.circular(8),
                                       child: Image.network(
                                         // Replace with your backend API
-                                        'http://localhost:3001/fetch-image?url=${Uri.encodeComponent(
+                                        'http://localhost:3002/fetch-image?url=${Uri.encodeComponent(
                                           (member is Parent
                                               ? member.image
                                               : (member as Family).image) ??
