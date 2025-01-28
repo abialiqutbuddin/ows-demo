@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
+import 'package:pdfx/pdfx.dart';
 import '../model/family_model.dart';
 import '../model/member_model.dart';
 import '../model/request_form_model.dart';
@@ -85,10 +87,35 @@ class Api {
         final data = json.decode(response.body);
         return data['nextReqFormId'];
       } else {
-        throw Exception("Failed to fetch data. Status code: ${response.statusCode}");
+        throw Exception(
+            "Failed to fetch data. Status code: ${response.statusCode}");
       }
     } catch (e) {
       throw Exception("Failed to fetch data. Status code: $e");
+    }
+  }
+
+  static String fetchImage(String imageUrl) {
+    return '$baseUrl/fetch-image?url=${Uri.encodeComponent(imageUrl)}';
+  }
+
+  static Future<Future<PdfDocument>> fetchAndLoadPDF(String its) async {
+    try {
+      // Fetch the PDF from the backend
+      final response =
+          //await http.get(Uri.parse('$baseUrl/fetch-pdf$its'));
+          await http.get(Uri.parse('$baseUrl/fetch-pdf1'));
+
+      if (response.statusCode == 200) {
+        final pdfData = response.bodyBytes;
+
+        // Load the PDF document from memory
+        return PdfDocument.openData(pdfData);
+      } else {
+        throw Exception('Failed to load PDF');
+      }
+    } catch (e) {
+      throw Exception(e);
     }
   }
 }

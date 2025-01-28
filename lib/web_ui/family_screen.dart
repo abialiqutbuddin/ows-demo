@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../api/api.dart';
 import '../constants/dummy_data.dart';
 import '../controller/profile_pdf_controller.dart';
 import '../model/family_model.dart';
@@ -105,7 +106,7 @@ class FamilyScreenWState extends State<FamilyScreenW> {
         //   family: widget.family,
         // ));
         Get.to(() => ProfilePDFScreen(
-          member: userProfile,
+          member: userProfile1,
           family: widget.family,
         ));
       } else {
@@ -203,17 +204,10 @@ class FamilyScreenWState extends State<FamilyScreenW> {
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.start,
                                     children: [
-                                      // Photo(member is Parent
-                                      //                                         ? member.image
-                                      //                                         : (member as Family).image) ??
-                                      //                                         '',
                                       ClipRRect(
                                         borderRadius: BorderRadius.circular(8),
                                         child: Image.network(
-                                          // Use your backend API to fetch the image
-                                          'http://localhost:3001/fetch-image?url=${Uri.encodeComponent(
-                                            (member is Parent ? member.image : (member as Family).image) ?? '',
-                                          )}',
+                                        Api.fetchImage((member is Parent ? member.image : (member as Family).image) ?? '').toString(),
                                           height: 150,
                                           width: 110,
                                           fit: BoxFit.contain,

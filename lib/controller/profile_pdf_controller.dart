@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:ows/api/api.dart';
 import 'package:pdfx/pdfx.dart';
 import '../mobile_ui/profile_pdf_screen.dart';
 import '../model/family_model.dart';
 import '../model/member_model.dart';
 import '../web_ui/profile_pdf_screen.dart';
-import 'package:http/http.dart' as http;
 
 class ProfilePDFScreen extends StatefulWidget {
   final UserProfile member;
@@ -27,7 +28,7 @@ class ProfilePDFScreenState extends State<ProfilePDFScreen> {
   @override
   void initState() {
     super.initState();
-    fetchAndLoadPDF();
+    fetchAndLoadPDF(widget.member.itsId.toString());
   }
 
   @override
@@ -49,45 +50,39 @@ class ProfilePDFScreenState extends State<ProfilePDFScreen> {
 
     return screenWidth <= mobileBreakpoint
         ? ProfilePDFScreenM(
-      family: widget.family,
-      member: widget.member,
-      pdfController: pdfController!,
-    )
+            family: widget.family,
+            member: widget.member,
+            pdfController: pdfController!,
+          )
         : ProfilePDFScreenW(
-      family: widget.family,
-      member: widget.member,
-      pdfController: pdfController!,
-    );
+            family: widget.family,
+            member: widget.member,
+            pdfController: pdfController!,
+          );
   }
 
-  Future<void> fetchAndLoadPDF() async {
+  void fetchAndLoadPDF(String its) async {
     try {
-      // Fetch the PDF from the backend
-      final response =
-      await http.get(Uri.parse('http://localhost:3002/fetch-pdf1'));
+      setState(() {
+        _isLoading = true;
+      });
+      // Load the PDF document from memory
+      final document = await Api.fetchAndLoadPDF(its);
 
-      if (response.statusCode == 200) {
-        final pdfData = response.bodyBytes;
-
-        // Load the PDF document from memory
-        final document = PdfDocument.openData(pdfData);
-
-        setState(() {
-          pdfController = PdfControllerPinch(
-            document: document,
-            viewportFraction: 1.0,
-          );
-          _isLoading = false; // Stop loading once initialized
-        });
-      } else {
-        throw Exception('Failed to load PDF');
-      }
+      setState(() {
+        pdfController = PdfControllerPinch(
+          document: document,
+          viewportFraction: 1.0,
+        );
+        _isLoading = false; // Stop loading once initialized
+      });
     } catch (e) {
       setState(() {
         _isLoading = false; // Stop loading on error
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load PDF: $e')),
+      Get.snackbar(
+        "Failure",
+        "Failed to Load PDF"
       );
     }
   }
