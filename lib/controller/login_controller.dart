@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:ows/api/api.dart';
+import 'package:ows/constants/constants.dart';
 import 'package:ows/controller/family_screen_controller.dart';
 import 'package:ows/controller/state_management/state_manager.dart';
 import 'package:get/get.dart';
-
+import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/dummy_data.dart';
 import '../mobile_ui/login_screen.dart';
 import '../model/family_model.dart';
@@ -34,24 +35,31 @@ class LoginController extends StatelessWidget {
     await Future.delayed(const Duration(seconds: 2)); // Simulate a delay
     stateController.toggleLoading(false); // Stop loading
 
+    Constants().saveToPrefs('appliedByIts', '${dummyFamily.its}');
+    Constants().saveToPrefs('appliedByName', '${dummyFamily.fullName}');
+
     Get.to(() => FamilyScreenController(family: dummyFamily));
   }
 
   // Fetch family data and navigate to FamilyScreen
-  Future<void> fetchAndNavigate(String itsId) async {
+  Future<void> fetchAndNavigate(String itsId,String? name) async {
     stateController.toggleLoading(true); // Start loading
     try {
       Family? family = await Api.fetchFamilyProfile(itsId);
-      stateController.toggleLoading(false); // Stop loading
 
       if (family != null) {
+        Constants().saveToPrefs('appliedByIts', '${family.its}');
+        Constants().saveToPrefs('appliedByName', '${family.fullName}');
+        stateController.toggleLoading(false); // Stop loading
         Get.to(() => FamilyScreenController(family: family));
       } else {
         Get.snackbar("Error", "No family data found for ITS ID: $itsId");
+        stateController.toggleLoading(false); // Stop loading
       }
     } catch (e) {
       stateController.toggleLoading(false); // Stop loading
       Get.snackbar("Error", "Failed to fetch family data: $e");
     }
   }
+
 }

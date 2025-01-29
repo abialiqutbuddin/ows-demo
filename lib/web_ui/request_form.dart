@@ -23,6 +23,8 @@ class RequestFormWState extends State<RequestFormW> {
   final StateController statecontroller = Get.put(StateController());
   UserProfile? member;
   bool isLoading = true; // Track loading state
+  String? appliedByName;
+  String? appliedbyIts;
 
   @override
   void initState() {
@@ -35,12 +37,14 @@ class RequestFormWState extends State<RequestFormW> {
       isLoading = true;
     });
 
-    member = widget.member; // Assuming data comes from the widget's member!
-    // If you fetch member! details, perform it here asynchronously
+    member = widget.member;
 
     setState(() {
       isLoading = false;
     });
+
+    appliedbyIts = await Constants().getFromPrefs('appliedByIts');
+    appliedByName = await Constants().getFromPrefs('appliedByName');
   }
 
   @override
@@ -142,7 +146,8 @@ class RequestFormWState extends State<RequestFormW> {
                     child: Text(
                       "Add Guardian",
                       style: TextStyle(color: Colors.white),
-                    )),
+                    )
+                ),
               ),
               SizedBox(
                 height: 35,
@@ -171,7 +176,7 @@ class RequestFormWState extends State<RequestFormW> {
                   ),
                   onPressed: () async {
                     final url =
-                        'https://www.mhbtalabulilm.com/home'; // Replace with your URL
+                        'https://www.talabulilm.com/profile/'; // Replace with your URL
                     if (await canLaunchUrl(Uri.parse(url))) {
                       await launchUrl(
                         Uri.parse(url),
@@ -212,11 +217,11 @@ class RequestFormWState extends State<RequestFormW> {
                         ),
                       ),
                     ),
-                    elevation: WidgetStateProperty.all(0), // Flat button
+                    elevation: WidgetStateProperty.all(0), 
                   ),
                   onPressed: () async {
                     final url =
-                        'https://www.paktalim.com/admin/login'; // Replace with your URL
+                        'https://paktalim.com/admin/profile/create';
                     if (await canLaunchUrl(Uri.parse(url))) {
                       await launchUrl(
                         Uri.parse(url),
@@ -384,8 +389,8 @@ class RequestFormWState extends State<RequestFormW> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   spacing: 15,
                   children: [
-                    profileBox('Applied By', '30445124', context),
-                    profileBox('Name', 'Abi Ali Qutbuddin', context),
+                    profileBox('Applied By', 'ITS', context),
+                    profileBox('Name', 'Name', context),
                   ],
                 ),
               )
@@ -487,11 +492,15 @@ class RequestFormWState extends State<RequestFormW> {
   }
 
   Widget profileBox(String title, String value, BuildContext context) {
+    if(value == 'ITS'){
+      value = appliedbyIts ?? '';
+    }else{
+      value = appliedByName ?? '';
+    }
     return Container(
       alignment: Alignment.centerLeft,
       padding: EdgeInsets.all(10),
       width: Constants().responsiveWidth(context, 0.12),
-      height: 80,
       decoration: BoxDecoration(
           color: Color(0xffffead1),
           borderRadius: BorderRadius.all(Radius.circular(5))),

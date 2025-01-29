@@ -76,7 +76,7 @@ class RequestFormController extends GetxController {
     }
 
     // Regular expression to allow only alphabets and spaces
-    final regex = RegExp(r'^[a-zA-Z\s]+$');
+    final regex = RegExp(r'^[a-zA-Z0-9\s\-\/\.]+$');
 
     if (!regex.hasMatch(value)) {
       return "Degree can only contain alphabets and spaces";
@@ -267,6 +267,7 @@ class RequestFormState extends State<RequestForm> {
     controller.whatsappController.addListener(validateForm);
     controller.fundsController.addListener(validateForm);
     controller.descriptionController.addListener(validateForm);
+    fetchDefaultValues();
   }
 
   Future<void> fetchReqId() async {
@@ -274,6 +275,28 @@ class RequestFormState extends State<RequestForm> {
     setState(() {
       controller.reqId;
     });
+  }
+
+  void fetchDefaultValues() {
+    String? email = widget.member.email;
+    String? phone = widget.member.mobileNo;
+    String? whatsapp = widget.member.whatsappNo;
+
+    if (widget.member.future != [] && widget.member.future != null && widget.member.future!.isNotEmpty) {
+      String? subject = widget.member.future!.first.subject ?? '';
+      String? institution = widget.member.future!.first.institute ?? '';
+      String? city = widget.member.future!.first.city ?? 'Select City';
+      String? study = widget.member.future!.first.study ?? '';
+
+      controller.classDegreeController.text = subject;
+      controller.institutionController.text = institution;
+      controller.selectedCity = city;
+      controller.studyController.text = study;
+    }
+
+    controller.emailController.text = email ?? '';
+    controller.phoneController.text = phone ?? '';
+    controller.whatsappController.text = whatsapp ?? '';
   }
 
   void validateForm() {

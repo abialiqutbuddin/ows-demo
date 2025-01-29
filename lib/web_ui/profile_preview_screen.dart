@@ -119,7 +119,7 @@ class ProfilePreview extends StatelessWidget {
                   elevation: WidgetStateProperty.all(0), // Flat button
                 ),
                 onPressed: () async {
-                  Get.to(LoginController());
+                  Constants().Logout();
                 },
                 child: Text(
                   "Logout",

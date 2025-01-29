@@ -1,7 +1,7 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
-import 'package:pdfx/pdfx.dart';
 import '../model/family_model.dart';
 import '../model/member_model.dart';
 import '../model/request_form_model.dart';
@@ -99,7 +99,7 @@ class Api {
     return '$baseUrl/fetch-image?url=${Uri.encodeComponent(imageUrl)}';
   }
 
-  static Future<Future<PdfDocument>> fetchAndLoadPDF(String its) async {
+  static Future<Uint8List> fetchAndLoadPDF(String its) async {
     try {
       // Fetch the PDF from the backend
       final response =
@@ -110,7 +110,9 @@ class Api {
         final pdfData = response.bodyBytes;
 
         // Load the PDF document from memory
-        return PdfDocument.openData(pdfData);
+        return
+          //PdfDocument.openData(pdfData);
+        pdfData;
       } else {
         throw Exception('Failed to load PDF');
       }

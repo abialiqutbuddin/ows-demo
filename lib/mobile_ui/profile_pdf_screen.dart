@@ -1,23 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:ows/constants/constants.dart';
 import 'package:ows/controller/request_form_controller.dart';
 import 'package:ows/model/member_model.dart';
 import 'package:ows/web_ui/request_form.dart';
 import 'package:get/get.dart';
-import 'package:pdfx/pdfx.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import '../controller/login_controller.dart';
 import '../model/family_model.dart';
 
 class ProfilePDFScreenM extends StatefulWidget {
   final UserProfile member;
   final Family family;
-  final PdfControllerPinch pdfController;
+  //final PdfControllerPinch pdfController;
+  final Uint8List pdfData; // Pass the PDF data as Uint8List
 
   const ProfilePDFScreenM({
     super.key,
     required this.member,
     required this.family,
-    required this.pdfController,
+    required this.pdfData,
+    //required this.pdfController,
   });
 
   @override
@@ -25,61 +29,80 @@ class ProfilePDFScreenM extends StatefulWidget {
 }
 
 class ProfilePDFScreenMState extends State<ProfilePDFScreenM> {
-  late PdfControllerPinch _pdfController;
-  bool _isLoading = true; // Loading state
-
-  @override
-  void initState() {
-    super.initState();
-    loadPdfController();
-  }
-
-  Future<void> loadPdfController() async {
-    setState(() {
-      _isLoading = true; // Start loading
-    });
-
-    await Future.delayed(const Duration(milliseconds: 500)); // Simulate loading delay
-    _pdfController = widget.pdfController;
-
-    setState(() {
-      _isLoading = false; // Stop loading
-    });
-  }
+  //late PdfControllerPinch _pdfController;
+  bool _isLoading = false; // Loading state
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xfffff7ec),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF008759),
-        title: const Text(
-          'Profile Preview',
-          style: TextStyle(color: Colors.white),
-        ),
-        actions: [
-          // Request Button
-          TextButton(
-            onPressed: () {
-              Get.to(() => RequestForm(member: widget.member));
-            },
-            child: const Text(
-              "Request",
-              style: TextStyle(color: Colors.white),
+          backgroundColor: Colors.brown,
+          centerTitle: false,
+          title: const Text(
+            'Profile Preview',
+            style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold), // White title text
+          ),
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 15.0),
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+              onPressed: () {
+                Navigator.pop(context); // Default back navigation
+              },
             ),
           ),
-          // Logout Button
-          TextButton(
-            onPressed: () {
-              Get.to(() => LoginController());
-            },
-            child: const Text(
-              "Logout",
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-        ],
-      ),
+          actions: [
+            Container(
+              height: 35,
+              padding: EdgeInsets.only(right: 15),
+              child: Row(
+                spacing: 5,
+                children: [
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF008759),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5),
+                        side: BorderSide(color: Color(0xFF008759), width: 2),
+                      ),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 15), // Removes extra padding
+                    ),
+                    onPressed: () {
+                      Get.to(() => RequestForm(member: widget.member));
+                    },
+                    //icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
+                    child: Text(
+                      "Request",
+                      style: TextStyle(color: Colors.black, fontSize: 12),
+                    ),
+                  ),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5),
+                        side: BorderSide(color: Color(0xFF008759), width: 2),
+                      ),
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 15), // Removes extra padding
+                    ),
+                    onPressed: () {
+                      Constants().Logout();
+                    },
+                    //icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
+                    child: Text(
+                      "Logout",
+                      style: TextStyle(color: Colors.black, fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          ]),
+      backgroundColor: const Color(0xfffff7ec),
       body: SizedBox(
         height: MediaQuery.of(context).size.height,
         child: Stack(
@@ -89,12 +112,11 @@ class ProfilePDFScreenMState extends State<ProfilePDFScreenM> {
               Column(
                 children: [
                   Expanded(
-                    child: PdfViewPinch(
-                      controller: _pdfController,
-                      padding: 0,
-                      scrollDirection: Axis.vertical,
+                    child: SfPdfViewer.memory(
+                      widget.pdfData,
+                      pageSpacing: 0,
                     ),
-                  ),
+                  )
                 ],
               ),
             // Loading overlay

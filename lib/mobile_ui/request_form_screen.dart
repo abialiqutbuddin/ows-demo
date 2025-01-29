@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:ows/model/member_model.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../api/api.dart';
 import '../constants/constants.dart';
 import '../controller/request_form_controller.dart';
@@ -22,6 +23,9 @@ class RequestFormMState extends State<RequestFormM> {
   final StateController statecontroller = Get.put(StateController());
   UserProfile? member;
   bool isLoading = true; // Track loading state
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  String? appliedByName;
+  String? appliedbyIts;
 
   @override
   void initState() {
@@ -37,13 +41,224 @@ class RequestFormMState extends State<RequestFormM> {
     setState(() {
       isLoading = false;
     });
+    appliedbyIts = await Constants().getFromPrefs('appliedByIts');
+    appliedByName = await Constants().getFromPrefs('appliedByName');
+
   }
 
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
-      appBar: AppBar(),
+      key: _scaffoldKey,
+      appBar: AppBar(
+          backgroundColor: Colors.brown,
+          centerTitle: false,
+          title: const Text(
+            'Request Form',
+            style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold), // White title text
+          ),
+          leading: Padding(
+            padding: const EdgeInsets.only(left: 15.0),
+            child: IconButton(
+              icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
+              onPressed: () {
+                Navigator.pop(context); // Default back navigation
+              },
+            ),
+          ),
+          actions: [
+            Container(
+              height: 35,
+              padding: EdgeInsets.only(right: 15),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF008759),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                ),
+                onPressed: () {
+                  _scaffoldKey.currentState
+                      ?.openDrawer(); // Open drawer when clicked
+                },
+                //icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
+                child: Row(
+                  spacing: 5,
+                  children: [
+                    Text(
+                      "More Options",
+                      style: TextStyle(color: Colors.black),
+                    ),
+                    Icon(Icons.arrow_drop_down,color: Colors.black,)
+                  ],
+                ),
+              ),
+            )
+          ]),
+      drawer: Drawer(
+        backgroundColor: Color(0xffffead1),
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            SizedBox(height: 100,),
+            Padding(
+              padding: const EdgeInsets.all(15.0),
+              child: Column(
+                spacing: 25,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height: 35,
+                    width: double.infinity,
+                    child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF008759),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                        ),
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return
+                                //GuardianFormDialog();
+                              SizedBox.shrink();
+                            },
+                          );
+                        },
+                        child: Text(
+                          "Add Guardian",
+                          style: TextStyle(color: Colors.white),
+                        )
+                    ),
+                  ),
+                  SizedBox(
+                    height: 35,
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.resolveWith<Color>(
+                              (Set<WidgetState> states) {
+                            if (states.contains(WidgetState.hovered)) {
+                              return Colors.transparent; // No hover effect
+                            }
+                            return Colors.transparent; // Default color
+                          },
+                        ),
+                        overlayColor: WidgetStateProperty.all(
+                            Colors.transparent), // No ripple effect
+                        shape: WidgetStateProperty.all(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
+                            side: BorderSide(
+                              color: const Color(0xFF008759),
+                              width: 2, // Green border
+                            ),
+                          ),
+                        ),
+                        elevation: WidgetStateProperty.all(0), // Flat button
+                      ),
+                      onPressed: () async {
+                        final url =
+                            'https://www.mhbtalabulilm.com/home'; // Replace with your URL
+                        if (await canLaunchUrl(Uri.parse(url))) {
+                          await launchUrl(
+                            Uri.parse(url),
+                            mode: LaunchMode
+                                .externalApplication, // Ensures it opens in a new tab or external browser
+                          );
+                        } else {
+                          throw 'Could not launch $url';
+                        }
+                      },
+                      child: Text(
+                        "Carry me to Talabulilm",
+                        style: TextStyle(
+                            color: Colors.black, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 35,
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ButtonStyle(
+                        backgroundColor: WidgetStateProperty.resolveWith<Color>(
+                              (Set<WidgetState> states) {
+                            if (states.contains(WidgetState.hovered)) {
+                              return Colors.transparent; // No hover effect
+                            }
+                            return Colors.transparent; // Default color
+                          },
+                        ),
+                        overlayColor: WidgetStateProperty.all(
+                            Colors.transparent), // No ripple effect
+                        shape: WidgetStateProperty.all(
+                          RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
+                            side: BorderSide(
+                              color: const Color(0xFF008759),
+                              width: 2, // Green border
+                            ),
+                          ),
+                        ),
+                        elevation: WidgetStateProperty.all(0), // Flat button
+                      ),
+                      onPressed: () async {
+                        final url =
+                            'https://www.paktalim.com/admin/login'; // Replace with your URL
+                        if (await canLaunchUrl(Uri.parse(url))) {
+                          await launchUrl(
+                            Uri.parse(url),
+                            mode: LaunchMode.externalApplication,
+                          );
+                        } else {
+                          throw 'Could not launch $url';
+                        }
+                      },
+                      child: Text(
+                        "Carry me to PakTalim",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 35,
+                    width: double.infinity,
+                    child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF008759),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(5),
+                          ),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: Text(
+                          "View my education profile",
+                          style: TextStyle(color: Colors.white),
+                        )),
+                  ),
+                  // IconButton(
+                  //   onPressed: () {
+                  //     Navigator.pop(context);
+                  //   },
+                  //   icon: Icon(Icons.close),
+                  // )
+                ],
+              ),
+            )
+          ],
+        ),
+      ),
       backgroundColor: Color(0xfffffcf6),
       body: Stack(
         children: [
@@ -218,13 +433,15 @@ class RequestFormMState extends State<RequestFormM> {
               )
             ],
           ),
-          SizedBox(height: 5,),
+          SizedBox(
+            height: 5,
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.start,
             spacing: 15,
             children: [
-              profileBox('Applied By', '30445124', context),
-              profileBox('Name', 'Abi Ali Qutbuddin', context),
+              profileBox('Applied By', 'ITS', context),
+              profileBox('Name', 'Name', context),
             ],
           ),
           lastEducation()
@@ -233,26 +450,33 @@ class RequestFormMState extends State<RequestFormM> {
     );
   }
 
+
   Widget profileBox(String title, String value, BuildContext context) {
-    return Container(
-      alignment: Alignment.centerLeft,
-      padding: EdgeInsets.all(10),
-      width: Constants().responsiveWidth(context, 0.12),
-      height: 80,
-      decoration: BoxDecoration(
-          color: Color(0xffffead1),
-          borderRadius: BorderRadius.all(Radius.circular(5))),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 15,
-        children: [
-          Text(title,
-              style:
-                  TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-          Text(value,
-              style: TextStyle(
-                  color: Constants().green, fontWeight: FontWeight.bold))
-        ],
+    if(value == 'ITS'){
+      value = appliedbyIts ?? '';
+    }else{
+    value = appliedByName ?? '';
+    }
+    return Expanded(
+      child: Container(
+        alignment: Alignment.centerLeft,
+        padding: EdgeInsets.all(10),
+        width: Constants().responsiveWidth(context, 0.12),
+        decoration: BoxDecoration(
+            color: Color(0xffffead1),
+            borderRadius: BorderRadius.all(Radius.circular(5))),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 15,
+          children: [
+            Text(title,
+                style:
+                    TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+            Text(value,
+                style: TextStyle(
+                    color: Constants().green, fontWeight: FontWeight.bold))
+          ],
+        ),
       ),
     );
   }
@@ -413,7 +637,7 @@ class RequestFormMState extends State<RequestFormM> {
               filled: true,
               fillColor: const Color(0xfffffcf6),
               contentPadding:
-              const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             ),
           ),
         ),
@@ -422,7 +646,7 @@ class RequestFormMState extends State<RequestFormM> {
         Builder(
           builder: (context) {
             String? error =
-            this.controller.validateField(label, controller.text);
+                this.controller.validateField(label, controller.text);
             if (error != null) {
               return Text(
                 error,
@@ -452,21 +676,18 @@ class RequestFormMState extends State<RequestFormM> {
             Column(
               spacing: 12,
               children: [
-                _buildField("Class / Degree Program",
-                    controller.classDegreeController),
                 _buildField(
-                    "Institution", controller.institutionController),
+                    "Class / Degree Program", controller.classDegreeController),
+                _buildField("Institution", controller.institutionController),
                 _buildDropdown(
                     "City", controller.selectedCity, controller.cities,
-                        (newValue) {
-                      setState(() {
-                        controller.selectedCity = newValue!;
-                      });
-                    }),
+                    (newValue) {
+                  setState(() {
+                    controller.selectedCity = newValue!;
+                  });
+                }),
                 _buildField("Study", controller.studyController),
-                _buildDropdown(
-                    "Subject / Course",
-                    controller.selectedSubject,
+                _buildDropdown("Subject / Course", controller.selectedSubject,
                     controller.subjects, (newValue) {
                   setState(() {
                     controller.selectedSubject = newValue!;
@@ -480,10 +701,8 @@ class RequestFormMState extends State<RequestFormM> {
               children: [
                 _buildField("Year", controller.yearController),
                 _buildField("Email", controller.emailController),
-                _buildField(
-                    "Phone Number", controller.phoneController),
-                _buildField(
-                    "WhatsApp Number", controller.whatsappController),
+                _buildField("Phone Number", controller.phoneController),
+                _buildField("WhatsApp Number", controller.whatsappController),
               ],
             ),
           ],
@@ -507,8 +726,7 @@ class RequestFormMState extends State<RequestFormM> {
               spacing: 12,
               children: [
                 _buildField("Funds", controller.fundsController),
-                _buildField(
-                    "Description", controller.descriptionController,
+                _buildField("Description", controller.descriptionController,
                     height: 100),
               ],
             ),
@@ -527,46 +745,46 @@ class RequestFormMState extends State<RequestFormM> {
                 ),
                 onPressed: controller.isButtonEnabled
                     ? () async {
-                  statecontroller.toggleLoading(true);
-                  if (controller.mainFormKey.currentState!.validate() &&
-                      controller.fundsFormKey.currentState!.validate()) {
-                    var newData = RequestFormModel(
-                      classDegree: controller.classDegreeController.text,
-                      institution: controller.institutionController.text,
-                      city: controller.selectedCity,
-                      study: controller.studyController.text,
-                      subject: controller.selectedSubject,
-                      year: controller.yearController.text,
-                      email: controller.emailController.text,
-                      phoneNumber: controller.phoneController.text,
-                      whatsappNumber: controller.whatsappController.text,
-                      fundAmount: controller.fundsController.text,
-                      memberITS: member!.itsId.toString(),
-                      appliedby: member!.itsId.toString(),
-                      fundDescription:
-                      controller.descriptionController.text,
-                      mohalla: member!.jamaatId.toString(),
-                      address: member!.address ?? "",
-                      dob: member!.dob ?? "",
-                      fullName: member!.fullName ?? "",
-                      firstName: member!.firstName ?? "",
-                      applyDate: DateTime.now().toString(),
-                    );
+                        statecontroller.toggleLoading(true);
+                        if (controller.mainFormKey.currentState!.validate() &&
+                            controller.fundsFormKey.currentState!.validate()) {
+                          var newData = RequestFormModel(
+                            classDegree: controller.classDegreeController.text,
+                            institution: controller.institutionController.text,
+                            city: controller.selectedCity,
+                            study: controller.studyController.text,
+                            subject: controller.selectedSubject,
+                            year: controller.yearController.text,
+                            email: controller.emailController.text,
+                            phoneNumber: controller.phoneController.text,
+                            whatsappNumber: controller.whatsappController.text,
+                            fundAmount: controller.fundsController.text,
+                            memberITS: member!.itsId.toString(),
+                            appliedby: member!.itsId.toString(),
+                            fundDescription:
+                                controller.descriptionController.text,
+                            mohalla: member!.jamaatId.toString(),
+                            address: member!.address ?? "",
+                            dob: member!.dob ?? "",
+                            fullName: member!.fullName ?? "",
+                            firstName: member!.firstName ?? "",
+                            applyDate: DateTime.now().toString(),
+                          );
 
-                    // Call the API to add request
-                    int returnCode = await Api.addRequestForm(newData);
-                    await Future.delayed(const Duration(seconds: 2));
-                    statecontroller.toggleLoading(false);
+                          // Call the API to add request
+                          int returnCode = await Api.addRequestForm(newData);
+                          await Future.delayed(const Duration(seconds: 2));
+                          statecontroller.toggleLoading(false);
 
-                    if (returnCode == 200) {
-                      Get.snackbar("Success!",
-                          "Data successfully inserted in Database!");
-                    } else {
-                      Get.snackbar(
-                          "Error", "Failed to insert Data in Database!");
-                    }
-                  }
-                }
+                          if (returnCode == 200) {
+                            Get.snackbar("Success!",
+                                "Data successfully inserted in Database!");
+                          } else {
+                            Get.snackbar(
+                                "Error", "Failed to insert Data in Database!");
+                          }
+                        }
+                      }
                     : null, // Disable the button when validation fails
                 child: const Text(
                   "Request",

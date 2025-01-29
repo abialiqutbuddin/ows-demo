@@ -1,24 +1,24 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:ows/controller/request_form_controller.dart';
 import 'package:ows/model/member_model.dart';
 import 'package:ows/constants/constants.dart';
-import 'package:ows/web_ui/request_form.dart';
 import 'package:get/get.dart';
-import 'package:pdfx/pdfx.dart';
-import '../controller/login_controller.dart';
 import '../model/family_model.dart';
+
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 
 class ProfilePDFScreenW extends StatefulWidget {
   final UserProfile member;
   final Family family;
-  final PdfControllerPinch pdfController;
+  final Uint8List pdfData; // Pass the PDF data as Uint8List
+
 
   const ProfilePDFScreenW({
     super.key,
     required this.member,
     required this.family,
-    required this.pdfController,
+    required this.pdfData,
   });
 
   @override
@@ -26,29 +26,6 @@ class ProfilePDFScreenW extends StatefulWidget {
 }
 
 class ProfilePDFScreenWState extends State<ProfilePDFScreenW> {
-  PdfControllerPinch? _pdfController;
-
-  bool _isLoading = true; // Loading state
-
-  @override
-  void initState() {
-    super.initState();
-    loadPdfController();
-  }
-
-  Future<void> loadPdfController() async {
-    setState(() {
-      _isLoading = true; // Start loading
-    });
-
-    await Future.delayed(
-        const Duration(milliseconds: 500)); // Simulate loading delay
-    _pdfController = widget.pdfController;
-
-    setState(() {
-      _isLoading = false; // Stop loading
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -71,21 +48,12 @@ class ProfilePDFScreenWState extends State<ProfilePDFScreenW> {
   }
 
   Widget buildPdf(BuildContext context) {
+
     return Expanded(
-      child: _pdfController != null
-          ? SizedBox.expand(
-              child: PdfViewPinch(
-                controller: _pdfController!,
-                scrollDirection: Axis.vertical,
-                padding: 0,
-              ),
-            )
-          : Center(
-              child: LoadingAnimationWidget.discreteCircle(
-                color: Colors.white,
-                size: 50,
-              ),
-            ),
+      child: SfPdfViewer.memory(
+          widget.pdfData,
+        pageSpacing: 0,
+      ),
     );
   }
 
@@ -141,7 +109,7 @@ class ProfilePDFScreenWState extends State<ProfilePDFScreenW> {
                   elevation: WidgetStateProperty.all(0), // Flat button
                 ),
                 onPressed: () async {
-                  Get.to(() => LoginController());
+                  Constants().Logout();
                 },
                 child: Text(
                   "Logout",

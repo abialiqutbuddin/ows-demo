@@ -40,7 +40,8 @@ dependencies:
   get: ^4.6.6
   timelines_plus: ^1.0.4
   http: ^1.2.2
-  pdfx: ^2.8.0
+  shared_preferences: ^2.4.0
+  syncfusion_flutter_pdfviewer: ^28.1.41
 
 dev_dependencies:
   flutter_test:

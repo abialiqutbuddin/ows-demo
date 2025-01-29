@@ -1,7 +1,8 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ows/api/api.dart';
-import 'package:pdfx/pdfx.dart';
 import '../mobile_ui/profile_pdf_screen.dart';
 import '../model/family_model.dart';
 import '../model/member_model.dart';
@@ -22,8 +23,8 @@ class ProfilePDFScreen extends StatefulWidget {
 }
 
 class ProfilePDFScreenState extends State<ProfilePDFScreen> {
-  PdfControllerPinch? pdfController; // Nullable to handle initialization
   bool _isLoading = true; // Loading state
+  late final Uint8List pdfData; // Pass the PDF data as Uint8List
 
   @override
   void initState() {
@@ -41,23 +42,26 @@ class ProfilePDFScreenState extends State<ProfilePDFScreen> {
     if (_isLoading) {
       // Show loading indicator while PDF is loading
       return Scaffold(
-        backgroundColor: const Color(0xfffff7ec),
+        backgroundColor: Color(0xffdbbb99),
         body: Center(
           child: CircularProgressIndicator(),
         ),
       );
     }
 
-    return screenWidth <= mobileBreakpoint
+    return
+      screenWidth <= mobileBreakpoint
         ? ProfilePDFScreenM(
             family: widget.family,
             member: widget.member,
-            pdfController: pdfController!,
+        pdfData: pdfData,
           )
-        : ProfilePDFScreenW(
+        :
+    ProfilePDFScreenW(
             family: widget.family,
             member: widget.member,
-            pdfController: pdfController!,
+            //pdfController: pdfController!,
+      pdfData: pdfData,
           );
   }
 
@@ -67,13 +71,9 @@ class ProfilePDFScreenState extends State<ProfilePDFScreen> {
         _isLoading = true;
       });
       // Load the PDF document from memory
-      final document = await Api.fetchAndLoadPDF(its);
+      pdfData = await Api.fetchAndLoadPDF(its);
 
-      setState(() {
-        pdfController = PdfControllerPinch(
-          document: document,
-          viewportFraction: 1.0,
-        );
+       setState(() {
         _isLoading = false; // Stop loading once initialized
       });
     } catch (e) {
