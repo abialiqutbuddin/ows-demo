@@ -42,7 +42,7 @@ class LoginController extends StatelessWidget {
   }
 
   // Fetch family data and navigate to FamilyScreen
-  Future<void> fetchAndNavigate(String itsId,String? name) async {
+  Future<void> fetchAndNavigate(String itsId) async {
     stateController.toggleLoading(true); // Start loading
     try {
       Family? family = await Api.fetchFamilyProfile(itsId);

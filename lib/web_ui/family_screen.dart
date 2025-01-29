@@ -95,9 +95,9 @@ class FamilyScreenWState extends State<FamilyScreenW> {
     });
     try {
       // Call the API to fetch user profile
-      //final userProfile = await Api.fetchUserProfile(itsId.toString()); // Add API call
-      final userProfile1 = userProfile;
-      if (userProfile1 != null) {
+      final userProfile = await Api.fetchUserProfile(itsId.toString()); // Add API call
+     // final userProfile1 = userProfile;
+      if (userProfile != null) {
         // Get.to(() => ProfilePreview(
         //   member: userProfile,
         //   family: widget.family,
@@ -107,7 +107,7 @@ class FamilyScreenWState extends State<FamilyScreenW> {
         //   family: widget.family,
         // ));
         Get.to(() => ProfilePDFScreen(
-          member: userProfile1,
+          member: userProfile,
           family: widget.family,
         ));
       } else {

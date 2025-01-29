@@ -167,8 +167,8 @@ class LoginPageW extends StatelessWidget {
                                             }
 
                                             // Call the fetchAndNavigate function
-                                            loginLogic.performLogin();
-                                            //loginLogic.fetchAndNavigate(itsId);
+                                           // loginLogic.performLogin();
+                                            loginLogic.fetchAndNavigate(itsId);
                                           },
                                           child: Row(
                                             mainAxisAlignment: MainAxisAlignment.center,
