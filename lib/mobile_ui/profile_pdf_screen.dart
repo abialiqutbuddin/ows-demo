@@ -34,15 +34,20 @@ class ProfilePDFScreenMState extends State<ProfilePDFScreenM> {
 
   @override
   Widget build(BuildContext context) {
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final double screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       appBar: AppBar(
           backgroundColor: Colors.brown,
           centerTitle: false,
-          title: const Text(
+          title: Text(
             'Profile Preview',
             style: TextStyle(
                 color: Colors.black,
-                fontWeight: FontWeight.bold), // White title text
+                fontWeight: FontWeight.bold,
+              fontSize: screenWidth*0.05
+            ), // White title text
           ),
           leading: Padding(
             padding: const EdgeInsets.only(left: 15.0),

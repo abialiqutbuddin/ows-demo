@@ -124,6 +124,9 @@ class FamilyScreenWState extends State<FamilyScreenW> {
 
   @override
   Widget build(BuildContext context) {
+    final double screenHeight = MediaQuery.of(context).size.height;
+    final double screenWidth = MediaQuery.of(context).size.width;
+
     return Container(
         decoration: BoxDecoration(
           color: Color(0xffffead1),
@@ -220,8 +223,8 @@ class FamilyScreenWState extends State<FamilyScreenW> {
                                           },
                                           errorBuilder: (context, error, stackTrace) {
                                             return Container(
-                                              height: 150,
-                                              width: 110,
+                                              height: screenHeight*0.1,
+                                              width: screenWidth*0.08,
                                               color: Colors.grey,
                                               child: const Icon(
                                                 Icons.error,

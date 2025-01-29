@@ -49,16 +49,20 @@ class RequestFormMState extends State<RequestFormM> {
   @override
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
+
+
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
           backgroundColor: Colors.brown,
           centerTitle: false,
-          title: const Text(
+          title: Text(
             'Request Form',
             style: TextStyle(
                 color: Colors.black,
-                fontWeight: FontWeight.bold), // White title text
+                fontWeight: FontWeight.bold,
+              fontSize: screenWidth*0.05
+            ), // White title text
           ),
           leading: Padding(
             padding: const EdgeInsets.only(left: 15.0),
@@ -75,6 +79,7 @@ class RequestFormMState extends State<RequestFormM> {
               padding: EdgeInsets.only(right: 15),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
+                  padding:EdgeInsets.symmetric(horizontal: 11),
                   backgroundColor: const Color(0xFF008759),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(5),
@@ -299,6 +304,9 @@ class RequestFormMState extends State<RequestFormM> {
   }
 
   Widget headerProfile(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    double fontSize = screenWidth*0.035;
+
     return Container(
       padding: EdgeInsets.all(15),
       margin: EdgeInsets.all(15),
@@ -330,11 +338,11 @@ class RequestFormMState extends State<RequestFormM> {
                     Text(
                       member!.fullName ?? '',
                       softWrap: true,
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(fontWeight: FontWeight.bold,fontSize: fontSize),
                     ),
                     Text(
                       'Student ITS: ${member!.itsId.toString()}',
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: TextStyle(fontWeight: FontWeight.bold,fontSize: fontSize),
                     )
                   ],
                 ),
@@ -356,7 +364,7 @@ class RequestFormMState extends State<RequestFormM> {
                     children: [
                       Icon(Icons.location_on_rounded),
                       Flexible(
-                          child: Text(member!.address ?? '', softWrap: true)),
+                          child: Text(member!.address ?? '', softWrap: true,style: TextStyle(fontSize: fontSize),)),
                     ],
                   ),
                   Row(
@@ -364,7 +372,7 @@ class RequestFormMState extends State<RequestFormM> {
                     children: [
                       Icon(Icons.location_on_rounded),
                       Text(
-                        member!.jamiaat ?? '',
+                        member!.jamiaat ?? '',style: TextStyle(fontSize: fontSize)
                       ),
                     ],
                   ),
@@ -379,7 +387,7 @@ class RequestFormMState extends State<RequestFormM> {
                         spacing: defSpacing,
                         children: [
                           Icon(Icons.calendar_month_rounded),
-                          Text(member!.dob ?? ''),
+                          Text(member!.dob ?? '',style: TextStyle(fontSize: fontSize)),
                         ],
                       ),
                       Row(
@@ -387,7 +395,7 @@ class RequestFormMState extends State<RequestFormM> {
                         children: [
                           Icon(Icons.calendar_month_rounded),
                           Text(
-                              "${controller.calculateAge(member!.dob ?? '')} years old"),
+                              "${controller.calculateAge(member!.dob ?? '')} years old",style: TextStyle(fontSize: fontSize)),
                         ],
                       ),
                     ],
@@ -403,7 +411,7 @@ class RequestFormMState extends State<RequestFormM> {
                     spacing: defSpacing,
                     children: [
                       Icon(Icons.email),
-                      Text(member!.email!),
+                      Text(member!.email!,style: TextStyle(fontSize: fontSize)),
                     ],
                   ),
                 ],
@@ -417,14 +425,14 @@ class RequestFormMState extends State<RequestFormM> {
                         spacing: defSpacing,
                         children: [
                           Icon(Icons.phone),
-                          Text(member!.mobileNo!),
+                          Text(member!.mobileNo!,style: TextStyle(fontSize: fontSize)),
                         ],
                       ),
                       Row(
                         spacing: defSpacing,
                         children: [
                           Icon(Icons.phone),
-                          Text(member!.whatsappNo!),
+                          Text(member!.whatsappNo!,style: TextStyle(fontSize: fontSize)),
                         ],
                       ),
                     ],
@@ -457,6 +465,8 @@ class RequestFormMState extends State<RequestFormM> {
     }else{
     value = appliedByName ?? '';
     }
+
+
     return Expanded(
       child: Container(
         alignment: Alignment.centerLeft,
@@ -482,6 +492,11 @@ class RequestFormMState extends State<RequestFormM> {
   }
 
   Widget lastEducation() {
+
+    final double screenWidth = MediaQuery.of(context).size.width;
+    double fontSize = screenWidth*0.037;
+
+
     if (member!.education == null || member!.education!.isEmpty) {
       return Padding(
         padding: const EdgeInsets.only(top: 10.0),
@@ -509,59 +524,101 @@ class RequestFormMState extends State<RequestFormM> {
           Divider(),
           Column(
             spacing: 20,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                spacing: 15,
-                children: [
-                  Row(
-                    children: [
-                      Text("Class/ Degree Program: ",
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      Text(
-                        member!.education![0].className ?? "Not available",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Constants().green),
+              RichText(
+                text: TextSpan(
+                  style: TextStyle(fontSize: fontSize), // Common font size
+                  children: [
+                    TextSpan(
+                      text: "Class/ Degree Program: ",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black, // Black color for label
                       ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Text("Institution: ",
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      Text(
-                        member!.education![0].institute ?? "Not available",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Constants().green),
+                    ),
+                    TextSpan(
+                      text: member?.education?.isNotEmpty == true
+                          ? member!.education![0].className ?? "Not available"
+                          : "Not available",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Constants().green, // Green color for value
                       ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Text("Field of Study: ",
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      Text(
-                        member!.education![0].subject ?? "Not available",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Constants().green),
+                    ),
+                  ],
+                ),
+              ),
+              RichText(
+                text: TextSpan(
+                  style: TextStyle(fontSize: fontSize), // Common font size
+                  children: [
+                    TextSpan(
+                      text: "Institution: ",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black, // Black color for label
                       ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Text("City: ",
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      Text(
-                        member!.education![0].city ?? "Not available",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Constants().green),
+                    ),
+                    TextSpan(
+                      text: member?.education?.isNotEmpty == true
+                          ? member!.education![0].institute ?? "Not available"
+                          : "Not available",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Constants().green, // Green color for value
                       ),
-                    ],
-                  ),
-                ],
+                    ),
+                  ],
+                ),
+                softWrap: true,
+              ),
+              RichText(
+                text: TextSpan(
+                  style: TextStyle(fontSize: fontSize), // Common font size
+                  children: [
+                    TextSpan(
+                      text: "Field of Study: ",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black, // Black color for label
+                      ),
+                    ),
+                    TextSpan(
+                      text: member?.education?.isNotEmpty == true
+                          ? member!.education![0].subject ?? "Not available"
+                          : "Not available",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Constants().green, // Green color for value
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              RichText(
+                text: TextSpan(
+                  style: TextStyle(fontSize: fontSize), // Common font size
+                  children: [
+                    TextSpan(
+                      text: "City: ",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black, // Black color for label
+                      ),
+                    ),
+                    TextSpan(
+                      text: member?.education?.isNotEmpty == true
+                          ? member!.education![0].city ?? "Not available"
+                          : "Not available",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Constants().green, // Green color for value
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
@@ -571,6 +628,7 @@ class RequestFormMState extends State<RequestFormM> {
   }
 
   Widget requestForm(BuildContext context) {
+
     return Container(
       padding: EdgeInsets.all(15),
       margin: EdgeInsets.all(15),
@@ -611,6 +669,8 @@ class RequestFormMState extends State<RequestFormM> {
 
   Widget _buildField(String label, TextEditingController controller,
       {double? height}) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    double fontSize = screenWidth*0.037;
     bool isDescription = height != null;
     return Column(
       spacing: 5,
@@ -621,6 +681,7 @@ class RequestFormMState extends State<RequestFormM> {
         SizedBox(
           height: height ?? 40,
           child: TextFormField(
+            style: TextStyle(fontSize: fontSize),
             controller: controller,
             maxLines: isDescription ? 3 : 1,
             validator: (value) {
