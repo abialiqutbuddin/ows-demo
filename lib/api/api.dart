@@ -1,14 +1,12 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import '../model/family_model.dart';
 import '../model/member_model.dart';
 import '../model/request_form_model.dart';
 
 class Api {
-  static const String baseUrl =
-      "http://172.16.109.104:3002"; // Replace with your server URL
+  static const String baseUrl = "http://192.168.18.7:3002"; // Replace with your server URL
 
   static Future<int> addRequestForm(RequestFormModel requestData) async {
     final url = Uri.parse('$baseUrl/add-request');
@@ -108,11 +106,7 @@ class Api {
 
       if (response.statusCode == 200) {
         final pdfData = response.bodyBytes;
-
-        // Load the PDF document from memory
-        return
-          //PdfDocument.openData(pdfData);
-        pdfData;
+        return pdfData;
       } else {
         throw Exception('Failed to load PDF');
       }
