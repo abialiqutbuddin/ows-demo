@@ -56,7 +56,7 @@ class _TableScreenState extends State<TableScreen> {
             rows: requests.map((request) {
               return DataRow(
                 cells: [
-                  DataCell(Text(request["id"].toString())),
+                  DataCell(Text(request["reqId"].toString())),
                   DataCell(Text(request["ITS"] ?? "N/A")),
                   DataCell(Text(request["reqByName"] ?? "N/A")),
                   DataCell(Text(request["city"] ?? "N/A")),
@@ -68,8 +68,8 @@ class _TableScreenState extends State<TableScreen> {
                       padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
                         color: request["currentStatus"] == "Approved"
-                            ? Colors.green.withOpacity(0.2)
-                            : Colors.red.withOpacity(0.2),
+                            ? Colors.green.withValues(alpha: 0.2)
+                            : Colors.red.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(5),
                       ),
                       child: Text(

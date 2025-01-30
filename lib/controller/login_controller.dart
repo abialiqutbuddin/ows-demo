@@ -4,7 +4,6 @@ import 'package:ows/constants/constants.dart';
 import 'package:ows/controller/family_screen_controller.dart';
 import 'package:ows/controller/state_management/state_manager.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/dummy_data.dart';
 import '../mobile_ui/login_screen.dart';
 import '../model/family_model.dart';

@@ -38,12 +38,11 @@ class RequestFormMState extends State<RequestFormM> {
       isLoading = true;
     });
     member = widget.member; // Assuming data comes from the widget's member!
+    appliedbyIts = await Constants().getFromPrefs('appliedByIts');
+    appliedByName = await Constants().getFromPrefs('appliedByName');
     setState(() {
       isLoading = false;
     });
-    appliedbyIts = await Constants().getFromPrefs('appliedByIts');
-    appliedByName = await Constants().getFromPrefs('appliedByName');
-
   }
 
   @override
@@ -334,16 +333,23 @@ class RequestFormMState extends State<RequestFormM> {
                       child: CircularProgressIndicator(),
                     );
                   },
+                  // errorBuilder: (context, error, stackTrace) {
+                  //   return Container(
+                  //     height: 70,
+                  //     width: 70,
+                  //     color: Colors.grey,
+                  //     child: const Icon(
+                  //       Icons.error,
+                  //       color: Colors.white,
+                  //       size: 40,
+                  //     ),
+                  //   );
+                  // },
                   errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      height: 70,
-                      width: 70,
-                      color: Colors.grey,
-                      child: const Icon(
-                        Icons.error,
-                        color: Colors.white,
-                        size: 40,
-                      ),
+                    return Image.asset(
+                      "assets/demo.jpg",  // Path to default image
+                      width: 100,
+                      fit: BoxFit.contain,
                     );
                   },
                 ),
@@ -478,6 +484,8 @@ class RequestFormMState extends State<RequestFormM> {
 
 
   Widget profileBox(String title, String value, BuildContext context) {
+    print(appliedbyIts);
+    print(appliedByName);
     if(value == 'ITS'){
       value = appliedbyIts ?? '';
     }else{
