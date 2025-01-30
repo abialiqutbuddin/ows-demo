@@ -1,6 +1,5 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:ows/api/api.dart';
 import '../mobile_ui/profile_pdf_screen.dart';
@@ -70,20 +69,32 @@ class ProfilePDFScreenState extends State<ProfilePDFScreen> {
       setState(() {
         _isLoading = true;
       });
-      // Load the PDF document from memory
-      pdfData = await Api.fetchAndLoadPDF(its);
 
-       setState(() {
-        _isLoading = false; // Stop loading once initialized
-      });
+      // Try fetching the PDF from API
+      //pdfData = await Api.fetchAndLoadPDF(its);
+
+      // If there's an error, load the default PDF from assets
+      ByteData byteData = await rootBundle.load("assets/profile.pdf");
+      pdfData = byteData.buffer.asUint8List(); // Convert ByteData to Uint8List
+
+      // Check if the fetched PDF is null or empty
+      if (pdfData.isEmpty) {
+        throw Exception("PDF data is null or empty");
+      }
     } catch (e) {
-      setState(() {
-        _isLoading = false; // Stop loading on error
-      });
+
+      // If there's an error, load the default PDF from assets
+      ByteData byteData = await rootBundle.load("profile.pdf");
+      pdfData = byteData.buffer.asUint8List(); // Convert ByteData to Uint8List
+
       Get.snackbar(
-        "Failure",
-        "Failed to Load PDF"
+          "Notice",
+          "Failed to Load PDF."
       );
+    } finally {
+      setState(() {
+        _isLoading = false; // Stop loading in all cases
+      });
     }
   }
 }

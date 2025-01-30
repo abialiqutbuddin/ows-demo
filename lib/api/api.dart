@@ -6,7 +6,7 @@ import '../model/member_model.dart';
 import '../model/request_form_model.dart';
 
 class Api {
-  static const String baseUrl = "http://192.168.18.7:3002"; // Replace with your server URL
+  static const String baseUrl = "http://localhost:3002"; // Replace with your server URL
 
   static Future<int> addRequestForm(RequestFormModel requestData) async {
     final url = Uri.parse('$baseUrl/add-request');
@@ -114,4 +114,57 @@ class Api {
       throw Exception(e);
     }
   }
+
+  static Future<bool> sendEmail({
+    required String to,
+    required String subject,
+    required String text,
+    required String html,
+  }) async {
+    final Uri url = Uri.parse("$baseUrl/send-email");
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "to": to,
+          "subject": subject,
+          "text": text,
+          "html": html,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        print("✅ Email sent successfully!");
+        return true;
+      } else {
+        print("❌ Failed to send email: ${response.body}");
+        return false;
+      }
+    } catch (e) {
+      print("❌ Error sending email: $e");
+      return false;
+    }
+  }
+
+  static Future<List<Map<String, dynamic>>> fetchRequests({String? id}) async {
+    final Uri url = Uri.parse("$baseUrl/get-requests${id != null ? "?id=$id" : ""}");
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        List<dynamic> data = jsonDecode(response.body);
+        return List<Map<String, dynamic>>.from(data);
+      } else {
+        print("❌ Failed to fetch data: ${response.body}");
+        return [];
+      }
+    } catch (e) {
+      print("❌ Error fetching requests: $e");
+      return [];
+    }
+  }
+
 }

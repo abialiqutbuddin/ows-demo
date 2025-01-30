@@ -461,10 +461,10 @@ class ProfilePreview extends StatelessWidget {
             (member is Parent ? member.image : (member as Family).image) ??
                 ''; // Use imageUrl if available
         final String fullName =
-            (member is Parent ? member.name : (member as Family).fullName) ??
+            (member is Parent ? member.fullName : (member as Family).fullName) ??
                 ''; // Fallback for fullName
         final String itsId =
-            (member is Parent ? member.itsId : (member as Family).its)
+            (member is Parent ? member.fullName: (member as Family).its)
                 .toString(); // ITS ID fallback
 
         return Row(

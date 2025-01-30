@@ -12,7 +12,8 @@ class RequestFormModel {
   String fundAmount;
   String fundDescription;
   String memberITS;
-  String appliedby;
+  String appliedbyIts;
+  String appliedbyName;
   String applyDate;
   String mohalla;
   String address;
@@ -32,7 +33,8 @@ class RequestFormModel {
     required this.whatsappNumber,
     required this.fundAmount,
     required this.memberITS,
-    required this.appliedby,
+    required this.appliedbyIts,
+    required this.appliedbyName,
     required this.applyDate,
     required this.fundDescription,
     required this.mohalla,
@@ -56,7 +58,8 @@ class RequestFormModel {
       'fundAmount': fundAmount,
       'fundDescription': fundDescription,
       'memberITS': memberITS,
-      'appliedby': appliedby,
+      'appliedbyIts': appliedbyIts,
+      'appliedbyName': appliedbyName,
       'applyDate': applyDate,
       'mohalla': mohalla,
       'address': address,
@@ -81,7 +84,8 @@ RequestFormModel(
   whatsappNumber: $whatsappNumber,
   fundAmount: $fundAmount,
   memberITS: $memberITS,
-  appliedby: $appliedby,
+  appliedbyIts: $appliedbyIts,
+  appliedbyName: $appliedbyName,
   applyDate: $applyDate
   fundDescription: $fundDescription
   mohalla: $mohalla

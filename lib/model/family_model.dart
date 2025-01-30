@@ -39,47 +39,43 @@ class Family {
 
   factory Family.fromJson(Map<String, dynamic> json) {
     return Family(
-      its: json['ITS'],
-      fullName: json['Full Name'],
-      gender: json['Gender'],
-      dateOfBirth: json['Date of Birth'],
-      age: json['Age'],
-      firstName: json['First Name'],
-      middleName: json['Middle Name'],
-      lastName: json['Last Name'],
-      residenceAddress: json['Residence Address'],
-      residencePhone: json['Residence Phone'],
-      image: json['Image'],
-      imaniInstitute: json['Imani Institute'],
-      previousInstitute: json['Previous Institute'],
-      previousClass: json['Previous Class'],
-      profileCompleted: json['Profile Completed'],
-      father: (json['father'] is Map<String, dynamic>)
-          ? Parent.fromJson(json['father'])
-          : null,
-      mother: (json['mother'] is Map<String, dynamic>)
-          ? Parent.fromJson(json['mother'])
-          : null,
+      its: json['its'],
+      fullName: json['full_name'],
+      gender: json['gender'],
+      dateOfBirth: json['date_of_birth'],
+      age: json['age'],
+      firstName: json['first_name'],
+      middleName: json['middle_name'],
+      lastName: json['last_name'],
+      residenceAddress: json['residence_address'],
+      residencePhone: json['residence_phone'],
+      image: json['image'],
+      imaniInstitute: json['imani_institute'],
+      previousInstitute: json['previous_institute'],
+      previousClass: json['previous_class'],
+      profileCompleted: json['profile_completed'],
+      father: json['father'] != null ? Parent.fromJson(json['father']) : null,
+      mother: json['mother'] != null ? Parent.fromJson(json['mother']) : null,
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'ITS': its,
-      'Full Name': fullName,
-      'Gender': gender,
-      'Date of Birth': dateOfBirth,
-      'Age': age,
-      'First Name': firstName,
-      'Middle Name': middleName,
-      'Last Name': lastName,
-      'Residence Address': residenceAddress,
-      'Residence Phone': residencePhone,
-      'Image': image,
-      'Imani Institute': imaniInstitute,
-      'Previous Institute': previousInstitute,
-      'Previous Class': previousClass,
-      'Profile Completed': profileCompleted,
+      'its': its,
+      'full_name': fullName,
+      'gender': gender,
+      'date_of_birth': dateOfBirth,
+      'age': age,
+      'first_name': firstName,
+      'middle_name': middleName,
+      'last_name': lastName,
+      'residence_address': residenceAddress,
+      'residence_phone': residencePhone,
+      'image': image,
+      'imani_institute': imaniInstitute,
+      'previous_institute': previousInstitute,
+      'previous_class': previousClass,
+      'profile_completed': profileCompleted,
       'father': father?.toJson(),
       'mother': mother?.toJson(),
     };
@@ -87,85 +83,69 @@ class Family {
 }
 
 class Parent {
-  int? itsId;
-  String? name;
-  String? qualification;
-  String? occupation;
-  String? organisation;
-  String? idara;
-  String? sabaq;
+  int? its;
+  String? fullName;
+  String? gender;
+  String? dateOfBirth;
+  int? age;
+  String? residenceAddress;
+  String? residencePhone;
   String? image;
-  String? officeAddress;
-  String? officePhone;
-  String? annualIncome;
-  String? mobile;
-  String? email;
   String? imaniInstitute;
   String? previousInstitute;
   String? previousClass;
   String? profileCompleted;
 
   Parent({
-    this.itsId,
-    this.name,
-    this.qualification,
-    this.occupation,
-    this.organisation,
-    this.idara,
-    this.sabaq,
+    this.its,
+    this.fullName,
+    this.gender,
+    this.dateOfBirth,
+    this.age,
+    this.residenceAddress,
+    this.residencePhone,
     this.image,
-    this.officeAddress,
-    this.officePhone,
-    this.annualIncome,
-    this.mobile,
-    this.email,
     this.imaniInstitute,
     this.previousInstitute,
     this.previousClass,
     this.profileCompleted,
   });
 
-  factory Parent.fromJson(Map<String, dynamic> json) {
+  factory Parent.fromJson(Map<String, dynamic>? json) {
+    if (json == null) {
+      return Parent(); // Return empty object if JSON is null
+    }
+
     return Parent(
-      itsId: json['Father ITS ID'] ?? json['Mother ITS ID'],
-      name: json['Father Name'] ?? json['Mother Name'],
-      qualification: json['Qualification'] ?? '',
-      occupation: json['Occupation'] ?? '',
-      organisation: json['Organisation'] ?? '',
-      idara: json['Idara'] ?? '',
-      sabaq: json['Sabaq'] ?? '',
-      image: json['Image'] ?? '',
-      officeAddress: json['Office Address'] ?? '',
-      officePhone: json['Office Phone'] ?? '',
-      annualIncome: json['Annual Income'] ?? '',
-      mobile: json['Mobile'] ?? '',
-      email: json['Email'] ?? '',
-      imaniInstitute: json['Imani Institute'] ?? '',
-      previousInstitute: json['Previous Institute'] ?? '',
-      previousClass: json['Previous Class'] ?? '',
-      profileCompleted: json['Profile Completed'] ?? '',
+      its: json['its'] != null ? int.tryParse(json['its'].toString()) : null, // Convert to int safely
+      fullName: json['full_name'] ?? "Unknown", // Default value if missing
+      gender: json['gender'] ?? "Not Specified",
+      dateOfBirth: json['date_of_birth'] ?? "N/A",
+      age: json['age'] != null ? int.tryParse(json['age'].toString()) : null, // Convert to int safely
+      residenceAddress: json['residence_address'] ?? "Not Available",
+      residencePhone: json['residence_phone'] ?? "Not Provided",
+      image: json['image'] ?? "https://example.com/default-profile.jpg", // Default placeholder image
+      imaniInstitute: json['imani_institute'] ?? "N/A",
+      previousInstitute: json['previous_institute'] ?? "N/A",
+      previousClass: json['previous_class'] ?? "N/A",
+      profileCompleted: json['profile_completed'] ?? "NO",
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'ITS ID': itsId,
-      'Name': name,
-      'Qualification': qualification,
-      'Occupation': occupation,
-      'Organisation': organisation,
-      'Idara': idara,
-      'Sabaq': sabaq,
-      'Image': image,
-      'Office Address': officeAddress,
-      'Office Phone': officePhone,
-      'Annual Income': annualIncome,
-      'Mobile': mobile,
-      'Email': email,
-      'Imani Institute': imaniInstitute,
-      'Previous Institute': previousInstitute,
-      'Previous Class': previousClass,
-      'Profile Completed': profileCompleted,
+      'its': its,
+      'full_name': fullName,
+      'gender': gender,
+      'date_of_birth': dateOfBirth,
+      'age': age,
+      'residence_address': residenceAddress,
+      'residence_phone': residencePhone,
+      'image': image,
+      'imani_institute': imaniInstitute,
+      'previous_institute': previousInstitute,
+      'previous_class': previousClass,
+      'profile_completed': profileCompleted,
     };
   }
 }

@@ -2,65 +2,60 @@ import '../model/family_model.dart'; // Ensure the Family model is imported
 import '../model/member_model.dart';
 
 // Create a Family instance using dummy data
-Family dummyFamily = Family(
-  its: 40470720,
-  fullName: "Mufaddal bhai Khuzaima bhai Lakdawala",
-  gender: "M",
-  dateOfBirth: "2004-08-12",
-  age: 20,
-  firstName: "Mufaddal",
-  middleName: "Khuzaima",
-  lastName: "Lakdawala",
-  residenceAddress:
-      "Qasr-E-Burhani, 1st Floor, Flat # 1, Shahra-E-Liaquat, Karachi, Pakistan",
-  residencePhone: "+923323126799",
-  image:
-      "https://followup.qardanhasana.in/assets/img/mumin_photos/40470720.jpg",
-  imaniInstitute: "NO",
-  previousInstitute: "Virtual University of Pakistan",
-  previousClass: "10th Grade",
-  profileCompleted: "YES",
-  father: Parent(
-    itsId: 40480515,
-    name: "Khuzaima bhai Ibrahim bhai Lakdawala",
-    qualification: "Graduate",
-    occupation: "Business",
-    organisation: "",
-    idara: null,
-    sabaq: null,
-    image:
-        "https://followup.qardanhasana.in/assets/img/mumin_photos/40480515.jpg",
-    officeAddress: null,
-    officePhone: "+923362442379",
-    annualIncome: null,
-    mobile: "+923362442379",
-    email: "khuzaimalakdawala@gmail.com",
-    imaniInstitute: "NO",
-    previousInstitute: "DJ Sindh Govt. Science College",
-    previousClass: "Bachelor's Degree",
-    profileCompleted: "YES",
-  ),
-  mother: Parent(
-    itsId: 40480520,
-    name: "Rashida bai Khuzaima bhai Lakdawala",
-    qualification: "Graduate",
-    occupation: "Houseperson",
-    organisation: "Saifee Womens Association",
-    idara: null,
-    sabaq: null,
-    image:
-        "https://followup.qardanhasana.in/assets/img/mumin_photos/40480520.jpg",
-    officeAddress: null,
-    officePhone: "+923362442379",
-    annualIncome: null,
-    mobile: "+923362442379",
-    email: "rashidalakdawala@gmail.com",
-    imaniInstitute: "NO",
-    previousInstitute: "Government Islamia College for Women",
-    previousClass: "Bachelor's Degree",
-    profileCompleted: "YES",
-  ),
-);
+final Map<String, dynamic> familyJson = {
+  "its": 40470720,
+  "full_name": "Mufaddal bhai Khuzaima bhai Lakdawala",
+  "gender": "M",
+  "date_of_birth": "2004-08-12",
+  "age": 20,
+  "first_name": "Mufaddal",
+  "middle_name": "Khuzaima",
+  "last_name": "Lakdawala",
+  "residence_address":
+  "Qasr-E-Burhani, 1st Floor, Flat # 1, Shahra-E-Liaquat, Karachi, Pakistan",
+  "residence_phone": "+923323126799",
+  "image":
+  "https://followup.qardanhasana.in/assets/img/mumin_photos/40470720.jpg",
+  "imani_institute": null,
+  "previous_institute": null,
+  "previous_class": null,
+  "profile_completed": "NO",
+  "father": {
+    "its": 40480515,
+    "full_name": "Khuzaima bhai Ibrahim bhai Lakdawala",
+    "gender": "M",
+    "date_of_birth": "1967-12-19",
+    "age": 57,
+    "residence_address":
+    "Qasr-E-Burhani, 1st Floor, Flat # 1, Shahra-E-Liaquat, Karachi, Pakistan",
+    "residence_phone": "+923362442379",
+    "image":
+    "https://followup.qardanhasana.in/assets/img/mumin_photos/40480515.jpg",
+    "imani_institute": "NO",
+    "previous_institute": "DJ Sindh Govt. Science College",
+    "previous_class": "Bachelors Degree Programs",
+    "profile_completed": "YES"
+  },
+  "mother": {
+    "its": 40480520,
+    "full_name": "Rashida bai Khuzaima bhai Lakdawala",
+    "gender": "F",
+    "date_of_birth": "1970-06-15",
+    "age": 54,
+    "residence_address":
+    "Qasr-E-Burhani, 1st Floor, Flat # 1, Shahra-E-Liaquat, Karachi, Pakistan",
+    "residence_phone": "+923362442379",
+    "image":
+    "https://followup.qardanhasana.in/assets/img/mumin_photos/40480520.jpg",
+    "imani_institute": "NO",
+    "previous_institute": "Government Islamia College for Women",
+    "previous_class": "Bachelors Degree",
+    "profile_completed": "YES"
+  }
+};
+
+// Create a Family instance from JSON
+Family dummyFamily = Family.fromJson(familyJson);
 
 UserProfile userProfile = UserProfile(
   id: 3678,

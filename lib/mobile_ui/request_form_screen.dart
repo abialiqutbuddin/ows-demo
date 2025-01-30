@@ -328,6 +328,24 @@ class RequestFormMState extends State<RequestFormM> {
                   Api.fetchImage(member!.imageUrl!),
                   width: 100,
                   fit: BoxFit.contain,
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return const Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      height: 70,
+                      width: 70,
+                      color: Colors.grey,
+                      child: const Icon(
+                        Icons.error,
+                        color: Colors.white,
+                        size: 40,
+                      ),
+                    );
+                  },
                 ),
               ),
               Expanded(
@@ -821,7 +839,8 @@ class RequestFormMState extends State<RequestFormM> {
                             whatsappNumber: controller.whatsappController.text,
                             fundAmount: controller.fundsController.text,
                             memberITS: member!.itsId.toString(),
-                            appliedby: member!.itsId.toString(),
+                            appliedbyIts: appliedbyIts.toString(),
+                            appliedbyName: appliedByName.toString(),
                             fundDescription:
                                 controller.descriptionController.text,
                             mohalla: member!.jamaatId.toString(),

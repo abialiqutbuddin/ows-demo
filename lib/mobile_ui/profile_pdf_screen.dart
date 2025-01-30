@@ -13,7 +13,6 @@ import '../model/family_model.dart';
 class ProfilePDFScreenM extends StatefulWidget {
   final UserProfile member;
   final Family family;
-  //final PdfControllerPinch pdfController;
   final Uint8List pdfData; // Pass the PDF data as Uint8List
 
   const ProfilePDFScreenM({
@@ -21,7 +20,6 @@ class ProfilePDFScreenM extends StatefulWidget {
     required this.member,
     required this.family,
     required this.pdfData,
-    //required this.pdfController,
   });
 
   @override
@@ -29,8 +27,7 @@ class ProfilePDFScreenM extends StatefulWidget {
 }
 
 class ProfilePDFScreenMState extends State<ProfilePDFScreenM> {
-  //late PdfControllerPinch _pdfController;
-  bool _isLoading = false; // Loading state
+  final bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {

@@ -146,8 +146,7 @@ class RequestFormWState extends State<RequestFormW> {
                     child: Text(
                       "Add Guardian",
                       style: TextStyle(color: Colors.white),
-                    )
-                ),
+                    )),
               ),
               SizedBox(
                 height: 35,
@@ -220,8 +219,7 @@ class RequestFormWState extends State<RequestFormW> {
                     elevation: WidgetStateProperty.all(0),
                   ),
                   onPressed: () async {
-                    final url =
-                        'https://paktalim.com/admin/profile/create';
+                    final url = 'https://paktalim.com/admin/profile/create';
                     if (await canLaunchUrl(Uri.parse(url))) {
                       await launchUrl(
                         Uri.parse(url),
@@ -492,9 +490,9 @@ class RequestFormWState extends State<RequestFormW> {
   }
 
   Widget profileBox(String title, String value, BuildContext context) {
-    if(value == 'ITS'){
+    if (value == 'ITS') {
       value = appliedbyIts ?? '';
-    }else{
+    } else {
       value = appliedByName ?? '';
     }
     return Container(
@@ -726,10 +724,10 @@ class RequestFormWState extends State<RequestFormW> {
                             phoneNumber: controller.phoneController.text,
                             whatsappNumber: controller.whatsappController.text,
                             fundAmount: controller.fundsController.text,
-                            memberITS: member!.itsId.toString(),
-                            appliedby: member!.itsId.toString(),
-                            fundDescription:
-                                controller.descriptionController.text,
+                            memberITS: appliedbyIts.toString(),
+                            appliedbyIts: appliedbyIts.toString(),
+                            appliedbyName: appliedByName.toString(),
+                            fundDescription: controller.descriptionController.text,
                             mohalla: member!.jamaatId.toString(),
                             address: member!.address ?? "",
                             dob: member!.dob ?? "",
@@ -746,6 +744,16 @@ class RequestFormWState extends State<RequestFormW> {
                           if (returnCode == 200) {
                             Get.snackbar("Success!",
                                 "Data successfully inserted in Database!");
+                            Api.sendEmail(
+                                to: 'abialigadi@gmail.com',
+                                subject: 'Request Received - OWS',
+                                text:
+                                "Afzal us Salam,\n\nYour request is received! Your request number is ${controller.reqId}.\n\nWassalam.",
+                                html: """
+                                        <p>Afzal us Salam,</p>
+                                        <p>Your request is received! Your request number is <strong>${controller.reqId}</strong>.</p>
+                                        <p>Wassalam.</p>
+                                        """);
                           } else {
                             Get.snackbar(
                                 "Error", "Failed to insert Data in Database!");

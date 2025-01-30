@@ -4,6 +4,7 @@ import 'package:ows/controller/request_form_controller.dart';
 import 'package:ows/model/member_model.dart';
 import 'package:ows/constants/constants.dart';
 import 'package:get/get.dart';
+import 'package:ows/table.dart';
 import '../model/family_model.dart';
 
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
@@ -65,6 +66,24 @@ class ProfilePDFScreenWState extends State<ProfilePDFScreenW> {
         Row(
           spacing: 16,
           children: [
+            SizedBox(
+              width: 120,
+              height: 35,
+              child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF008759),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                  ),
+                  onPressed: () {
+                    Get.to(() => TableScreen());
+                  },
+                  child: Text(
+                    "Table",
+                    style: TextStyle(color: Colors.white),
+                  )),
+            ),
             SizedBox(
               width: 120,
               height: 35,

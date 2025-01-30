@@ -95,9 +95,9 @@ class FamilyScreenWState extends State<FamilyScreenW> {
     });
     try {
       // Call the API to fetch user profile
-      final userProfile = await Api.fetchUserProfile(itsId.toString()); // Add API call
-     // final userProfile1 = userProfile;
-      if (userProfile != null) {
+      //final userProfile = await Api.fetchUserProfile(itsId.toString()); // Add API call
+      final userProfile1 = userProfile;
+      if (userProfile1 != null) {
         // Get.to(() => ProfilePreview(
         //   member: userProfile,
         //   family: widget.family,
@@ -107,7 +107,7 @@ class FamilyScreenWState extends State<FamilyScreenW> {
         //   family: widget.family,
         // ));
         Get.to(() => ProfilePDFScreen(
-          member: userProfile,
+          member: userProfile1,
           family: widget.family,
         ));
       } else {
@@ -264,7 +264,7 @@ class FamilyScreenWState extends State<FamilyScreenW> {
                                                 children: [
                                                   Text(
                                                     (member is Parent
-                                                            ? member.name
+                                                            ? member.fullName
                                                             : (member as Family)
                                                                 .fullName) ??
                                                         '',
@@ -279,7 +279,7 @@ class FamilyScreenWState extends State<FamilyScreenW> {
                                                   const SizedBox(height: 4),
                                                   Text(
                                                     (member is Parent
-                                                            ? member.itsId
+                                                            ? member.its
                                                             : (member as Family).its)
                                                         .toString(),
                                                     style:
@@ -308,7 +308,7 @@ class FamilyScreenWState extends State<FamilyScreenW> {
                             final selectedMember =
                             familyMembers[_selectedIndex!]['member'];
                             final itsId = (selectedMember is Parent
-                                ? selectedMember.itsId
+                                ? selectedMember.its
                                 : (selectedMember as Family).its) ??
                                 0;
                             fetchUserProfile(itsId);

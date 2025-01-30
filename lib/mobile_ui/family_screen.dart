@@ -207,7 +207,7 @@ class FamilyScreenMState extends State<FamilyScreenM> {
                                       children: [
                                         Text(
                                           (member is Parent
-                                              ? member.name
+                                              ? member.fullName
                                               : (member as Family).fullName) ??
                                               '',
                                           style: TextStyle(
@@ -218,7 +218,7 @@ class FamilyScreenMState extends State<FamilyScreenM> {
                                         const SizedBox(height: 4),
                                         Text(
                                           (member is Parent
-                                              ? member.itsId
+                                              ? member.its
                                               : (member as Family).its)
                                               .toString(),
                                           style: TextStyle(fontSize: screenWidth*0.035),
@@ -248,7 +248,7 @@ class FamilyScreenMState extends State<FamilyScreenM> {
                           final selectedMember =
                           familyMembers[_selectedIndex!]['member'];
                           final itsId = (selectedMember is Parent
-                              ? selectedMember.itsId
+                              ? selectedMember.its
                               : (selectedMember as Family).its) ??
                               0;
                           fetchUserProfile(itsId);
