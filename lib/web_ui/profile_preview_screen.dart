@@ -6,6 +6,7 @@ import 'package:ows/constants/expandable_container.dart';
 import 'package:ows/web_ui/request_form.dart';
 import 'package:timelines_plus/timelines_plus.dart';
 import 'package:get/get.dart';
+import '../api/api.dart';
 import '../controller/login_controller.dart';
 import '../model/family_model.dart';
 
@@ -147,8 +148,9 @@ class ProfilePreview extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(5),
               child: Image.network(
-                'http://localhost:3001/fetch-image?url=${Uri.encodeComponent(member.imageUrl!)}',
-                width: 140,
+                Api.fetchImage(member.imageUrl!),
+                width: 120,
+                height: 170,
                 fit: BoxFit.cover,
               ),
             ),
@@ -464,7 +466,7 @@ class ProfilePreview extends StatelessWidget {
             (member is Parent ? member.fullName : (member as Family).fullName) ??
                 ''; // Fallback for fullName
         final String itsId =
-            (member is Parent ? member.fullName: (member as Family).its)
+            (member is Parent ? member.its: (member as Family).its)
                 .toString(); // ITS ID fallback
 
         return Row(
@@ -474,9 +476,8 @@ class ProfilePreview extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(5),
               child: Image.network(
-                'http://localhost:3001/fetch-image?url=${Uri.encodeComponent(imageUrl)}',
+                Api.fetchImage((member is Parent ? member.image : (member as Family).image) ?? '').toString(),
                 width: 80,
-                height: 80,
                 fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(

@@ -28,7 +28,7 @@ class _TableScreenState extends State<TableScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Requests Table"),
+        title: Text("Requests List"),
         centerTitle: true,
         backgroundColor: Colors.blueAccent,
       ),
