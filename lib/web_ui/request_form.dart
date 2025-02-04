@@ -8,6 +8,7 @@ import '../api/api.dart';
 import 'package:get/get.dart';
 import '../controller/request_form_controller.dart';
 import '../controller/state_management/state_manager.dart';
+import '../dropdown.dart';
 
 class RequestFormW extends StatefulWidget {
   final UserProfile member;
@@ -19,17 +20,60 @@ class RequestFormW extends StatefulWidget {
 
 class RequestFormWState extends State<RequestFormW> {
   final double defSpacing = 8;
-  final RequestFormController controller = Get.put(RequestFormController());
+  final RequestFormController controller = Get.find<RequestFormController>();
   final StateController statecontroller = Get.put(StateController());
-  UserProfile? member;
+  late final UserProfile? member;
   bool isLoading = true; // Track loading state
   String? appliedByName;
   String? appliedbyIts;
+
+  List<dynamic> allData = [];
+  List<dynamic> filteredStudies = [];
+  List<dynamic> filteredNames = [];
+
+  int? selectedMarhala;
+  int? selectedStudy;
+  int? selectedName;
 
   @override
   void initState() {
     super.initState();
     initializeMember();
+
+    Api.loadData().then((data) {
+      setState(() {
+        allData = data;
+      });
+    });
+  }
+
+  void filterStudies(int marhalaId) {
+    setState(() {
+      filteredStudies = allData
+          .where((item) => item['marhala_id'] == marhalaId)
+          .map((item) => {
+                'id': item['study_id'],
+                'name': item['study'],
+              })
+          .toSet()
+          .toList(); // Remove duplicates
+      selectedStudy = null;
+      filteredNames = [];
+      selectedName = null;
+    });
+  }
+
+  void filterNames(int studyId) {
+    setState(() {
+      filteredNames = allData
+          .where((item) => item['study_id'] == studyId)
+          .map((item) => {
+                'id': item['id'],
+                'name': item['name'],
+              })
+          .toList();
+      selectedName = null;
+    });
   }
 
   Future<void> initializeMember() async {
@@ -75,31 +119,33 @@ class RequestFormWState extends State<RequestFormW> {
           )
         : buildContent(context);
 
-    return Scaffold(
-      backgroundColor: Color(0xfffffcf6),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            child: SizedBox(
-              child: content,
+    return SelectionArea(
+      child: Scaffold(
+        backgroundColor: Color(0xfffffcf6),
+        body: Stack(
+          children: [
+            SingleChildScrollView(
+              child: SizedBox(
+                child: content,
+              ),
             ),
-          ),
-          Obx(() {
-            if (statecontroller.isLoading.value) {
-              return Container(
-                color: Colors.black
-                    .withValues(alpha: 0.5), // Semi-transparent background
-                child: Center(
-                  child: LoadingAnimationWidget.discreteCircle(
-                    color: Colors.white,
-                    size: 50,
+            Obx(() {
+              if (statecontroller.isLoading.value) {
+                return Container(
+                  color: Colors.black
+                      .withValues(alpha: 0.5), // Semi-transparent background
+                  child: Center(
+                    child: LoadingAnimationWidget.discreteCircle(
+                      color: Colors.white,
+                      size: 50,
+                    ),
                   ),
-                ),
-              );
-            }
-            return const SizedBox.shrink(); // Empty widget when not loading
-          }),
-        ],
+                );
+              }
+              return const SizedBox.shrink(); // Empty widget when not loading
+            }),
+          ],
+        ),
       ),
     );
   }
@@ -322,7 +368,8 @@ class RequestFormWState extends State<RequestFormW> {
                           spacing: defSpacing,
                           children: [
                             Icon(Icons.location_on_rounded),
-                            Text(member!.address ?? ''),
+                            SizedBox(
+                                width: 600, child: Text(member!.address ?? '')),
                           ],
                         ),
                         Row(
@@ -405,6 +452,7 @@ class RequestFormWState extends State<RequestFormW> {
       return Padding(
         padding: const EdgeInsets.only(top: 10.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Constants().subHeading("Last Education"),
             Divider(),
@@ -420,69 +468,41 @@ class RequestFormWState extends State<RequestFormW> {
     return Padding(
       padding: const EdgeInsets.only(top: 10.0),
       child: Column(
-        spacing: 5,
-        mainAxisAlignment: MainAxisAlignment.start,
+        spacing: 10,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Constants().subHeading("Last Education"),
           Divider(),
-          Column(
-            spacing: 20,
+          Wrap(
+            spacing: 20, // Space between items
+            runSpacing: 10, // Space between lines when wrapped
             children: [
-              Row(
-                spacing: 50,
-                children: [
-                  Row(
-                    children: [
-                      Text("Class/ Degree Program: ",
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      Text(
-                        member!.education![0].className ?? "Not available",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Constants().green),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Text("Institution: ",
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      Text(
-                        member!.education![0].institute ?? "Not available",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Constants().green),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Text("Field of Study: ",
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      Text(
-                        member!.education![0].subject ?? "Not available",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Constants().green),
-                      ),
-                    ],
-                  ),
-                  Row(
-                    children: [
-                      Text("City: ",
-                          style: TextStyle(fontWeight: FontWeight.bold)),
-                      Text(
-                        member!.education![0].city ?? "Not available",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Constants().green),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+              buildEducationRow(
+                  "Class/ Degree Program: ", member!.education![0].className),
+              buildEducationRow(
+                  "Institution: ", member!.education![0].institute),
+              buildEducationRow(
+                  "Field of Study: ", member!.education![0].subject),
+              buildEducationRow("City: ", member!.education![0].city),
             ],
+          ),
+          SizedBox()
+        ],
+      ),
+    );
+  }
+
+// ✅ Helper Widget to Ensure Consistent Text Styling
+  Widget buildEducationRow(String label, String? value) {
+    return RichText(
+      text: TextSpan(
+        style: TextStyle(fontSize: 14, color: Colors.black), // Default style
+        children: [
+          TextSpan(text: label, style: TextStyle(fontWeight: FontWeight.bold)),
+          TextSpan(
+            text: value ?? "Not available",
+            style: TextStyle(
+                fontWeight: FontWeight.bold, color: Constants().green),
           ),
         ],
       ),
@@ -536,7 +556,7 @@ class RequestFormWState extends State<RequestFormW> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Text(
-                "Request #: 000${controller.reqId}",
+                "${controller.reqNum}${controller.reqId}",
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               Text("|"),
@@ -553,58 +573,52 @@ class RequestFormWState extends State<RequestFormW> {
     );
   }
 
-  Widget _buildField(String label, TextEditingController controller,
-      {double? height}) {
+  Widget _buildField(String label, RxString rxValue, {double? height}) {
     bool isDescription = height != null;
+
     return Column(
-      spacing: 5,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
-        //const SizedBox(height: 5),
-        SizedBox(
-          height: height ?? 40,
-          child: TextFormField(
-            controller: controller,
-            maxLines: isDescription ? 3 : 1,
-            validator: (value) {
-              this.controller.validateField(label, value);
-              return null;
-            },
-            decoration: InputDecoration(
-              enabledBorder: const OutlineInputBorder(
-                borderSide: BorderSide.none, // Removes the border
+        Obx(
+          () => SizedBox(
+            height: height ?? 40,
+            child: TextFormField(
+              controller: TextEditingController(text: rxValue.value)
+                ..selection =
+                    TextSelection.collapsed(offset: rxValue.value.length),
+              onChanged: (value) {
+                rxValue.value = value;
+                controller.validateForm();
+              },
+              maxLines: isDescription ? 3 : 1,
+              decoration: InputDecoration(
+                enabledBorder: const OutlineInputBorder(
+                  borderSide: BorderSide.none, // Removes the border
+                ),
+                focusedBorder: const OutlineInputBorder(
+                  borderSide: BorderSide.none, // No border when focused
+                ),
+                filled: true,
+                fillColor: const Color(0xfffffcf6),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               ),
-              focusedBorder: const OutlineInputBorder(
-                borderSide: BorderSide.none, // No border when focused
-              ),
-              filled: true,
-              fillColor: const Color(0xfffffcf6),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
             ),
           ),
         ),
-        // Fixed height container for error messages
-        //const SizedBox(height: 1), // Adjust this height as needed
-        Builder(
-          builder: (context) {
-            String? error =
-                this.controller.validateField(label, controller.text);
-            if (error != null) {
-              return Text(
-                error,
-                style: const TextStyle(color: Colors.red, fontSize: 12),
-              );
-            }
-            return const SizedBox(height: 17);
-          },
-        ),
+        // Display real-time validation error messages
+        Obx(() {
+          String? error = controller.validateField(label, rxValue.value);
+          return error != null
+              ? Text(error,
+                  style: const TextStyle(color: Colors.red, fontSize: 12))
+              : const SizedBox(height: 17);
+        }),
       ],
     );
   }
 
-// Wrap the form sections inside a `Form` widget
   Widget _form() {
     return Form(
       key: controller.mainFormKey,
@@ -618,50 +632,109 @@ class RequestFormWState extends State<RequestFormW> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              spacing: 10,
+              spacing: 5,
               children: [
                 Flexible(
-                    child: _buildField("Class / Degree Program",
-                        controller.classDegreeController)),
-                Flexible(
-                    child: _buildField(
-                        "Institution", controller.institutionController)),
-                Flexible(
                   child: _buildDropdown(
-                      "City", controller.selectedCity, controller.cities,
-                      (newValue) {
-                    setState(() {
-                      controller.selectedCity = newValue!;
+                    label: "Marhala",
+                    selectedValue: controller.selectedMarhala,
+                    items: controller.predefinedMarhalas,
+                    onChanged: (value) {
+                      controller.selectedMarhala.value = value!;
+                      controller.filterStudies(value);
+                    },
+                    isEnabled: true,
+                  ),
+                ),
+                Flexible(
+                  child: Obx(
+                    () => _buildDropdown(
+                      label: "Study",
+                      selectedValue: controller.selectedStudy,
+                      items: controller.filteredStudies,
+                      onChanged: (value) {
+                        controller.selectedStudy.value = value!;
+                        controller.filterFields(value);
+                        controller.updateDropdownState();
+                      },
+                      isEnabled: controller.isStudyEnabled.value,
+                    ),
+                  ),
+                ),
+                Flexible(
+                  child:
+                      // Field Dropdown
+                      Obx(() => _buildDropdown(
+                            label: "Field",
+                            selectedValue: controller.selectedField,
+                            items: controller.filteredFields,
+                            onChanged: (value) {
+                              controller.selectedField.value = value!;
+                              controller.updateDropdownState();
+                            },
+                            isEnabled: controller.isFieldEnabled.value,
+                          )),
+                ),
+                Flexible(
+                  child: Obx(() {
+                    String? memberCity =
+                    (member!.future != null && member!.future!.isNotEmpty)
+                        ? member!.future![0].city
+                        : null;
+                  
+                    // Find matching city ID
+                    int cityId = controller.cities.firstWhere(
+                          (city) => city['name'] == memberCity,
+                      orElse: () => {"id": -1}, // Default to -1 if not found
+                    )['id'];
+                  
+                    // Ensure state update happens AFTER the current frame
+                    Future.microtask(() {
+                      if (controller.selectedCity.value !=
+                          (cityId == -1 ? "Select City" : memberCity!)) {
+                        controller
+                            .selectCity(cityId); // ✅ Update in GetX Controller
+                      }
                     });
+                  
+                    return _buildDropdown(
+                      label: "City",
+                      selectedValue: Rxn<int>(cityId), // ✅ Pass the matched city ID
+                      items: controller.cities,
+                      isEnabled: true,
+                      onChanged: (int? cityId) => controller.selectCity(cityId),
+                    );
                   }),
                 ),
                 Flexible(
-                    child: _buildField("Study", controller.studyController)),
-                Flexible(
-                  child: _buildDropdown(
-                      "Subject / Course",
-                      controller.selectedSubject,
-                      controller.subjects, (newValue) {
-                    setState(() {
-                      controller.selectedSubject = newValue!;
-                    });
-                  }),
+                  child: Obx(() => CustomDropdownSearch<String>(
+                        label: "Institute",
+                        itemsLoader: (filter, _) async {
+                          return controller.filteredInstitutes
+                              .map((e) => e['name'] as String)
+                              .toList();
+                        },
+                        selectedItem: controller.selectedInstituteName.value,
+                        isEnabled: controller.selectedCity.value.isNotEmpty &&
+                            controller.selectedCity.value != "Select City",
+                        onChanged: (String? institute) {
+                          if (institute != null) {
+                            controller.selectedInstituteName.value = institute;
+                          }
+                        },
+                      )),
                 ),
               ],
             ),
             const SizedBox(height: 16),
             Row(
-              spacing: 10,
+              spacing: 5,
               children: [
-                Flexible(child: _buildField("Year", controller.yearController)),
+                Flexible(child: _buildField("Year", controller.year)),
+                Flexible(child: _buildField("Email", controller.email)),
+                Flexible(child: _buildField("Phone Number", controller.phone)),
                 Flexible(
-                    child: _buildField("Email", controller.emailController)),
-                Flexible(
-                    child: _buildField(
-                        "Phone Number", controller.phoneController)),
-                Flexible(
-                    child: _buildField(
-                        "WhatsApp Number", controller.whatsappController)),
+                    child: _buildField("WhatsApp Number", controller.whatsapp)),
               ],
             ),
           ],
@@ -685,85 +758,86 @@ class RequestFormWState extends State<RequestFormW> {
               spacing: 10,
               children: [
                 Flexible(
-                    flex: 2,
-                    child: _buildField("Funds", controller.fundsController)),
+                    flex: 2, child: _buildField("Funds", controller.funds)),
                 Flexible(
                   flex: 5,
-                  child: _buildField(
-                      "Description", controller.descriptionController,
+                  child: _buildField("Description", controller.description,
                       height: 100),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            SizedBox(
-              width: 120,
-              height: 35,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: controller.isButtonEnabled
-                      ? const Color(0xFF008759)
-                      : Colors.grey, // Change color based on validation
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5),
+            Obx(
+              () => SizedBox(
+                width: 120,
+                height: 35,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: controller.isButtonEnabled.value
+                        ? const Color(0xFF008759)
+                        : Colors.grey, // Change color based on validation
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
                   ),
-                ),
-                onPressed: controller.isButtonEnabled
-                    ? () async {
-                        statecontroller.toggleLoading(true);
-                        if (controller.mainFormKey.currentState!.validate() &&
-                            controller.fundsFormKey.currentState!.validate()) {
-                          var newData = RequestFormModel(
-                            classDegree: controller.classDegreeController.text,
-                            institution: controller.institutionController.text,
-                            city: controller.selectedCity,
-                            study: controller.studyController.text,
-                            subject: controller.selectedSubject,
-                            year: controller.yearController.text,
-                            email: controller.emailController.text,
-                            phoneNumber: controller.phoneController.text,
-                            whatsappNumber: controller.whatsappController.text,
-                            fundAmount: controller.fundsController.text,
-                            memberITS: appliedbyIts.toString(),
-                            appliedbyIts: appliedbyIts.toString(),
-                            appliedbyName: appliedByName.toString(),
-                            fundDescription: controller.descriptionController.text,
-                            mohalla: member!.jamaatId.toString(),
-                            address: member!.address ?? "",
-                            dob: member!.dob ?? "",
-                            fullName: member!.fullName ?? "",
-                            firstName: member!.firstName ?? "",
-                            applyDate: DateTime.now().toString(),
-                          );
+                  onPressed: controller.isButtonEnabled.value
+                      ? () async {
+                          statecontroller.toggleLoading(true);
+                          if (controller.mainFormKey.currentState!.validate() &&
+                              controller.fundsFormKey.currentState!
+                                  .validate()) {
+                            var newData = RequestFormModel(
+                              classDegree: controller.classDegree.value,
+                              institution: controller.selectedInstituteName.value!,
+                              city: controller.selectedCity.value,
+                              study: controller.study.value,
+                              subject: controller.selectedSubject.value,
+                              year: controller.year.value,
+                              email: controller.email.value,
+                              phoneNumber: controller.phone.value,
+                              whatsappNumber: controller.whatsapp.value,
+                              fundAmount: controller.funds.value,
+                              memberITS: appliedbyIts.toString(),
+                              appliedbyIts: appliedbyIts.toString(),
+                              appliedbyName: appliedByName.toString(),
+                              fundDescription: controller.description.value,
+                              mohalla: member!.jamaatId.toString(),
+                              address: member!.address ?? "",
+                              dob: member!.dob ?? "",
+                              fullName: member!.fullName ?? "",
+                              firstName: member!.firstName ?? "",
+                              applyDate: DateTime.now().toString(),
+                            );
 
-                          // Call the API to add request
-                          int returnCode = await Api.addRequestForm(newData);
-                          await Future.delayed(const Duration(seconds: 2));
-                          statecontroller.toggleLoading(false);
+                            // Call the API to add request
+                            int returnCode = await Api.addRequestForm(newData);
+                            await Future.delayed(const Duration(seconds: 2));
+                            statecontroller.toggleLoading(false);
 
-                          if (returnCode == 200) {
-                            Get.snackbar("Success!",
-                                "Data successfully inserted in Database!");
-                            Api.sendEmail(
-                                to: 'abialigadi@gmail.com',
-                                subject: 'Request Received - OWS',
-                                text:
-                                "Afzal us Salam,\n\nYour request is received! Your request number is ${controller.reqId}.\n\nWassalam.",
-                                html: """
+                            if (returnCode == 200) {
+                              Get.snackbar("Success!",
+                                  "Data successfully inserted in Database!");
+                              Api.sendEmail(
+                                  to: 'abialigadi@gmail.com',
+                                  subject: 'Request Received - OWS',
+                                  text:
+                                      "Afzal us Salam,\n\nYour request is received! Your request number is ${controller.reqId}.\n\nWassalam.",
+                                  html: """
                                         <p>Afzal us Salam,</p>
                                         <p>Your request is received! Your request number is <strong>${controller.reqId}</strong>.</p>
                                         <p>Wassalam.</p>
                                         """);
-                          } else {
-                            Get.snackbar(
-                                "Error", "Failed to insert Data in Database!");
+                            } else {
+                              Get.snackbar("Error",
+                                  "Failed to insert Data in Database!");
+                            }
                           }
                         }
-                      }
-                    : null, // Disable the button when validation fails
-                child: const Text(
-                  "Request",
-                  style: TextStyle(color: Colors.white),
+                      : null, // Disable the button when validation fails
+                  child: const Text(
+                    "Request",
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ),
             ),
@@ -773,55 +847,76 @@ class RequestFormWState extends State<RequestFormW> {
     );
   }
 
-  // Helper method for dropdowns
-  Widget _buildDropdown(String label, String selectedValue, List<String> items,
-      ValueChanged<String?> onChanged) {
+  Widget _buildDropdown({
+    required String label,
+    required Rxn<int> selectedValue,
+    required List<Map<String, dynamic>> items,
+    required ValueChanged<int?> onChanged,
+    required bool isEnabled,
+  }) {
     return Column(
-      spacing: 5,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
-        SizedBox(
-          height: 40,
-          child: DropdownButtonFormField<String>(
-            value: selectedValue,
-            icon: const Icon(Icons.arrow_drop_down),
-            decoration: InputDecoration(
-              filled: true,
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide.none, // Removes the border
+        Obx(() => SizedBox(
+              height: 40,
+              child: DropdownButtonFormField<int>(
+                isExpanded: true,
+                value: selectedValue.value,
+                icon: const Icon(Icons.arrow_drop_down),
+                decoration: InputDecoration(
+                  filled: true,
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide.none, // Removes the border
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide.none, // No border when focused
+                  ),
+                  fillColor: const Color(0xfffffcf6), // Background color
+                  border: OutlineInputBorder(),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                ),
+                items: items.map((Map<String, dynamic> item) {
+                  return DropdownMenuItem<int>(
+                    value: item['id'],
+                    child: Text(item['name']),
+                  );
+                }).toList(),
+                onChanged: isEnabled
+                    ? (value) {
+                        selectedValue.value = value;
+                        onChanged(value);
+                        controller.validateForm();
+                      }
+                    : null, // Disable when needed
+                disabledHint: Text("Select ${_getDisabledHint(label)}"),
               ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide.none, // No border when focused
-              ),
-              fillColor: const Color(0xfffffcf6), // Background color
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-            ),
-            items: items.map((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
-              );
-            }).toList(),
-            onChanged: onChanged,
-          ),
-        ),
-        Builder(
-          builder: (context) {
-            String? error = controller.validateDropdown(label, selectedValue);
-            if (error != null) {
-              return Text(
-                error,
-                style: const TextStyle(color: Colors.red, fontSize: 12),
-              );
-            }
-            return const SizedBox(
-                height: 17); // Reserve space for validation message
-          },
-        ),
+            )),
+        // Show validation message dynamically
+        Obx(() {
+          String? error = controller.validateDropdown(label, selectedValue);
+          return error != null
+              ? Text(
+                  error,
+                  style: const TextStyle(color: Colors.red, fontSize: 12),
+                )
+              : const SizedBox(
+                  height: 17); // Reserve space for validation message
+        }),
       ],
     );
+  }
+
+  String _getDisabledHint(String label) {
+    switch (label) {
+      case "Study":
+        return "Marhala First";
+      case "Field":
+        return "Study First";
+      default:
+        return label;
+    }
   }
 }
 

@@ -1,12 +1,21 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import '../model/family_model.dart';
 import '../model/member_model.dart';
 import '../model/request_form_model.dart';
 
 class Api {
-  static const String baseUrl = "http://localhost:3002"; // Replace with your server URL
+  static const String baseUrl =
+      //"http://36.50.12.171:3002";
+     // "http://localhost:3002";
+  "https://mode.imadiinnovations.com:3002";
+
+  static Future<List<dynamic>> loadData() async {
+    final String response = await rootBundle.loadString('assets/data.json');
+    return json.decode(response);
+  }
 
   static Future<int> addRequestForm(RequestFormModel requestData) async {
     final url = Uri.parse('$baseUrl/add-request');
@@ -42,6 +51,7 @@ class Api {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = json.decode(response.body);
+        print(jsonResponse);
         return UserProfile.fromJson(jsonResponse);
       } else {
         print("Failed to load profile: ${response.statusCode}");
@@ -101,8 +111,8 @@ class Api {
     try {
       // Fetch the PDF from the backend
       final response =
-          //await http.get(Uri.parse('$baseUrl/fetch-pdf$its'));
-          await http.get(Uri.parse('$baseUrl/fetch-pdf1'));
+          await http.get(Uri.parse('$baseUrl/fetch-pdf$its'));
+          //await http.get(Uri.parse('$baseUrl/fetch-pdf1'));
 
       if (response.statusCode == 200) {
         final pdfData = response.bodyBytes;

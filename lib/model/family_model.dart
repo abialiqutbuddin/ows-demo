@@ -54,8 +54,15 @@ class Family {
       previousInstitute: json['previous_institute'],
       previousClass: json['previous_class'],
       profileCompleted: json['profile_completed'],
-      father: json['father'] != null ? Parent.fromJson(json['father']) : null,
-      mother: json['mother'] != null ? Parent.fromJson(json['mother']) : null,
+      // Handle cases where father can be a Map, a List, or null
+      father: (json['father'] is Map<String, dynamic>)
+          ? Parent.fromJson(json['father'])
+          : null,
+
+      // Handle cases where mother can be a Map, a List, or null
+      mother: (json['mother'] is Map<String, dynamic>)
+          ? Parent.fromJson(json['mother'])
+          : null,
     );
   }
 
@@ -117,14 +124,14 @@ class Parent {
     }
 
     return Parent(
-      its: json['its'] != null ? int.tryParse(json['its'].toString()) : null, // Convert to int safely
+      its: json['its_id'], // Convert to int safely
       fullName: json['full_name'] ?? "Unknown", // Default value if missing
       gender: json['gender'] ?? "Not Specified",
       dateOfBirth: json['date_of_birth'] ?? "N/A",
       age: json['age'] != null ? int.tryParse(json['age'].toString()) : null, // Convert to int safely
       residenceAddress: json['residence_address'] ?? "Not Available",
       residencePhone: json['residence_phone'] ?? "Not Provided",
-      image: json['image'] ?? "https://example.com/default-profile.jpg", // Default placeholder image
+      image: json['image_url'] ?? "https://example.com/default-profile.jpg", // Default placeholder image
       imaniInstitute: json['imani_institute'] ?? "N/A",
       previousInstitute: json['previous_institute'] ?? "N/A",
       previousClass: json['previous_class'] ?? "N/A",

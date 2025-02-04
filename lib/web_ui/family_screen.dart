@@ -89,15 +89,15 @@ class FamilyScreenWState extends State<FamilyScreenW> {
     );
   }
 
-  Future<void> fetchUserProfile(int itsId) async {
+  Future<void> fetchUserProfile(String itsId) async {
     setState(() {
       _isLoading = true;
     });
     try {
       // Call the API to fetch user profile
-      //final userProfile = await Api.fetchUserProfile(itsId.toString()); // Add API call
-      final userProfile1 = userProfile;
-      if (userProfile1 != null) {
+      final userProfile = await Api.fetchUserProfile(itsId.toString()); // Add API call
+      //final userProfile = userProfile1;
+      if (userProfile != null) {
         // Get.to(() => ProfilePreview(
         //   member: userProfile,
         //   family: widget.family,
@@ -107,7 +107,7 @@ class FamilyScreenWState extends State<FamilyScreenW> {
         //   family: widget.family,
         // ));
         Get.to(() => ProfilePDFScreen(
-          member: userProfile1,
+          member: userProfile,
           family: widget.family,
         ));
       } else {
@@ -311,7 +311,7 @@ class FamilyScreenWState extends State<FamilyScreenW> {
                                 ? selectedMember.its
                                 : (selectedMember as Family).its) ??
                                 0;
-                            fetchUserProfile(itsId);
+                            fetchUserProfile(itsId.toString());
                           }
                               : null,
                           style: ElevatedButton.styleFrom(

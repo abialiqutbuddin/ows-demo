@@ -71,14 +71,14 @@ class FamilyScreenMState extends State<FamilyScreenM> {
     );
   }
 
-  Future<void> fetchUserProfile(int itsId) async {
+  Future<void> fetchUserProfile(String itsId) async {
     setState(() {
       _isLoading = true;
     });
     try {
+      final userProfile = await Api.fetchUserProfile(itsId.toString()); // Add API call
       // Call the API to fetch user profile
-      final userProfile1 = userProfile;
-      if (userProfile1 != null) {
+      if (userProfile != null) {
         Get.to(() => ProfilePDFScreen(
           member: userProfile,
           family: widget.family,
@@ -251,7 +251,7 @@ class FamilyScreenMState extends State<FamilyScreenM> {
                               ? selectedMember.its
                               : (selectedMember as Family).its) ??
                               0;
-                          fetchUserProfile(itsId);
+                          fetchUserProfile(itsId.toString());
                         }
                             : null,
                         style: ElevatedButton.styleFrom(

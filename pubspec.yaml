@@ -42,6 +42,8 @@ dependencies:
   http: ^1.2.2
   shared_preferences: ^2.4.0
   syncfusion_flutter_pdfviewer: ^28.1.41
+  dropdown_button2: ^2.3.9
+  dropdown_search: ^6.0.2
 
 dev_dependencies:
   flutter_test:
@@ -70,6 +72,7 @@ flutter:
     - assets/
     - assets/its.png
     - assets/profile.pdf
+    - assets/data.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

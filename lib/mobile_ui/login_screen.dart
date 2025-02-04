@@ -158,7 +158,7 @@ class _LoginPageMState extends State<LoginPageM> {
                                   );
                                   return;
                                 }
-                                loginLogic.performLogin();
+                                loginLogic.fetchAndNavigate(itsId);
                               },
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,

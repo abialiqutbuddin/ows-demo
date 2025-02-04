@@ -118,7 +118,7 @@ class UserProfile {
       hofId: json['hof_id'] ?? 0,
       motherIts: json['mother_its'] ?? 0,
       fatherIts: json['father_its'] ?? 0,
-      spouseIts: json['spouse_its'] ?? 0,
+      spouseIts: (json['spouse_its'] is int) ? json['spouse_its'] : int.tryParse(json['spouse_its'].toString()) ?? 0,
       sfNo: json['sf_no'] ?? 0,
       jamaatId: json['jamaat_id'] ?? 0,
       fullName: json['full_name'] ?? "-",
@@ -166,8 +166,14 @@ class UserProfile {
       approvedBy: json['approved_by'] ?? 0,
       isDelete: json['is_delete'] ?? 0,
       future: (json['future'] as List<dynamic>?)?.map((item) => FuturePlan.fromJson(item)).toList() ?? [],
-      education: (json['education'] as List<dynamic>?)?.map((item) => Education.fromJson(item)).toList() ?? [],
-    );
+      education: (json['education'] as List<dynamic>?)
+          ?.map((item) => Education.fromJson(item))
+          .toList()
+          .where((edu) => edu.marhalaId != null) // Ensure marhalaId is not null
+          .toList()
+          .cast<Education>()
+        ?..sort((a, b) => (b.marhalaId ?? 0).compareTo(a.marhalaId ?? 0)), // Sort in descending order
+        );
   }
 
   Map<String, dynamic> toJson() {
@@ -227,6 +233,10 @@ class UserProfile {
       'future': future?.map((item) => item.toJson()).toList() ?? [],
       'education': education?.map((item) => item.toJson()).toList() ?? [],
     };
+  }
+  int? _parseInt(dynamic value) {
+    if (value == null || value == "" || value.toString().trim().isEmpty) return null;
+    return int.tryParse(value.toString()); // Convert safely
   }
 }
 

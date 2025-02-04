@@ -2,11 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:ows/api/api.dart';
+import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import '../mobile_ui/profile_pdf_screen.dart';
 import '../model/family_model.dart';
 import '../model/member_model.dart';
 import '../web_ui/profile_pdf_screen.dart';
 
+class PDFScreenController extends GetxController {
+  Rxn<Uint8List> pdfData = Rxn<Uint8List>(); // Pass the PDF data as Uint8List
+
+  /// **Fetch and Load PDF Data**
+  Future<void> fetchAndLoadPDF(String its) async {
+    try {
+      pdfData.value = null; // Reset before loading
+
+      Uint8List fetchedData = await Api.fetchAndLoadPDF(its);
+
+      if (fetchedData.isEmpty) {
+        throw Exception("PDF data is null or empty");
+      }
+
+      pdfData.value = fetchedData;
+
+    } catch (e) {
+      Get.snackbar("Notice", "Failed to Load PDF.");
+    }
+  }
+
+}
 class ProfilePDFScreen extends StatefulWidget {
   final UserProfile member;
   final Family family;
@@ -24,11 +47,13 @@ class ProfilePDFScreen extends StatefulWidget {
 class ProfilePDFScreenState extends State<ProfilePDFScreen> {
   bool _isLoading = true; // Loading state
   late final Uint8List pdfData; // Pass the PDF data as Uint8List
+  final PDFScreenController controller = Get.find<PDFScreenController>();
+
 
   @override
   void initState() {
     super.initState();
-    fetchAndLoadPDF(widget.member.itsId.toString());
+    controller.fetchAndLoadPDF(widget.member.itsId.toString());
   }
 
   @override
@@ -37,31 +62,21 @@ class ProfilePDFScreenState extends State<ProfilePDFScreen> {
     final double screenWidth = MediaQuery.of(context).size.width;
     // Define the breakpoint for mobile
     const double mobileBreakpoint = 600;
-
-    if (_isLoading) {
       // Show loading indicator while PDF is loading
       return Scaffold(
         backgroundColor: Color(0xffdbbb99),
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
-
-    return
-      screenWidth <= mobileBreakpoint
-        ? ProfilePDFScreenM(
+        body: screenWidth <= mobileBreakpoint
+              ? ProfilePDFScreenM(
             family: widget.family,
             member: widget.member,
-        pdfData: pdfData,
+            //pdfData: pdfData,
           )
-        :
-    ProfilePDFScreenW(
+              :
+          ProfilePDFScreenW(
             family: widget.family,
             member: widget.member,
-            //pdfController: pdfController!,
-      pdfData: pdfData,
-          );
+          ),
+      );
   }
 
   void fetchAndLoadPDF(String its) async {
@@ -71,11 +86,11 @@ class ProfilePDFScreenState extends State<ProfilePDFScreen> {
       });
 
       // Try fetching the PDF from API
-      //pdfData = await Api.fetchAndLoadPDF(its);
+      //controller.pdfData = await Api.fetchAndLoadPDF(its);
 
       // If there's an error, load the default PDF from assets
-      ByteData byteData = await rootBundle.load("assets/profile.pdf");
-      pdfData = byteData.buffer.asUint8List(); // Convert ByteData to Uint8List
+      // ByteData byteData = await rootBundle.load("assets/profile.pdf");
+      // pdfData = byteData.buffer.asUint8List(); // Convert ByteData to Uint8List
 
       // Check if the fetched PDF is null or empty
       if (pdfData.isEmpty) {
@@ -84,8 +99,8 @@ class ProfilePDFScreenState extends State<ProfilePDFScreen> {
     } catch (e) {
 
       // If there's an error, load the default PDF from assets
-      ByteData byteData = await rootBundle.load("profile.pdf");
-      pdfData = byteData.buffer.asUint8List(); // Convert ByteData to Uint8List
+      // ByteData byteData = await rootBundle.load("profile.pdf");
+      // pdfData = byteData.buffer.asUint8List(); // Convert ByteData to Uint8List
 
       Get.snackbar(
           "Notice",

@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:ows/controller/request_form_controller.dart';
 import 'package:ows/model/member_model.dart';
 import 'package:ows/constants/constants.dart';
 import 'package:ows/constants/expandable_container.dart';
-import 'package:ows/web_ui/request_form.dart';
 import 'package:timelines_plus/timelines_plus.dart';
 import 'package:get/get.dart';
 import '../api/api.dart';
-import '../controller/login_controller.dart';
 import '../model/family_model.dart';
 
 class ProfilePreview extends StatelessWidget {
@@ -16,8 +13,6 @@ class ProfilePreview extends StatelessWidget {
   ProfilePreview({super.key, required this.member, required this.family});
 
   late final List<Widget> futureSubEducation = [
-    subEducation("Dunyawi", "Future Education Plan,", "No Data Available"),
-    subEducation("Dunyawi", "Future Education Plan,", "No Data Available"),
     subEducation("Dunyawi", "Future Education Plan,", "No Data Available"),
   ];
 
@@ -87,48 +82,48 @@ class ProfilePreview extends StatelessWidget {
                     ),
                   ),
                   onPressed: () {
-                    Get.to(() => RequestForm(member: member));
+                    Get.back();
                   },
                   child: Text(
-                    "Request",
+                    "Go Back",
                     style: TextStyle(color: Colors.white),
                   )),
             ),
-            SizedBox(
-              height: 35,
-              child: ElevatedButton(
-                style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.resolveWith<Color>(
-                    (Set<WidgetState> states) {
-                      if (states.contains(WidgetState.hovered)) {
-                        return Colors.transparent; // No hover effect
-                      }
-                      return Colors.transparent; // Default color
-                    },
-                  ),
-                  overlayColor: WidgetStateProperty.all(
-                      Colors.transparent), // No ripple effect
-                  shape: WidgetStateProperty.all(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
-                      side: BorderSide(
-                        color: const Color(0xFF008759),
-                        width: 2, // Green border
-                      ),
-                    ),
-                  ),
-                  elevation: WidgetStateProperty.all(0), // Flat button
-                ),
-                onPressed: () async {
-                  Constants().Logout();
-                },
-                child: Text(
-                  "Logout",
-                  style: TextStyle(
-                      color: Colors.black, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
+            // SizedBox(
+            //   height: 35,
+            //   child: ElevatedButton(
+            //     style: ButtonStyle(
+            //       backgroundColor: WidgetStateProperty.resolveWith<Color>(
+            //         (Set<WidgetState> states) {
+            //           if (states.contains(WidgetState.hovered)) {
+            //             return Colors.transparent; // No hover effect
+            //           }
+            //           return Colors.transparent; // Default color
+            //         },
+            //       ),
+            //       overlayColor: WidgetStateProperty.all(
+            //           Colors.transparent), // No ripple effect
+            //       shape: WidgetStateProperty.all(
+            //         RoundedRectangleBorder(
+            //           borderRadius: BorderRadius.circular(5),
+            //           side: BorderSide(
+            //             color: const Color(0xFF008759),
+            //             width: 2, // Green border
+            //           ),
+            //         ),
+            //       ),
+            //       elevation: WidgetStateProperty.all(0), // Flat button
+            //     ),
+            //     onPressed: () async {
+            //       Constants().Logout();
+            //     },
+            //     child: Text(
+            //       "Logout",
+            //       style: TextStyle(
+            //           color: Colors.black, fontWeight: FontWeight.bold),
+            //     ),
+            //   ),
+            // ),
           ],
         )
       ],
@@ -138,11 +133,6 @@ class ProfilePreview extends StatelessWidget {
   Widget headerProfile(BuildContext context) {
     return Row(
       children: [
-        // Container(
-        //   width: 120,
-        //     height: 170,
-        //     child: Image.asset('assets/img.png',fit: BoxFit.contain,)
-        // ),
         Column(
           children: [
             ClipRRect(
@@ -152,6 +142,18 @@ class ProfilePreview extends StatelessWidget {
                 width: 120,
                 height: 170,
                 fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    width: 80,
+                    height: 80,
+                    color: Colors.grey,
+                    child: const Icon(
+                      Icons.person,
+                      color: Colors.white,
+                      size: 40,
+                    ),
+                  );
+                },
               ),
             ),
           ],
@@ -279,6 +281,7 @@ class ProfilePreview extends StatelessWidget {
     ];
 
     final groupedEducation = groupEducationByMarhala(member.education ?? []);
+    final groupedFutureEducation = groupFutureEducationByMarhala(member.future ?? []);
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -367,21 +370,65 @@ class ProfilePreview extends StatelessWidget {
             ),
           ],
         ),
-
         Expanded(
           child: Column(
-            spacing: 20,
             children: [
-              ExpandableEducation(
-                title: "Future Education",
-                subEducation: futureSubEducation,
-              ),
+              // Future Education Section
+              if (groupedFutureEducation.values.first.isEmpty)
+                ExpandableEducation(title: "Future Education", subEducation: futureSubEducation)
+              else
+                ...groupedFutureEducation.entries.map((entry) {
+                  return ExpandableEducation(
+                    title: "Future Education",
+                    subEducation: entry.value.map((future) => futureEducationDetails(future)).toList(),
+                  );
+                }),
+              // Grouped Education Section
               ...groupedEducation.entries.map((entry) {
                 return ExpandableEducation(
                   title: "Marhala ${entry.key}",
-                  subEducation: entry.value.map((edu) => educationDetails(edu,edu.imaniOtherSchool ?? 0)).toList(),
+                  subEducation: entry.value.map((edu) => educationDetails(edu, edu.imaniOtherSchool ?? 0)).toList(),
                 );
               }),
+            ],
+          ),
+        )
+
+      ],
+    );
+  }
+
+  Widget futureEducationDetails(FuturePlan education) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      spacing: 5,
+      children: [
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(20),
+          decoration: BoxDecoration(
+              color: Color(0xfffff7ec),
+              borderRadius: BorderRadius.all(Radius.circular(12))),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 5,
+            children: [
+              // Container(
+              //   padding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+              //   decoration: BoxDecoration(
+              //     borderRadius: BorderRadius.all(Radius.circular(20)),
+              //     color: type == 1 ? Constants().blue : Constants().green,
+              //   ),
+              //   child: Text(
+              //     type == 1 ? 'Deeni' : 'Dunyawi',
+              //     style: TextStyle(color: Colors.white),
+              //   ),
+              // ),
+              Text("Institution: ${education.institute ?? '-'}"),
+              Text("Course: ${education.subject ?? '-'}"),
+              Text("Standard: ${education.study ?? '-'}"),
+              Text("City: ${education.city ?? '-'}"),
+              Text("Country: ${education.country ?? '-'}"),
             ],
           ),
         )
@@ -476,7 +523,7 @@ class ProfilePreview extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(5),
               child: Image.network(
-                Api.fetchImage((member is Parent ? member.image : (member as Family).image) ?? '').toString(),
+                Api.fetchImage((imageUrl)).toString(),
                 width: 80,
                 fit: BoxFit.contain,
                 errorBuilder: (context, error, stackTrace) {
@@ -634,8 +681,11 @@ class ProfilePreview extends StatelessWidget {
     );
   }
 
-  Map<int, List<Education>> groupEducationByMarhala(
-      List<Education> educationList) {
+  Map<int, List<FuturePlan>> groupFutureEducationByMarhala(List<FuturePlan> educationList) {
+    return {0: educationList}; // Using key `0` or any arbitrary key
+  }
+
+  Map<int, List<dynamic>> groupEducationByMarhala(List<dynamic> educationList) {
     Map<int, List<Education>> groupedEducation = {};
     for (var education in educationList) {
       groupedEducation

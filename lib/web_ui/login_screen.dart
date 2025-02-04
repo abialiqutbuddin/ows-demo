@@ -114,25 +114,28 @@ class LoginPageW extends StatelessWidget {
                                         style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                       ),
                                       const SizedBox(height: 10),
-                                      SizedBox(
-                                        height: 70,
-                                        child: TextFormField(
-                                          controller: itsIdController,
-                                          maxLength: 8,
-                                          keyboardType: TextInputType.number,
-                                          decoration: InputDecoration(
-                                            hintText: "Enter 8-digit ITS ID",
-                                            counterText: "",
-                                            enabledBorder: const OutlineInputBorder(
-                                              borderSide: BorderSide(color: Color(0xFF008759),width: 2), // Removes the border
+                                      MouseRegion(
+                                        cursor: SystemMouseCursors.text, // Ensures proper pointer handling
+                                        child: SizedBox(
+                                          height: 70,
+                                          child: TextFormField(
+                                            controller: itsIdController,
+                                            maxLength: 8,
+                                            keyboardType: TextInputType.number,
+                                            decoration: InputDecoration(
+                                              hintText: "Enter 8-digit ITS ID",
+                                              counterText: "",
+                                              enabledBorder: const OutlineInputBorder(
+                                                borderSide: BorderSide(color: Color(0xFF008759),width: 2), // Removes the border
+                                              ),
+                                              focusedBorder: const OutlineInputBorder(
+                                                borderSide: BorderSide(color: Color(0xFF008759),width: 2), // No border when focused
+                                              ),
+                                              filled: true,
+                                              fillColor: const Color(0xfffffcf6),
+                                              contentPadding:
+                                              const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                                             ),
-                                            focusedBorder: const OutlineInputBorder(
-                                              borderSide: BorderSide(color: Color(0xFF008759),width: 2), // No border when focused
-                                            ),
-                                            filled: true,
-                                            fillColor: const Color(0xfffffcf6),
-                                            contentPadding:
-                                            const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                                           ),
                                         ),
                                       ),
@@ -167,8 +170,8 @@ class LoginPageW extends StatelessWidget {
                                             }
 
                                             // Call the fetchAndNavigate function
-                                            loginLogic.performLogin();
-                                           // loginLogic.fetchAndNavigate(itsId);
+                                            //loginLogic.performLogin();
+                                            loginLogic.fetchAndNavigate(itsId);
                                           },
                                           child: Row(
                                             mainAxisAlignment: MainAxisAlignment.center,

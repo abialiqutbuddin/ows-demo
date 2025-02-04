@@ -1,11 +1,14 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:ows/controller/request_form_controller.dart';
 import 'package:ows/model/member_model.dart';
 import 'package:ows/constants/constants.dart';
 import 'package:get/get.dart';
 import 'package:ows/table.dart';
 import 'package:ows/web_ui/profile_preview_screen.dart';
+import '../controller/profile_pdf_controller.dart';
+import '../dropdown.dart';
 import '../model/family_model.dart';
 
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
@@ -13,14 +16,11 @@ import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 class ProfilePDFScreenW extends StatefulWidget {
   final UserProfile member;
   final Family family;
-  final Uint8List pdfData; // Pass the PDF data as Uint8List
-
 
   const ProfilePDFScreenW({
     super.key,
     required this.member,
     required this.family,
-    required this.pdfData,
   });
 
   @override
@@ -29,12 +29,12 @@ class ProfilePDFScreenW extends StatefulWidget {
 
 class ProfilePDFScreenWState extends State<ProfilePDFScreenW> {
 
+  final PDFScreenController controller = Get.find<PDFScreenController>();
+
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xfffff7ec),
-      body: buildContent(context),
-    );
+    return buildContent(context);
   }
 
   Widget buildContent(BuildContext context) {
@@ -50,12 +50,23 @@ class ProfilePDFScreenWState extends State<ProfilePDFScreenW> {
   }
 
   Widget buildPdf(BuildContext context) {
-
     return Expanded(
-      child: SfPdfViewer.memory(
-          widget.pdfData,
-        pageSpacing: 0,
-      ),
+      child: Obx(() {
+        if (controller.pdfData.value == null) {
+          return Center(
+            child: LoadingAnimationWidget.discreteCircle(
+              color: Colors.white,
+              size: 50,
+            ),
+          );
+        }
+        return SfPdfViewer.memory(
+          enableTextSelection: false,
+          enableDocumentLinkAnnotation: false,
+          controller.pdfData.value!,
+          pageSpacing: 0,
+        );
+      }),
     );
   }
 

@@ -3,61 +3,89 @@ import '../model/member_model.dart';
 
 // Create a Family instance using dummy data
 final Map<String, dynamic> familyJson = {
-  "its": 40470720,
-  "full_name": "Mufaddal bhai Khuzaima bhai Lakdawala",
+  "its": 20377228,
+  "full_name": "Shaikh Aliasgar bhai Taherali bhai Khumusi",
   "gender": "M",
-  "date_of_birth": "2004-08-12",
-  "age": 20,
-  "first_name": "Mufaddal",
-  "middle_name": "Khuzaima",
-  "last_name": "Lakdawala",
+  "date_of_birth": "1958-05-28",
+  "age": 66,
+  "first_name": "Aliasgar",
+  "middle_name": "Taherali",
+  "last_name": "Khumusi",
   "residence_address":
-  "Qasr-E-Burhani, 1st Floor, Flat # 1, Shahra-E-Liaquat, Karachi, Pakistan",
-  "residence_phone": "+923323126799",
+  "Flat No.B6, 2nd Floor, KDA Apartments, Block A, N.Nazimabad, Karachi, 74700",
+  "residence_phone": "+923362780552",
   "image":
-  "https://followup.qardanhasana.in/assets/img/mumin_photos/40470720.jpg",
-  "imani_institute": null,
-  "previous_institute": null,
-  "previous_class": null,
+  "https://followup.qardanhasana.in/assets/img/mumin_photos/20377228.jpg",
+  "imani_institute": "NO",
+  "previous_institute": "Jinnah Government College",
+  "previous_class": "Bachelors Degree Programs",
   "profile_completed": "NO",
-  "father": {
-    "its": 40480515,
-    "full_name": "Khuzaima bhai Ibrahim bhai Lakdawala",
-    "gender": "M",
-    "date_of_birth": "1967-12-19",
-    "age": 57,
-    "residence_address":
-    "Qasr-E-Burhani, 1st Floor, Flat # 1, Shahra-E-Liaquat, Karachi, Pakistan",
-    "residence_phone": "+923362442379",
-    "image":
-    "https://followup.qardanhasana.in/assets/img/mumin_photos/40480515.jpg",
-    "imani_institute": "NO",
-    "previous_institute": "DJ Sindh Govt. Science College",
-    "previous_class": "Bachelors Degree Programs",
-    "profile_completed": "YES"
-  },
+
+  // Handle father as an empty list (`[]`) by assigning `null`
+  "father": null,
+
+  // Mother data
   "mother": {
-    "its": 40480520,
-    "full_name": "Rashida bai Khuzaima bhai Lakdawala",
+    "id": 24818,
+    "its_id": 40464111,
+    "hof_id": 20377228,
+    "mother_its": null,
+    "father_its": null,
+    "spouse_its": null,
+    "sf_no": null,
+    "jamaat_id": 1120,
+    "full_name": "Batul bai Taherali bhai Surty",
+    "first_name": null,
+    "suffix": null,
+    "father_name": null,
+    "father_suffix": null,
+    "father_surname": null,
+    "mother_name": null,
+    "surname": null,
+    "dob": "1930-01-01",
     "gender": "F",
-    "date_of_birth": "1970-06-15",
-    "age": 54,
-    "residence_address":
-    "Qasr-E-Burhani, 1st Floor, Flat # 1, Shahra-E-Liaquat, Karachi, Pakistan",
-    "residence_phone": "+923362442379",
-    "image":
-    "https://followup.qardanhasana.in/assets/img/mumin_photos/40480520.jpg",
-    "imani_institute": "NO",
-    "previous_institute": "Government Islamia College for Women",
-    "previous_class": "Bachelors Degree",
-    "profile_completed": "YES"
+    "vatan": null,
+    "martial_status": null,
+    "qualification": null,
+    "jamiaat": null,
+    "idara": null,
+    "organization": null,
+    "email": "surty52@gmail.com",
+    "mobile_no": "+923453387525",
+    "whatsapp_no": null,
+    "tanzeem": "Mahalatburhaniyah_Fakhri_Mohalla",
+    "age": 85,
+    "hifz_sanad": null,
+    "misaq": null,
+    "status": 1,
+    "completed": 0,
+    "hometown": null,
+    "address": null,
+    "current_city": null,
+    "nationality": null,
+    "website": null,
+    "profession": null,
+    "image_url":
+    "https://followup.qardanhasana.in/assets/img/mumin_photos/no_user.png",
+    "its_status": null,
+    "marhala_ongoing": null,
+    "ambition_id": 0,
+    "current_marhala": 0,
+    "current_class": null,
+    "current_complete": 0,
+    "previous_complete": 0,
+    "progress": 0,
+    "is_approved": 0,
+    "approved_on": null,
+    "approved_by": null,
+    "is_delete": 1
   }
 };
 
 // Create a Family instance from JSON
 Family dummyFamily = Family.fromJson(familyJson);
 
-UserProfile userProfile = UserProfile(
+UserProfile userProfile1 = UserProfile(
   id: 3678,
   itsId: 20377228,
   hofId: 20377228,
@@ -93,7 +121,7 @@ UserProfile userProfile = UserProfile(
   completed: 0,
   hometown: "KHI (AL-MAHALAT-TUL-BURHANIYAH)",
   address:
-      "Flat No.B6, 2nd Floor, KDA Apartments, Block A, N.Nazimabad, Karachi, 74700",
+      "Flat No.B6, 2nd Floor, KDA Apartments, Block A, N.Nazimabad, Karachi,  HAHAHKEMSG:HMRDSKGMSER:GMSEKGFS 74700",
   currentCity: "Karachi",
   nationality: "Pakistani",
   website: null,
@@ -130,7 +158,7 @@ UserProfile userProfile = UserProfile(
       willAsbaaq: null,
       willKhidmat: null,
       study: "Pakistan",
-      city: "Karachi",
+      city: "Karachiee3e33",
       institute: "Greenwich University",
       subject: "MS Data Sciences - 2 / 2.5 yrs",
       country: "Pakistan",
@@ -149,7 +177,7 @@ UserProfile userProfile = UserProfile(
       startDate: "1978-01-01",
       endDate: "1980-01-01",
       country: "Pakistan",
-      city: "Karachi",
+      city: "Karachi00",
       imaniOtherSchool: 0,
       institute: "Jinnah Government College",
       subject: "BSc/Statistic",

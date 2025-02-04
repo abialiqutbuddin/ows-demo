@@ -1,49 +1,232 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:ows/controller/state_management/state_manager.dart';
 import '../api/api.dart';
 import '../mobile_ui/request_form_screen.dart';
+import '../model/institutes_model.dart';
 import '../model/member_model.dart';
 import '../web_ui/request_form.dart';
 
 class RequestFormController extends GetxController {
-
-  bool isLoading = true; // Loading state
+  // **State Management**
+  RxBool isLoading = true.obs;
+  RxBool isButtonEnabled = false.obs;
 
   final double defSpacing = 8;
-  late final UserProfile member;
-  bool isButtonEnabled = false;
-  final StateController statecontroller = Get.put(StateController());
-  late int reqId = 0;
 
-  // Add separate keys for each form section
+  RxInt reqId = 0.obs;
+  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
+  String? appliedByName;
+  String? appliedbyIts;
+  final String reqNum = "Request #: ows-req-000";
+
+  RxList<Institute> institutes = <Institute>[].obs;
+  RxList<Map<String, dynamic>> cities = <Map<String, dynamic>>[].obs;
+  RxList<Map<String, dynamic>> filteredInstitutes =
+      <Map<String, dynamic>>[].obs;
+
+  // **Form Keys**
   final GlobalKey<FormState> mainFormKey = GlobalKey<FormState>();
   final GlobalKey<FormState> fundsFormKey = GlobalKey<FormState>();
 
-  // Dropdown values
-  String selectedCity = "Select City";
-  String selectedSubject = "Select Subject";
+  // **Dropdown Selections**
+  RxString selectedCity = "Select City".obs;
+  RxString selectedSubject = "Select Subject".obs;
+  Rxn<String> selectedInstituteName = Rxn<String>();
+  var allData = [].obs;
 
-  // Dropdown options
-  final List<String> cities = ["Select City", "Karachi", "Islamabad", "Lahore"];
-  final List<String> subjects = [
-    "Select Subject",
-    "Math",
-    "Science",
-    "History",
-    "Computer Science"
+  // Define Marhalas
+  final List<Map<String, dynamic>> predefinedMarhalas = [
+    {'id': 4, 'name': 'Middle School (9th - 10th)'},
+    {'id': 5, 'name': 'Higher Studies (11th - 12th)'},
+    {'id': 6, 'name': 'Undergraduate'},
+    {'id': 7, 'name': 'Postgraduate'},
   ];
 
-  final TextEditingController classDegreeController = TextEditingController();
-  final TextEditingController institutionController = TextEditingController();
-  final TextEditingController studyController = TextEditingController();
-  final TextEditingController subjectController = TextEditingController();
-  final TextEditingController yearController = TextEditingController();
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
-  final TextEditingController whatsappController = TextEditingController();
-  final TextEditingController fundsController = TextEditingController();
-  final TextEditingController descriptionController = TextEditingController();
+  var filteredStudies = <Map<String, dynamic>>[].obs;
+  var filteredFields = <Map<String, dynamic>>[].obs;
+
+  var selectedMarhala = Rxn<int>();
+  var selectedStudy = Rxn<int>();
+  var selectedField = Rxn<int>();
+  Rxn<int> selectedInstitute = Rxn<int>();
+
+  RxBool isStudyEnabled = false.obs;
+  RxBool isFieldEnabled = false.obs;
+
+  void updateDropdownState() {
+    isStudyEnabled.value =
+        selectedMarhala.value != null && filteredStudies.isNotEmpty;
+    isFieldEnabled.value =
+        selectedStudy.value != null && filteredFields.isNotEmpty;
+    update();
+  }
+
+  Future<void> loadData() async {
+    final String response = await rootBundle.loadString('assets/data.json');
+    final data = json.decode(response);
+    allData.assignAll(data);
+
+    reqId.value = await Api.fetchNextReqMasId();
+    // Set default university list
+  }
+
+  void updateFilteredInstitutes() {
+    if (selectedCity.value == "Select City") {
+      filteredInstitutes.clear();
+      selectedInstitute.value = null;
+      selectedInstituteName.value = null;
+    } else {
+      filteredInstitutes.value = institutes
+          .where((u) => u.cityName == selectedCity.value)
+          .map((u) => {"id": u.id, "name": u.name})
+          .toList();
+
+      if (!filteredInstitutes.any((i) => i['id'] == selectedInstitute.value)) {
+        selectedInstitute.value = null;
+        selectedInstituteName.value = null;
+      }
+    }
+    update();
+  }
+
+  void selectCity(int? cityId) {
+    if (cityId == null || cityId == -1) {
+      selectedCity.value = "Select City";
+      filteredInstitutes.clear();
+      //selectInstitute(-1);
+    } else {
+      selectedCity.value = cities.firstWhere((c) => c['id'] == cityId)['name'];
+      updateFilteredInstitutes();
+    }
+  }
+
+  void selectInstitute(int? instituteId) {
+    selectedInstitute.value = instituteId;
+    print(instituteId);
+    if (instituteId != null) {
+      var selected = filteredInstitutes.firstWhere(
+        (inst) => inst['id'] == instituteId,
+        orElse: () => {"id": -1, "name": ""},
+      );
+      selectedInstituteName.value = selected['name'];
+      print(selectedInstituteName.value);
+    } else {
+      selectedInstituteName.value = "";
+    }
+    update();
+  }
+
+  void filterStudies(int marhalaId) {
+    filteredStudies.assignAll(
+      _extractUniqueValues(
+        allData.where((item) => item['marhala_id'] == marhalaId).toList(),
+        'study_id',
+        (item) => {'id': item['study_id'], 'name': item['study']},
+      ),
+    );
+    selectedStudy.value = null;
+    filteredFields.clear();
+    selectedField.value = null;
+    updateDropdownState();
+  }
+
+  void filterFields(int studyId) {
+    filteredFields.assignAll(
+      _extractUniqueValues(
+        allData.where((item) => item['study_id'] == studyId).toList(),
+        'id',
+        (item) => {'id': item['id'], 'name': item['name']},
+      ),
+    );
+    selectedField.value = null;
+    update(); // ✅ Ensure UI updates
+  }
+
+  List<Map<String, dynamic>> _extractUniqueValues(List<dynamic> data,
+      String key, Map<String, dynamic> Function(dynamic) mapFunction) {
+    final seenKeys = <dynamic>{};
+    return data
+        .where((item) =>
+            item[key] != null && seenKeys.add(item[key])) // Ignore nulls
+        .map(mapFunction)
+        .toList();
+  }
+
+  // **Reactive Input Fields**
+  RxString classDegree = ''.obs;
+  RxString institution = ''.obs;
+  RxString study = ''.obs;
+  RxString year = ''.obs;
+  RxString email = ''.obs;
+  RxString phone = ''.obs;
+  RxString whatsapp = ''.obs;
+  RxString funds = ''.obs;
+  RxString description = ''.obs;
+
+  @override
+  Future<void> onInit() async {
+    super.onInit();
+
+    loadData();
+    loadInstitute();
+
+    // Trigger validation when dropdowns change
+    //ever(selectedCity, (_) => validateForm());
+    ever(selectedSubject, (_) => validateForm());
+    ever(selectedCity, (_) => validateForm());
+    ever(selectedInstitute, (_) => validateForm());
+    ever(classDegree, (_) => validateForm());
+    ever(study, (_) => validateForm());
+    ever(year, (_) => validateForm());
+    ever(email, (_) => validateForm());
+    ever(phone, (_) => validateForm());
+    ever(whatsapp, (_) => validateForm());
+    ever(funds, (_) => validateForm());
+    ever(description, (_) => validateForm());
+  }
+
+  Future<void> loadInstitute() async {
+    final String response =
+        await rootBundle.loadString('assets/institutes.json');
+    final List<dynamic> data = json.decode(response);
+    institutes.value = data.map((json) => Institute.fromJson(json)).toList();
+
+    // Extract unique cities
+    Set<String> uniqueCities = institutes.map((u) => u.cityName).toSet();
+    cities.value = [
+      {"id": -1, "name": "Select City"},
+      ...uniqueCities
+          .map((city) => {"id": city.hashCode, "name": city})
+    ];
+  }
+
+  void validateForm() {
+    bool isValid =
+        //selectedInstitute.value != null &&
+        selectedCity.value != 'Select City' &&
+        selectedMarhala.value != null &&
+        selectedStudy.value != null &&
+        selectedField.value != null &&
+        year.value.isNotEmpty &&
+        _validateYear(year.value) == null && // ✅ Validate year
+        email.value.isNotEmpty &&
+        _validateEmail(email.value) == null && // ✅ Validate email
+        phone.value.isNotEmpty &&
+        _validatePhoneNumber(phone.value) == null && // ✅ Validate phone
+        whatsapp.value.isNotEmpty &&
+        _validatePhoneNumber(whatsapp.value) == null && // ✅ Validate WhatsApp
+        funds.value.isNotEmpty &&
+        _validateFunds(funds.value) == null && // ✅ Validate funds
+        description.value.isNotEmpty;
+
+    if (isValid != isButtonEnabled.value) {
+      isButtonEnabled.value = isValid;
+      update();
+    }
+  }
 
   // Define validation logic here
   String? validateField(String label, String? value) {
@@ -76,7 +259,7 @@ class RequestFormController extends GetxController {
     }
 
     // Regular expression to allow only alphabets and spaces
-    final regex = RegExp(r'^[a-zA-Z0-9\s\-\/\.]+$');
+    final regex = RegExp(r'^[a-zA-Z0-9\s\-/.]+$');
 
     if (!regex.hasMatch(value)) {
       return "Degree can only contain alphabets and spaces";
@@ -152,7 +335,9 @@ class RequestFormController extends GetxController {
     }
 
     // Check if email starts or ends with invalid characters
-    if (value.startsWith('.') || value.startsWith('-') || value.startsWith('_')) {
+    if (value.startsWith('.') ||
+        value.startsWith('-') ||
+        value.startsWith('_')) {
       return "Email cannot start with a special character";
     }
 
@@ -216,8 +401,11 @@ class RequestFormController extends GetxController {
     return null;
   }
 
-  String? validateDropdown(String label, String value) {
-    if (value == "Select City" || value == "Select Subject") {
+  String? validateDropdown(String label, Rxn<int> selectedValue) {
+    if (selectedValue.value == null) {
+      return "* $label is required";
+    }
+    if (selectedValue.value == -1){
       return "* $label is required";
     }
     return null;
@@ -236,6 +424,27 @@ class RequestFormController extends GetxController {
     return age;
   }
 
+  // **Fetch Next Request ID**
+  Future<void> fetchReqId() async {
+    reqId.value = await Api.fetchNextReqMasId();
+  }
+
+  void fetchDefaultValues(UserProfile member) {
+    email.value =
+        member.email ?? ''; // ✅ Use RxString instead of emailController.text
+    phone.value = member.mobileNo ?? '';
+    whatsapp.value = member.whatsappNo ?? '';
+
+    if (member.future != null && member.future!.isNotEmpty) {
+      classDegree.value = member.future!.first.subject ?? ''; // ✅ Use RxString
+      institution.value = member.future!.first.institute ?? '';
+
+      selectedCity.value = member.future!.first.city ?? 'Select City';
+      selectedSubject.value = member.future!.first.study ?? '';
+
+      update(); // ✅ Ensures UI updates in GetX
+    }
+  }
 }
 
 class RequestForm extends StatefulWidget {
@@ -251,82 +460,12 @@ class RequestForm extends StatefulWidget {
 }
 
 class RequestFormState extends State<RequestForm> {
-
-  final RequestFormController controller = Get.put(RequestFormController());
+  final RequestFormController controller = Get.find<RequestFormController>();
 
   @override
   void initState() {
+    controller.fetchDefaultValues(widget.member);
     super.initState();
-    fetchReqId();
-    controller.classDegreeController.addListener(validateForm);
-    controller.institutionController.addListener(validateForm);
-    controller.studyController.addListener(validateForm);
-    controller.yearController.addListener(validateForm);
-    controller.emailController.addListener(validateForm);
-    controller.phoneController.addListener(validateForm);
-    controller.whatsappController.addListener(validateForm);
-    controller.fundsController.addListener(validateForm);
-    controller.descriptionController.addListener(validateForm);
-    fetchDefaultValues();
-  }
-
-  Future<void> fetchReqId() async {
-    controller.reqId = await Api.fetchNextReqMasId();
-    setState(() {
-      controller.reqId;
-    });
-  }
-
-  void fetchDefaultValues() {
-    String? email = widget.member.email;
-    String? phone = widget.member.mobileNo;
-    String? whatsapp = widget.member.whatsappNo;
-
-    if (widget.member.future != [] && widget.member.future != null && widget.member.future!.isNotEmpty) {
-      String? subject = widget.member.future!.first.subject ?? '';
-      String? institution = widget.member.future!.first.institute ?? '';
-      String? city = widget.member.future!.first.city ?? 'Select City';
-      String? study = widget.member.future!.first.study ?? '';
-
-      controller.classDegreeController.text = subject;
-      controller.institutionController.text = institution;
-      controller.selectedCity = city;
-      controller.studyController.text = study;
-    }
-
-    controller.emailController.text = email ?? '';
-    controller.phoneController.text = phone ?? '';
-    controller.whatsappController.text = whatsapp ?? '';
-  }
-
-  void validateForm() {
-    setState(() {
-      controller.isButtonEnabled = controller.classDegreeController.text.isNotEmpty &&
-          controller.institutionController.text.isNotEmpty &&
-          controller.selectedCity != "Select City" &&
-          controller.studyController.text.isNotEmpty &&
-          controller.selectedSubject != "Select Subject" &&
-          controller.yearController.text.isNotEmpty &&
-          controller.emailController.text.isNotEmpty &&
-          controller.phoneController.text.isNotEmpty &&
-          controller.whatsappController.text.isNotEmpty &&
-          controller.fundsController.text.isNotEmpty &&
-          controller.descriptionController.text.isNotEmpty;
-    });
-  }
-
-  @override
-  void dispose() {
-    controller.classDegreeController.dispose();
-    controller.institutionController.dispose();
-    controller.studyController.dispose();
-    controller.yearController.dispose();
-    controller.emailController.dispose();
-    controller.phoneController.dispose();
-    controller.whatsappController.dispose();
-    controller.fundsController.dispose();
-    controller.descriptionController.dispose();
-    super.dispose();
   }
 
   @override

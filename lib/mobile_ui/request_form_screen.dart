@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:ows/model/member_model.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../api/api.dart';
 import '../constants/constants.dart';
 import '../controller/request_form_controller.dart';
 import '../controller/state_management/state_manager.dart';
+import '../dropdown.dart';
+import '../model/member_model.dart';
 import '../model/request_form_model.dart';
 
 class RequestFormM extends StatefulWidget {
@@ -18,14 +19,9 @@ class RequestFormM extends StatefulWidget {
 }
 
 class RequestFormMState extends State<RequestFormM> {
-  final double defSpacing = 15;
   final RequestFormController controller = Get.find<RequestFormController>();
   final StateController statecontroller = Get.put(StateController());
-  UserProfile? member;
-  bool isLoading = true; // Track loading state
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  String? appliedByName;
-  String? appliedbyIts;
+  late final UserProfile member;
 
   @override
   void initState() {
@@ -35,13 +31,13 @@ class RequestFormMState extends State<RequestFormM> {
 
   Future<void> initializeMember() async {
     setState(() {
-      isLoading = true;
+      controller.isLoading.value = true;
     });
-    member = widget.member; // Assuming data comes from the widget's member!
-    appliedbyIts = await Constants().getFromPrefs('appliedByIts');
-    appliedByName = await Constants().getFromPrefs('appliedByName');
+    member = widget.member;
+    controller.appliedbyIts = await Constants().getFromPrefs('appliedByIts');
+    controller.appliedByName = await Constants().getFromPrefs('appliedByName');
     setState(() {
-      isLoading = false;
+      controller.isLoading.value = false;
     });
   }
 
@@ -49,9 +45,8 @@ class RequestFormMState extends State<RequestFormM> {
   Widget build(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
 
-
     return Scaffold(
-      key: _scaffoldKey,
+      key: controller.scaffoldKey,
       appBar: AppBar(
           backgroundColor: Colors.brown,
           centerTitle: false,
@@ -60,8 +55,7 @@ class RequestFormMState extends State<RequestFormM> {
             style: TextStyle(
                 color: Colors.black,
                 fontWeight: FontWeight.bold,
-              fontSize: screenWidth*0.05
-            ), // White title text
+                fontSize: screenWidth * 0.05), // White title text
           ),
           leading: Padding(
             padding: const EdgeInsets.only(left: 15.0),
@@ -78,14 +72,14 @@ class RequestFormMState extends State<RequestFormM> {
               padding: EdgeInsets.only(right: 15),
               child: ElevatedButton(
                 style: ElevatedButton.styleFrom(
-                  padding:EdgeInsets.symmetric(horizontal: 11),
+                  padding: EdgeInsets.symmetric(horizontal: 11),
                   backgroundColor: const Color(0xFF008759),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(5),
                   ),
                 ),
                 onPressed: () {
-                  _scaffoldKey.currentState
+                  controller.scaffoldKey.currentState
                       ?.openDrawer(); // Open drawer when clicked
                 },
                 //icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
@@ -96,7 +90,10 @@ class RequestFormMState extends State<RequestFormM> {
                       "More Options",
                       style: TextStyle(color: Colors.black),
                     ),
-                    Icon(Icons.arrow_drop_down,color: Colors.black,)
+                    Icon(
+                      Icons.arrow_drop_down,
+                      color: Colors.black,
+                    )
                   ],
                 ),
               ),
@@ -107,7 +104,9 @@ class RequestFormMState extends State<RequestFormM> {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            SizedBox(height: 100,),
+            SizedBox(
+              height: 100,
+            ),
             Padding(
               padding: const EdgeInsets.all(15.0),
               child: Column(
@@ -129,16 +128,15 @@ class RequestFormMState extends State<RequestFormM> {
                             context: context,
                             builder: (BuildContext context) {
                               return
-                                //GuardianFormDialog();
-                              SizedBox.shrink();
+                                  //GuardianFormDialog();
+                                  SizedBox.shrink();
                             },
                           );
                         },
                         child: Text(
                           "Add Guardian",
                           style: TextStyle(color: Colors.white),
-                        )
-                    ),
+                        )),
                   ),
                   SizedBox(
                     height: 35,
@@ -146,7 +144,7 @@ class RequestFormMState extends State<RequestFormM> {
                     child: ElevatedButton(
                       style: ButtonStyle(
                         backgroundColor: WidgetStateProperty.resolveWith<Color>(
-                              (Set<WidgetState> states) {
+                          (Set<WidgetState> states) {
                             if (states.contains(WidgetState.hovered)) {
                               return Colors.transparent; // No hover effect
                             }
@@ -192,7 +190,7 @@ class RequestFormMState extends State<RequestFormM> {
                     child: ElevatedButton(
                       style: ButtonStyle(
                         backgroundColor: WidgetStateProperty.resolveWith<Color>(
-                              (Set<WidgetState> states) {
+                          (Set<WidgetState> states) {
                             if (states.contains(WidgetState.hovered)) {
                               return Colors.transparent; // No hover effect
                             }
@@ -304,7 +302,7 @@ class RequestFormMState extends State<RequestFormM> {
 
   Widget headerProfile(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
-    double fontSize = screenWidth*0.035;
+    double fontSize = screenWidth * 0.035;
 
     return Container(
       padding: EdgeInsets.all(15),
@@ -324,7 +322,7 @@ class RequestFormMState extends State<RequestFormM> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(5),
                 child: Image.network(
-                  Api.fetchImage(member!.imageUrl!),
+                  Api.fetchImage(member.imageUrl!),
                   width: 100,
                   fit: BoxFit.contain,
                   loadingBuilder: (context, child, loadingProgress) {
@@ -333,25 +331,25 @@ class RequestFormMState extends State<RequestFormM> {
                       child: CircularProgressIndicator(),
                     );
                   },
-                  // errorBuilder: (context, error, stackTrace) {
-                  //   return Container(
-                  //     height: 70,
-                  //     width: 70,
-                  //     color: Colors.grey,
-                  //     child: const Icon(
-                  //       Icons.error,
-                  //       color: Colors.white,
-                  //       size: 40,
-                  //     ),
-                  //   );
-                  // },
                   errorBuilder: (context, error, stackTrace) {
-                    return Image.asset(
-                      "assets/demo.jpg",  // Path to default image
-                      width: 100,
-                      fit: BoxFit.contain,
+                    return Container(
+                      height: 70,
+                      width: 70,
+                      color: Colors.grey,
+                      child: const Icon(
+                        Icons.error,
+                        color: Colors.white,
+                        size: 40,
+                      ),
                     );
                   },
+                  // errorBuilder: (context, error, stackTrace) {
+                  //   return Image.asset(
+                  //     "assets/demo.jpg", // Path to default image
+                  //     width: 100,
+                  //     fit: BoxFit.contain,
+                  //   );
+                  // },
                 ),
               ),
               Expanded(
@@ -360,13 +358,15 @@ class RequestFormMState extends State<RequestFormM> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      member!.fullName ?? '',
+                      member.fullName ?? '',
                       softWrap: true,
-                      style: TextStyle(fontWeight: FontWeight.bold,fontSize: fontSize),
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: fontSize),
                     ),
                     Text(
-                      'Student ITS: ${member!.itsId.toString()}',
-                      style: TextStyle(fontWeight: FontWeight.bold,fontSize: fontSize),
+                      'Student ITS: ${member.itsId.toString()}',
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: fontSize),
                     )
                   ],
                 ),
@@ -379,25 +379,28 @@ class RequestFormMState extends State<RequestFormM> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Column(
-                spacing: defSpacing,
+                spacing: controller.defSpacing,
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    spacing: defSpacing,
+                    spacing: controller.defSpacing,
                     children: [
                       Icon(Icons.location_on_rounded),
                       Flexible(
-                          child: Text(member!.address ?? '', softWrap: true,style: TextStyle(fontSize: fontSize),)),
+                          child: Text(
+                        member.address ?? '',
+                        softWrap: true,
+                        style: TextStyle(fontSize: fontSize),
+                      )),
                     ],
                   ),
                   Row(
-                    spacing: defSpacing,
+                    spacing: controller.defSpacing,
                     children: [
                       Icon(Icons.location_on_rounded),
-                      Text(
-                        member!.jamiaat ?? '',style: TextStyle(fontSize: fontSize)
-                      ),
+                      Text(member.jamiaat ?? '',
+                          style: TextStyle(fontSize: fontSize)),
                     ],
                   ),
                 ],
@@ -408,18 +411,20 @@ class RequestFormMState extends State<RequestFormM> {
                     spacing: 15,
                     children: [
                       Row(
-                        spacing: defSpacing,
+                        spacing: controller.defSpacing,
                         children: [
                           Icon(Icons.calendar_month_rounded),
-                          Text(member!.dob ?? '',style: TextStyle(fontSize: fontSize)),
+                          Text(member.dob ?? '',
+                              style: TextStyle(fontSize: fontSize)),
                         ],
                       ),
                       Row(
-                        spacing: defSpacing,
+                        spacing: controller.defSpacing,
                         children: [
                           Icon(Icons.calendar_month_rounded),
                           Text(
-                              "${controller.calculateAge(member!.dob ?? '')} years old",style: TextStyle(fontSize: fontSize)),
+                              "${controller.calculateAge(member.dob ?? '')} years old",
+                              style: TextStyle(fontSize: fontSize)),
                         ],
                       ),
                     ],
@@ -427,15 +432,15 @@ class RequestFormMState extends State<RequestFormM> {
                 ],
               ),
               Column(
-                spacing: defSpacing,
+                spacing: controller.defSpacing,
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
-                    spacing: defSpacing,
+                    spacing: controller.defSpacing,
                     children: [
                       Icon(Icons.email),
-                      Text(member!.email!,style: TextStyle(fontSize: fontSize)),
+                      Text(member.email!, style: TextStyle(fontSize: fontSize)),
                     ],
                   ),
                 ],
@@ -446,17 +451,19 @@ class RequestFormMState extends State<RequestFormM> {
                     spacing: 15,
                     children: [
                       Row(
-                        spacing: defSpacing,
+                        spacing: controller.defSpacing,
                         children: [
                           Icon(Icons.phone),
-                          Text(member!.mobileNo!,style: TextStyle(fontSize: fontSize)),
+                          Text(member.mobileNo!,
+                              style: TextStyle(fontSize: fontSize)),
                         ],
                       ),
                       Row(
-                        spacing: defSpacing,
+                        spacing: controller.defSpacing,
                         children: [
                           Icon(Icons.phone),
-                          Text(member!.whatsappNo!,style: TextStyle(fontSize: fontSize)),
+                          Text(member.whatsappNo!,
+                              style: TextStyle(fontSize: fontSize)),
                         ],
                       ),
                     ],
@@ -482,16 +489,12 @@ class RequestFormMState extends State<RequestFormM> {
     );
   }
 
-
   Widget profileBox(String title, String value, BuildContext context) {
-    print(appliedbyIts);
-    print(appliedByName);
-    if(value == 'ITS'){
-      value = appliedbyIts ?? '';
-    }else{
-    value = appliedByName ?? '';
+    if (value == 'ITS') {
+      value = controller.appliedbyIts ?? '';
+    } else {
+      value = controller.appliedByName ?? '';
     }
-
 
     return Expanded(
       child: Container(
@@ -506,8 +509,8 @@ class RequestFormMState extends State<RequestFormM> {
           spacing: 15,
           children: [
             Text(title,
-                style:
-                    TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                style: TextStyle(
+                    color: Colors.black, fontWeight: FontWeight.bold)),
             Text(value,
                 style: TextStyle(
                     color: Constants().green, fontWeight: FontWeight.bold))
@@ -518,12 +521,10 @@ class RequestFormMState extends State<RequestFormM> {
   }
 
   Widget lastEducation() {
-
     final double screenWidth = MediaQuery.of(context).size.width;
-    double fontSize = screenWidth*0.037;
+    double fontSize = screenWidth * 0.035;
 
-
-    if (member!.education == null || member!.education!.isEmpty) {
+    if (member.education == null || member.education!.isEmpty) {
       return Padding(
         padding: const EdgeInsets.only(top: 10.0),
         child: Column(
@@ -565,8 +566,8 @@ class RequestFormMState extends State<RequestFormM> {
                       ),
                     ),
                     TextSpan(
-                      text: member?.education?.isNotEmpty == true
-                          ? member!.education![0].className ?? "Not available"
+                      text: member.education?.isNotEmpty == true
+                          ? member.education![0].className ?? "Not available"
                           : "Not available",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
@@ -588,8 +589,8 @@ class RequestFormMState extends State<RequestFormM> {
                       ),
                     ),
                     TextSpan(
-                      text: member?.education?.isNotEmpty == true
-                          ? member!.education![0].institute ?? "Not available"
+                      text: member.education?.isNotEmpty == true
+                          ? member.education![0].institute ?? "Not available"
                           : "Not available",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
@@ -612,8 +613,8 @@ class RequestFormMState extends State<RequestFormM> {
                       ),
                     ),
                     TextSpan(
-                      text: member?.education?.isNotEmpty == true
-                          ? member!.education![0].subject ?? "Not available"
+                      text: member.education?.isNotEmpty == true
+                          ? member.education![0].subject ?? "Not available"
                           : "Not available",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
@@ -635,8 +636,8 @@ class RequestFormMState extends State<RequestFormM> {
                       ),
                     ),
                     TextSpan(
-                      text: member?.education?.isNotEmpty == true
-                          ? member!.education![0].city ?? "Not available"
+                      text: member.education?.isNotEmpty == true
+                          ? member.education![0].city ?? "Not available"
                           : "Not available",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
@@ -654,6 +655,8 @@ class RequestFormMState extends State<RequestFormM> {
   }
 
   Widget requestForm(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    double fontSize = screenWidth * 0.035;
 
     return Container(
       padding: EdgeInsets.all(15),
@@ -673,13 +676,15 @@ class RequestFormMState extends State<RequestFormM> {
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
               Text(
-                "Request #: 000${controller.reqId}",
-                style: TextStyle(fontWeight: FontWeight.bold),
+                "${controller.reqNum}${controller.reqId}",
+                style:
+                    TextStyle(fontWeight: FontWeight.bold, fontSize: fontSize),
               ),
-              Text("|"),
+              Text("|", style: TextStyle(fontSize: fontSize)),
               Text(
                 "Date: ${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}",
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style:
+                    TextStyle(fontWeight: FontWeight.bold, fontSize: fontSize),
               )
             ],
           ),
@@ -690,60 +695,6 @@ class RequestFormMState extends State<RequestFormM> {
           SizedBox(),
         ],
       ),
-    );
-  }
-
-  Widget _buildField(String label, TextEditingController controller,
-      {double? height}) {
-    final double screenWidth = MediaQuery.of(context).size.width;
-    double fontSize = screenWidth*0.037;
-    bool isDescription = height != null;
-    return Column(
-      spacing: 5,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
-        //const SizedBox(height: 5),
-        SizedBox(
-          height: height ?? 40,
-          child: TextFormField(
-            style: TextStyle(fontSize: fontSize),
-            controller: controller,
-            maxLines: isDescription ? 3 : 1,
-            validator: (value) {
-              this.controller.validateField(label, value);
-              return null;
-            },
-            decoration: InputDecoration(
-              enabledBorder: const OutlineInputBorder(
-                borderSide: BorderSide.none, // Removes the border
-              ),
-              focusedBorder: const OutlineInputBorder(
-                borderSide: BorderSide.none, // No border when focused
-              ),
-              filled: true,
-              fillColor: const Color(0xfffffcf6),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-            ),
-          ),
-        ),
-        // Fixed height container for error messages
-        //const SizedBox(height: 1), // Adjust this height as needed
-        Builder(
-          builder: (context) {
-            String? error =
-                this.controller.validateField(label, controller.text);
-            if (error != null) {
-              return Text(
-                error,
-                style: const TextStyle(color: Colors.red, fontSize: 12),
-              );
-            }
-            return const SizedBox(height: 17);
-          },
-        ),
-      ],
     );
   }
 
@@ -763,33 +714,94 @@ class RequestFormMState extends State<RequestFormM> {
             Column(
               spacing: 12,
               children: [
-                _buildField(
-                    "Class / Degree Program", controller.classDegreeController),
-                _buildField("Institution", controller.institutionController),
                 _buildDropdown(
-                    "City", controller.selectedCity, controller.cities,
-                    (newValue) {
-                  setState(() {
-                    controller.selectedCity = newValue!;
+                  label: "Marhala",
+                  selectedValue: controller.selectedMarhala,
+                  items: controller.predefinedMarhalas,
+                  onChanged: (value) {
+                    controller.selectedMarhala.value = value!;
+                    controller.filterStudies(value);
+                  },
+                  isEnabled: true,
+                ),
+                Obx(
+                  () => _buildDropdown(
+                    label: "Study",
+                    selectedValue: controller.selectedStudy,
+                    items: controller.filteredStudies,
+                    onChanged: (value) {
+                      controller.selectedStudy.value = value!;
+                      controller.filterFields(value);
+                      controller
+                          .updateDropdownState(); // ✅ Update dropdown state
+                    },
+                    isEnabled: controller.isStudyEnabled.value,
+                  ),
+                ),
+                Obx(() => _buildDropdown(
+                      label: "Field",
+                      selectedValue: controller.selectedField,
+                      items: controller.filteredFields,
+                      onChanged: (value) {
+                        controller.selectedField.value = value!;
+                        controller.updateDropdownState();
+                      },
+                      isEnabled: controller.isFieldEnabled.value,
+                    )),
+                Obx(() {
+                  String? memberCity =
+                  (member.future != null && member.future!.isNotEmpty)
+                      ? member.future![0].city
+                      : null;
+
+                  // Find matching city ID
+                  int cityId = controller.cities.firstWhere(
+                    (city) => city['name'] == memberCity,
+                    orElse: () => {"id": -1}, // Default to -1 if not found
+                  )['id'];
+
+                  // Ensure state update happens AFTER the current frame
+                  Future.microtask(() {
+                    if (controller.selectedCity.value !=
+                        (cityId == -1 ? "Select City" : memberCity!)) {
+                      controller
+                          .selectCity(cityId); // ✅ Update in GetX Controller
+                    }
                   });
+
+                  return _buildDropdown(
+                    label: "City",
+                    selectedValue: Rxn<int>(cityId), // ✅ Pass the matched city ID
+                    items: controller.cities,
+                    isEnabled: true,
+                    onChanged: (int? cityId) => controller.selectCity(cityId),
+                  );
                 }),
-                _buildField("Study", controller.studyController),
-                _buildDropdown("Subject / Course", controller.selectedSubject,
-                    controller.subjects, (newValue) {
-                  setState(() {
-                    controller.selectedSubject = newValue!;
-                  });
-                }),
+                Obx(() => CustomDropdownSearch<String>(
+                      label: "Institute",
+                      itemsLoader: (filter, _) async {
+                        return controller.filteredInstitutes
+                            .map((e) => e['name'] as String)
+                            .toList();
+                      },
+                      selectedItem: controller.selectedInstituteName.value,
+                      isEnabled: controller.selectedCity.value != "Select City",
+                      onChanged: (String? institute) {
+                        if (institute != null) {
+                          controller.selectedInstituteName.value = institute;
+                        }
+                      },
+                    )),
               ],
             ),
             const SizedBox(height: 16),
             Column(
               spacing: 10,
               children: [
-                _buildField("Year", controller.yearController),
-                _buildField("Email", controller.emailController),
-                _buildField("Phone Number", controller.phoneController),
-                _buildField("WhatsApp Number", controller.whatsappController),
+                _buildField1("Year", controller.year),
+                _buildField1("Email", controller.email),
+                _buildField1("Phone Number", controller.phone),
+                _buildField1("WhatsApp Number", controller.whatsapp),
               ],
             ),
           ],
@@ -812,71 +824,75 @@ class RequestFormMState extends State<RequestFormM> {
             Column(
               spacing: 12,
               children: [
-                _buildField("Funds", controller.fundsController),
-                _buildField("Description", controller.descriptionController,
+                _buildField1("Funds", controller.funds),
+                _buildField1("Description", controller.description,
                     height: 100),
               ],
             ),
             const SizedBox(height: 16),
-            SizedBox(
-              width: 120,
-              height: 35,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: controller.isButtonEnabled
-                      ? const Color(0xFF008759)
-                      : Colors.grey, // Change color based on validation
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5),
+            Obx(
+              () => SizedBox(
+                width: 120,
+                height: 35,
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: controller.isButtonEnabled.value
+                        ? const Color(0xFF008759)
+                        : Colors.grey, // Change color based on validation
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
                   ),
-                ),
-                onPressed: controller.isButtonEnabled
-                    ? () async {
-                        statecontroller.toggleLoading(true);
-                        if (controller.mainFormKey.currentState!.validate() &&
-                            controller.fundsFormKey.currentState!.validate()) {
-                          var newData = RequestFormModel(
-                            classDegree: controller.classDegreeController.text,
-                            institution: controller.institutionController.text,
-                            city: controller.selectedCity,
-                            study: controller.studyController.text,
-                            subject: controller.selectedSubject,
-                            year: controller.yearController.text,
-                            email: controller.emailController.text,
-                            phoneNumber: controller.phoneController.text,
-                            whatsappNumber: controller.whatsappController.text,
-                            fundAmount: controller.fundsController.text,
-                            memberITS: member!.itsId.toString(),
-                            appliedbyIts: appliedbyIts.toString(),
-                            appliedbyName: appliedByName.toString(),
-                            fundDescription:
-                                controller.descriptionController.text,
-                            mohalla: member!.jamaatId.toString(),
-                            address: member!.address ?? "",
-                            dob: member!.dob ?? "",
-                            fullName: member!.fullName ?? "",
-                            firstName: member!.firstName ?? "",
-                            applyDate: DateTime.now().toString(),
-                          );
+                  onPressed: controller.isButtonEnabled.value
+                      ? () async {
+                          statecontroller.toggleLoading(true);
+                          if (controller.mainFormKey.currentState!.validate() &&
+                              controller.fundsFormKey.currentState!
+                                  .validate()) {
+                            var newData = RequestFormModel(
+                              classDegree: controller
+                                  .classDegree.value, // ✅ Use RxString.value
+                              institution: controller.institution.value,
+                              city: controller.selectedCity.value,
+                              study: controller.study.value,
+                              subject: controller.selectedSubject.value,
+                              year: controller.year.value,
+                              email: controller.email.value,
+                              phoneNumber: controller.phone.value,
+                              whatsappNumber: controller.whatsapp.value,
+                              fundAmount: controller.funds.value,
+                              memberITS: controller.appliedbyIts.toString(),
+                              appliedbyIts: controller.appliedbyIts.toString(),
+                              appliedbyName:
+                                  controller.appliedByName.toString(),
+                              fundDescription: controller.description.value,
+                              mohalla: member.jamaatId.toString(),
+                              address: member.address ?? "",
+                              dob: member.dob ?? "",
+                              fullName: member.fullName ?? "",
+                              firstName: member.firstName ?? "",
+                              applyDate: DateTime.now().toString(),
+                            );
 
-                          // Call the API to add request
-                          int returnCode = await Api.addRequestForm(newData);
-                          await Future.delayed(const Duration(seconds: 2));
-                          statecontroller.toggleLoading(false);
+                            // Call the API to add request
+                            int returnCode = await Api.addRequestForm(newData);
+                            await Future.delayed(const Duration(seconds: 2));
+                            statecontroller.toggleLoading(false);
 
-                          if (returnCode == 200) {
-                            Get.snackbar("Success!",
-                                "Data successfully inserted in Database!");
-                          } else {
-                            Get.snackbar(
-                                "Error", "Failed to insert Data in Database!");
+                            if (returnCode == 200) {
+                              Get.snackbar("Success!",
+                                  "Data successfully inserted in Database!");
+                            } else {
+                              Get.snackbar("Error",
+                                  "Failed to insert Data in Database!");
+                            }
                           }
                         }
-                      }
-                    : null, // Disable the button when validation fails
-                child: const Text(
-                  "Request",
-                  style: TextStyle(color: Colors.white),
+                      : null, // Disable the button when validation fails
+                  child: const Text(
+                    "Request",
+                    style: TextStyle(color: Colors.white),
+                  ),
                 ),
               ),
             ),
@@ -886,54 +902,121 @@ class RequestFormMState extends State<RequestFormM> {
     );
   }
 
-  // Helper method for dropdowns
-  Widget _buildDropdown(String label, String selectedValue, List<String> items,
-      ValueChanged<String?> onChanged) {
+  Widget _buildField1(String label, RxString rxValue, {double? height}) {
+    bool isDescription = height != null;
+
     return Column(
-      spacing: 5,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+        Obx(
+          () => SizedBox(
+            height: height ?? 40,
+            child: TextFormField(
+              controller: TextEditingController(text: rxValue.value)
+                ..selection =
+                    TextSelection.collapsed(offset: rxValue.value.length),
+              onChanged: (value) {
+                rxValue.value = value;
+                controller.validateForm();
+              },
+              maxLines: isDescription ? 3 : 1,
+              decoration: InputDecoration(
+                enabledBorder: const OutlineInputBorder(
+                  borderSide: BorderSide.none, // Removes the border
+                ),
+                focusedBorder: const OutlineInputBorder(
+                  borderSide: BorderSide.none, // No border when focused
+                ),
+                filled: true,
+                fillColor: const Color(0xfffffcf6),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              ),
+            ),
+          ),
+        ),
+        // Display real-time validation error messages
+        Obx(() {
+          String? error = controller.validateField(label, rxValue.value);
+          return error != null
+              ? Text(error,
+                  style: const TextStyle(color: Colors.red, fontSize: 12))
+              : const SizedBox(height: 17);
+        }),
+      ],
+    );
+  }
+
+  Widget _buildDropdown({
+    required String label,
+    required Rxn<int> selectedValue,
+    required List<Map<String, dynamic>> items,
+    required ValueChanged<int?> onChanged,
+    required bool isEnabled,
+  }) {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
-        SizedBox(
-          height: 40,
-          child: DropdownButtonFormField<String>(
-            value: selectedValue,
-            icon: const Icon(Icons.arrow_drop_down),
-            decoration: InputDecoration(
-              filled: true,
-              enabledBorder: OutlineInputBorder(
-                borderSide: BorderSide.none, // Removes the border
+        Obx(() => SizedBox(
+              height: 40,
+              child: DropdownButtonFormField<int>(
+                isExpanded: true,
+                value: selectedValue.value,
+                icon: const Icon(Icons.arrow_drop_down),
+                decoration: InputDecoration(
+                  filled: true,
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide.none, // Removes the border
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide.none, // No border when focused
+                  ),
+                  fillColor: const Color(0xfffffcf6), // Background color
+                  border: OutlineInputBorder(),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                ),
+                items: items.map((Map<String, dynamic> item) {
+                  return DropdownMenuItem<int>(
+                    value: item['id'],
+                    child: Text(item['name']),
+                  );
+                }).toList(),
+                onChanged: isEnabled
+                    ? (value) {
+                        selectedValue.value = value;
+                        onChanged(value);
+                        controller.validateForm();
+                      }
+                    : null, // Disable when needed
+                disabledHint: Text("Select ${_getDisabledHint(label)}"),
               ),
-              focusedBorder: OutlineInputBorder(
-                borderSide: BorderSide.none, // No border when focused
-              ),
-              fillColor: const Color(0xfffffcf6), // Background color
-              border: OutlineInputBorder(),
-              contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-            ),
-            items: items.map((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(value),
-              );
-            }).toList(),
-            onChanged: onChanged,
-          ),
-        ),
-        Builder(
-          builder: (context) {
-            String? error = controller.validateDropdown(label, selectedValue);
-            if (error != null) {
-              return Text(
-                error,
-                style: const TextStyle(color: Colors.red, fontSize: 12),
-              );
-            }
-            return const SizedBox(
-                height: 17); // Reserve space for validation message
-          },
-        ),
+            )),
+        // Show validation message dynamically
+        Obx(() {
+          String? error = controller.validateDropdown(label, selectedValue);
+          return error != null
+              ? Text(
+                  error,
+                  style: const TextStyle(color: Colors.red, fontSize: 12),
+                )
+              : const SizedBox(
+                  height: 17); // Reserve space for validation message
+        }),
       ],
     );
+  }
+
+  String _getDisabledHint(String label) {
+    switch (label) {
+      case "Study":
+        return "Marhala First";
+      case "Field":
+        return "Study First";
+      default:
+        return label;
+    }
   }
 }
