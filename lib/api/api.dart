@@ -9,8 +9,8 @@ import '../model/request_form_model.dart';
 class Api {
   static const String baseUrl =
       //"http://36.50.12.171:3002";
-     // "http://localhost:3002";
-  "https://mode.imadiinnovations.com:3002";
+      // "http://localhost:3002";
+      "https://mode.imadiinnovations.com:3002";
 
   static Future<List<dynamic>> loadData() async {
     final String response = await rootBundle.loadString('assets/data.json');
@@ -51,8 +51,10 @@ class Api {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = json.decode(response.body);
-        print(jsonResponse);
-        return UserProfile.fromJson(jsonResponse);
+        if (jsonResponse['error'] == null) {
+          return UserProfile.fromJson(jsonResponse);
+        }
+        return null;
       } else {
         print("Failed to load profile: ${response.statusCode}");
         return null;
@@ -73,8 +75,10 @@ class Api {
       final response = await http.get(url);
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = json.decode(response.body);
-        print(jsonResponse);
-        return Family.fromJson(jsonResponse);
+        if (jsonResponse['error'] == null) {
+          return Family.fromJson(jsonResponse);
+        }
+        return null;
       } else {
         print("Failed to load family profile: ${response.statusCode}");
         return null;
@@ -110,9 +114,8 @@ class Api {
   static Future<Uint8List> fetchAndLoadPDF(String its) async {
     try {
       // Fetch the PDF from the backend
-      final response =
-          await http.get(Uri.parse('$baseUrl/fetch-pdf$its'));
-          //await http.get(Uri.parse('$baseUrl/fetch-pdf1'));
+      final response = await http.get(Uri.parse('$baseUrl/fetch-pdf$its'));
+      //await http.get(Uri.parse('$baseUrl/fetch-pdf1'));
 
       if (response.statusCode == 200) {
         final pdfData = response.bodyBytes;
@@ -159,7 +162,8 @@ class Api {
   }
 
   static Future<List<Map<String, dynamic>>> fetchRequests({String? id}) async {
-    final Uri url = Uri.parse("$baseUrl/get-requests${id != null ? "?id=$id" : ""}");
+    final Uri url =
+        Uri.parse("$baseUrl/get-requests${id != null ? "?id=$id" : ""}");
 
     try {
       final response = await http.get(url);
@@ -176,5 +180,4 @@ class Api {
       return [];
     }
   }
-
 }

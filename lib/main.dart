@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:ows/constants/dummy_data.dart';
 import 'package:ows/controller/login_controller.dart';
 import 'package:ows/table.dart';
 import 'controller/profile_pdf_controller.dart';
 import 'controller/request_form_controller.dart';
-import 'dropdown.dart';
+import 'constants/dropdown_search.dart';
 
 void main() {
   Get.put(RequestFormController());
@@ -23,10 +24,11 @@ class MyApp extends StatelessWidget {
       title: 'OWS',
       theme: ThemeData(
         primaryColor: const Color(0xFF008759),
+        textTheme: GoogleFonts.poppinsTextTheme(),
       ),
-      //home: SelectionArea(child: LoginController()),
+      home: SelectionArea(child: LoginController()),
       //home: DropdownFilteringPage(),
-      home: RequestForm(member: userProfile1),
+      //home: RequestForm(member: userProfile1),
       //home:SelectionArea(child: RequestTable())
     );
   }

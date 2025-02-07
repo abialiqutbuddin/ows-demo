@@ -1,8 +1,7 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import 'controller/request_form_controller.dart';
+import '../controller/request_form_controller.dart';
 
 class CustomDropdownSearch<T> extends StatelessWidget {
   final String label;

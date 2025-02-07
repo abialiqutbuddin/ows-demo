@@ -44,6 +44,7 @@ class LoginController extends StatelessWidget {
   Future<void> fetchAndNavigate(String itsId) async {
     stateController.toggleLoading(true); // Start loading
     try {
+
       Family? family = await Api.fetchFamilyProfile(itsId);
 
       if (family != null) {

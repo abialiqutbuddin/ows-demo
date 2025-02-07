@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../api/api.dart';
 import '../constants/constants.dart';
-import '../constants/dummy_data.dart';
 import '../controller/profile_pdf_controller.dart';
 import '../model/family_model.dart';
 
@@ -98,6 +97,10 @@ class FamilyScreenWState extends State<FamilyScreenW> {
       final userProfile = await Api.fetchUserProfile(itsId.toString()); // Add API call
       //final userProfile = userProfile1;
       if (userProfile != null) {
+        if (userProfile.isDelete==1){
+          Get.snackbar("Error", "User Invalid");
+          return;
+        }
         // Get.to(() => ProfilePreview(
         //   member: userProfile,
         //   family: widget.family,

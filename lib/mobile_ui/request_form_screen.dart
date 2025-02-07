@@ -1,3 +1,4 @@
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:get/get.dart';
@@ -6,7 +7,7 @@ import '../api/api.dart';
 import '../constants/constants.dart';
 import '../controller/request_form_controller.dart';
 import '../controller/state_management/state_manager.dart';
-import '../dropdown.dart';
+import '../constants/dropdown_search.dart';
 import '../model/member_model.dart';
 import '../model/request_form_model.dart';
 
@@ -67,104 +68,76 @@ class RequestFormMState extends State<RequestFormM> {
             ),
           ),
           actions: [
-            Container(
-              height: 35,
-              padding: EdgeInsets.only(right: 15),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(horizontal: 11),
-                  backgroundColor: const Color(0xFF008759),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                ),
-                onPressed: () {
-                  controller.scaffoldKey.currentState
-                      ?.openDrawer(); // Open drawer when clicked
-                },
-                //icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
-                child: Row(
-                  spacing: 5,
-                  children: [
-                    Text(
-                      "More Options",
-                      style: TextStyle(color: Colors.black),
-                    ),
-                    Icon(
-                      Icons.arrow_drop_down,
-                      color: Colors.black,
-                    )
-                  ],
-                ),
-              ),
-            )
-          ]),
-      drawer: Drawer(
-        backgroundColor: Color(0xffffead1),
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            SizedBox(
-              height: 100,
-            ),
             Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: Column(
-                spacing: 25,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    height: 35,
-                    width: double.infinity,
-                    child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF008759),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5),
-                          ),
+              padding: const EdgeInsets.all(8.0),
+              child: DropdownButtonHideUnderline(
+                child: SizedBox(
+                  child: DropdownButton2(
+                    isExpanded: true,
+                    customButton:
+                        const Icon(Icons.more_vert, color: Colors.black),
+                    items: [
+                      DropdownMenuItem<String>(
+                        value: 'add_guardian',
+                        child: Row(
+                          children: const [
+                            Icon(Icons.person_rounded, size: 20, color: Colors.black),
+                            SizedBox(width: 10),
+                            Text("Add Guardian"),
+                          ],
                         ),
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return
-                                  //GuardianFormDialog();
-                                  SizedBox.shrink();
-                            },
-                          );
-                        },
-                        child: Text(
-                          "Add Guardian",
-                          style: TextStyle(color: Colors.white),
-                        )),
-                  ),
-                  SizedBox(
-                    height: 35,
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ButtonStyle(
-                        backgroundColor: WidgetStateProperty.resolveWith<Color>(
-                          (Set<WidgetState> states) {
-                            if (states.contains(WidgetState.hovered)) {
-                              return Colors.transparent; // No hover effect
-                            }
-                            return Colors.transparent; // Default color
-                          },
-                        ),
-                        overlayColor: WidgetStateProperty.all(
-                            Colors.transparent), // No ripple effect
-                        shape: WidgetStateProperty.all(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5),
-                            side: BorderSide(
-                              color: const Color(0xFF008759),
-                              width: 2, // Green border
-                            ),
-                          ),
-                        ),
-                        elevation: WidgetStateProperty.all(0), // Flat button
                       ),
-                      onPressed: () async {
+                      DropdownMenuItem<String>(
+                        value: 'paktalim',
+                        child: Row(
+                          children: const [
+                            Icon(Icons.update_rounded,
+                                size: 20, color: Colors.black),
+                            SizedBox(width: 10),
+                            Text("Update Profile"),
+                          ],
+                        ),
+                      ),
+                      DropdownMenuItem<String>(
+                        value: 'talabulilm',
+                        child: Row(
+                          children: const [
+                            Icon(Icons.open_in_browser_rounded, size: 20, color: Colors.black),
+                            SizedBox(width: 10),
+                            Text("Visit Talabulilm"),
+                          ],
+                        ),
+                      ),
+                      DropdownMenuItem<String>(
+                        value: 'logout',
+                        child: Row(
+                          children: const [
+                            Icon(Icons.logout_rounded,
+                                size: 20, color: Colors.black),
+                            SizedBox(width: 10),
+                            Text("Logout"),
+                          ],
+                        ),
+                      ),
+                    ],
+                    onChanged: (value) async {
+                      if (value == 'logout') {
+                        //_logout(context);
+                        Get.back();
+                      } else if (value == 'paktalim') {
+                        //_openLink();
+                        final url =
+                            'https://www.paktalim.com/admin/login'; // Replace with your URL
+                        if (await canLaunchUrl(Uri.parse(url))) {
+                          await launchUrl(
+                            Uri.parse(url),
+                            mode: LaunchMode.externalApplication,
+                          );
+                        } else {
+                          throw 'Could not launch $url';
+                        }
+                      } else if (value == 'talabulilm') {
+                        //_showAlert(context);
                         final url =
                             'https://www.mhbtalabulilm.com/home'; // Replace with your URL
                         if (await canLaunchUrl(Uri.parse(url))) {
@@ -176,91 +149,48 @@ class RequestFormMState extends State<RequestFormM> {
                         } else {
                           throw 'Could not launch $url';
                         }
-                      },
-                      child: Text(
-                        "Carry me to Talabulilm",
-                        style: TextStyle(
-                            color: Colors.black, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 35,
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ButtonStyle(
-                        backgroundColor: WidgetStateProperty.resolveWith<Color>(
-                          (Set<WidgetState> states) {
-                            if (states.contains(WidgetState.hovered)) {
-                              return Colors.transparent; // No hover effect
-                            }
-                            return Colors.transparent; // Default color
+                      } else if (value == 'add_guardian') {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return
+                                //GuardianFormDialog();
+                                SizedBox.shrink();
                           },
-                        ),
-                        overlayColor: WidgetStateProperty.all(
-                            Colors.transparent), // No ripple effect
-                        shape: WidgetStateProperty.all(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5),
-                            side: BorderSide(
-                              color: const Color(0xFF008759),
-                              width: 2, // Green border
-                            ),
-                          ),
-                        ),
-                        elevation: WidgetStateProperty.all(0), // Flat button
-                      ),
-                      onPressed: () async {
-                        final url =
-                            'https://www.paktalim.com/admin/login'; // Replace with your URL
-                        if (await canLaunchUrl(Uri.parse(url))) {
-                          await launchUrl(
-                            Uri.parse(url),
-                            mode: LaunchMode.externalApplication,
-                          );
-                        } else {
-                          throw 'Could not launch $url';
-                        }
-                      },
-                      child: Text(
-                        "Carry me to PakTalim",
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        );
+                      }
+                    },
+                    buttonStyleData: const ButtonStyleData(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
+                        color: Colors
+                            .transparent, // Transparent to blend in AppBar
                       ),
                     ),
-                  ),
-                  SizedBox(
-                    height: 35,
-                    width: double.infinity,
-                    child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF008759),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(5),
+                    dropdownStyleData: DropdownStyleData(
+                      width: 200,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        color: Color(0xffffead1),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 5,
+                            spreadRadius: 1,
                           ),
-                        ),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: Text(
-                          "View my education profile",
-                          style: TextStyle(color: Colors.white),
-                        )),
+                        ],
+                      ),
+                    ),
+                    menuItemStyleData: const MenuItemStyleData(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    ),
                   ),
-                  // IconButton(
-                  //   onPressed: () {
-                  //     Navigator.pop(context);
-                  //   },
-                  //   icon: Icon(Icons.close),
-                  // )
-                ],
+                ),
               ),
-            )
-          ],
-        ),
-      ),
+            ),
+          ]),
       backgroundColor: Color(0xfffffcf6),
       body: Stack(
         children: [
@@ -749,29 +679,10 @@ class RequestFormMState extends State<RequestFormM> {
                       isEnabled: controller.isFieldEnabled.value,
                     )),
                 Obx(() {
-                  String? memberCity =
-                  (member.future != null && member.future!.isNotEmpty)
-                      ? member.future![0].city
-                      : null;
-
-                  // Find matching city ID
-                  int cityId = controller.cities.firstWhere(
-                    (city) => city['name'] == memberCity,
-                    orElse: () => {"id": -1}, // Default to -1 if not found
-                  )['id'];
-
-                  // Ensure state update happens AFTER the current frame
-                  Future.microtask(() {
-                    if (controller.selectedCity.value !=
-                        (cityId == -1 ? "Select City" : memberCity!)) {
-                      controller
-                          .selectCity(cityId); // ✅ Update in GetX Controller
-                    }
-                  });
-
                   return _buildDropdown(
                     label: "City",
-                    selectedValue: Rxn<int>(cityId), // ✅ Pass the matched city ID
+                    selectedValue: Rxn<int>(controller
+                        .selectedCityId.value), // ✅ Pass the matched city ID
                     items: controller.cities,
                     isEnabled: true,
                     onChanged: (int? cityId) => controller.selectCity(cityId),
@@ -785,7 +696,8 @@ class RequestFormMState extends State<RequestFormM> {
                             .toList();
                       },
                       selectedItem: controller.selectedInstituteName.value,
-                      isEnabled: controller.selectedCity.value != "Select City",
+                      isEnabled: controller.selectedCity.value.isNotEmpty &&
+                          controller.selectedCity.value != "Select City",
                       onChanged: (String? institute) {
                         if (institute != null) {
                           controller.selectedInstituteName.value = institute;

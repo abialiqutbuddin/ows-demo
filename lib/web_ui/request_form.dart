@@ -8,7 +8,7 @@ import '../api/api.dart';
 import 'package:get/get.dart';
 import '../controller/request_form_controller.dart';
 import '../controller/state_management/state_manager.dart';
-import '../dropdown.dart';
+import '../constants/dropdown_search.dart';
 
 class RequestFormW extends StatefulWidget {
   final UserProfile member;
@@ -677,29 +677,9 @@ class RequestFormWState extends State<RequestFormW> {
                 ),
                 Flexible(
                   child: Obx(() {
-                    String? memberCity =
-                    (member!.future != null && member!.future!.isNotEmpty)
-                        ? member!.future![0].city
-                        : null;
-                  
-                    // Find matching city ID
-                    int cityId = controller.cities.firstWhere(
-                          (city) => city['name'] == memberCity,
-                      orElse: () => {"id": -1}, // Default to -1 if not found
-                    )['id'];
-                  
-                    // Ensure state update happens AFTER the current frame
-                    Future.microtask(() {
-                      if (controller.selectedCity.value !=
-                          (cityId == -1 ? "Select City" : memberCity!)) {
-                        controller
-                            .selectCity(cityId); // ✅ Update in GetX Controller
-                      }
-                    });
-                  
                     return _buildDropdown(
                       label: "City",
-                      selectedValue: Rxn<int>(cityId), // ✅ Pass the matched city ID
+                      selectedValue: Rxn<int>(controller.selectedCityId.value),
                       items: controller.cities,
                       isEnabled: true,
                       onChanged: (int? cityId) => controller.selectCity(cityId),

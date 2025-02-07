@@ -7,13 +7,13 @@ import '../controller/login_controller.dart';
 import 'package:get/get.dart';
 
 class LoginPageM extends StatefulWidget {
-  LoginPageM({super.key});
+  const LoginPageM({super.key});
 
   @override
-  _LoginPageMState createState() => _LoginPageMState();
+  LoginPageMState createState() => LoginPageMState();
 }
 
-class _LoginPageMState extends State<LoginPageM> {
+class LoginPageMState extends State<LoginPageM> {
 
   final StateController statecontroller = Get.put(StateController());
   final TextEditingController itsIdController = TextEditingController();

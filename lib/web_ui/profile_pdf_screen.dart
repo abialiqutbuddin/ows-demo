@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:ows/controller/request_form_controller.dart';
@@ -8,7 +7,6 @@ import 'package:get/get.dart';
 import 'package:ows/table.dart';
 import 'package:ows/web_ui/profile_preview_screen.dart';
 import '../controller/profile_pdf_controller.dart';
-import '../dropdown.dart';
 import '../model/family_model.dart';
 
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';

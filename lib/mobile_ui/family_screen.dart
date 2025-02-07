@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../api/api.dart';
 import '../constants/constants.dart';
-import '../constants/dummy_data.dart';
 import '../controller/profile_pdf_controller.dart';
 import '../model/family_model.dart';
 

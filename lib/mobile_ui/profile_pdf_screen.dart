@@ -1,13 +1,10 @@
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:ows/constants/constants.dart';
 import 'package:ows/controller/request_form_controller.dart';
 import 'package:ows/model/member_model.dart';
-import 'package:ows/web_ui/request_form.dart';
 import 'package:get/get.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
-import '../controller/login_controller.dart';
 import '../controller/profile_pdf_controller.dart';
 import '../model/family_model.dart';
 
@@ -28,13 +25,13 @@ class ProfilePDFScreenM extends StatefulWidget {
 }
 
 class ProfilePDFScreenMState extends State<ProfilePDFScreenM> {
-  final bool _isLoading = false;
+  //final bool _isLoading = false;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final PDFScreenController controller = Get.find<PDFScreenController>();
 
   @override
   Widget build(BuildContext context) {
-    final double screenHeight = MediaQuery.of(context).size.height;
+    //final double screenHeight = MediaQuery.of(context).size.height;
     final double screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
@@ -59,126 +56,98 @@ class ProfilePDFScreenMState extends State<ProfilePDFScreenM> {
             ),
           ),
           actions: [
-            Container(
-              height: 35,
-              padding: EdgeInsets.only(right: 15),
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(horizontal: 11),
-                  backgroundColor: const Color(0xFF008759),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                ),
-                onPressed: () {
-                  _scaffoldKey.currentState
-                      ?.openDrawer(); // Open drawer when clicked
-                },
-                //icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
-                child: Row(
-                  spacing: 5,
-                  children: [
-                    Text(
-                      "More Options",
-                      style: TextStyle(color: Colors.black),
-                    ),
-                    Icon(
-                      Icons.arrow_drop_down,
-                      color: Colors.black,
-                    )
-                  ],
-                ),
-              ),
-            )
-          ]),
-      backgroundColor: const Color(0xfffff7ec),
-      drawer: Drawer(
-        backgroundColor: Color(0xffffead1),
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            SizedBox(
-              height: 100,
-            ),
             Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: Column(
-                spacing: 10,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF008759),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                          side: BorderSide(color: Color(0xFF008759), width: 2),
+              padding: const EdgeInsets.all(8.0),
+              child: DropdownButtonHideUnderline(
+                child: SizedBox(
+                  child: DropdownButton2(
+                    isExpanded: true,
+                    customButton:
+                    const Icon(Icons.more_vert, color: Colors.black),
+                    items: [
+                      DropdownMenuItem<String>(
+                        value: 'request',
+                        child: Row(
+                          children: const [
+                            Icon(Icons.person_rounded, size: 20, color: Colors.black),
+                            SizedBox(width: 10),
+                            Text("Request"),
+                          ],
                         ),
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 15), // Removes extra padding
                       ),
-                      onPressed: () {
+                      DropdownMenuItem<String>(
+                        value: 'logout',
+                        child: Row(
+                          children: const [
+                            Icon(Icons.logout_rounded,
+                                size: 20, color: Colors.black),
+                            SizedBox(width: 10),
+                            Text("Logout"),
+                          ],
+                        ),
+                      ),
+                    ],
+                    onChanged: (value) async {
+                      if (value == 'logout') {
+                        Get.back();
+                      } else if (value == 'request') {
                         Get.to(() => RequestForm(member: widget.member));
-                      },
-                      //icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
-                      child: Text(
-                        "Request",
-                        style: TextStyle(color: Colors.black, fontSize: 12),
+                      }
+                    },
+                    buttonStyleData: const ButtonStyleData(
+                      padding: EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
+                        color: Colors
+                            .transparent, // Transparent to blend in AppBar
                       ),
+                    ),
+                    dropdownStyleData: DropdownStyleData(
+                      width: 200,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        color: Color(0xffffead1),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black26,
+                            blurRadius: 5,
+                            spreadRadius: 1,
+                          ),
+                        ],
+                      ),
+                    ),
+                    menuItemStyleData: const MenuItemStyleData(
+                      padding:
+                      EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     ),
                   ),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                          side: BorderSide(color: Color(0xFF008759), width: 2),
-                        ),
-                        padding: EdgeInsets.symmetric(
-                            horizontal: 15), // Removes extra padding
-                      ),
-                      onPressed: () {
-                        Constants().Logout();
-                      },
-                      //icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
-                      child: Text(
-                        "Logout",
-                        style: TextStyle(color: Colors.black, fontSize: 12),
-                      ),
-                    ),
-                  )
-                ],
+                ),
               ),
-            )
-          ],
-        ),
+            ),
+          ]
       ),
+      backgroundColor: const Color(0xfffff7ec),
       body: SizedBox(
         height: MediaQuery.of(context).size.height,
         child: Stack(
           children: [
             // Main content
-            Expanded(
-              child: Obx(() {
-                if (controller.pdfData.value == null) {
-                  return Center(
-                    child: LoadingAnimationWidget.discreteCircle(
-                      color: Colors.white,
-                      size: 50,
-                    ),
-                  );
-                }
-                return SfPdfViewer.memory(
-                  enableTextSelection: false,
-                  enableDocumentLinkAnnotation: false,
-                  controller.pdfData.value!,
-                  pageSpacing: 0,
+            Obx(() {
+              if (controller.pdfData.value == null) {
+                return Center(
+                  child: LoadingAnimationWidget.discreteCircle(
+                    color: Colors.white,
+                    size: 50,
+                  ),
                 );
-              }),
-            )
+              }
+              return SfPdfViewer.memory(
+                enableTextSelection: false,
+                enableDocumentLinkAnnotation: false,
+                controller.pdfData.value!,
+                pageSpacing: 0,
+              );
+            })
           ],
         ),
       ),

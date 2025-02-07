@@ -51,7 +51,8 @@ class RequestFormController extends GetxController {
   var selectedMarhala = Rxn<int>();
   var selectedStudy = Rxn<int>();
   var selectedField = Rxn<int>();
-  Rxn<int> selectedInstitute = Rxn<int>();
+  var selectedCityId = Rxn<int>();
+  var selectedInstitute = Rxn<int>();
 
   RxBool isStudyEnabled = false.obs;
   RxBool isFieldEnabled = false.obs;
@@ -99,20 +100,19 @@ class RequestFormController extends GetxController {
       //selectInstitute(-1);
     } else {
       selectedCity.value = cities.firstWhere((c) => c['id'] == cityId)['name'];
+      selectedCityId.value = cities.firstWhere((c) => c['id'] == cityId)['id'];
       updateFilteredInstitutes();
     }
   }
 
   void selectInstitute(int? instituteId) {
     selectedInstitute.value = instituteId;
-    print(instituteId);
     if (instituteId != null) {
       var selected = filteredInstitutes.firstWhere(
         (inst) => inst['id'] == instituteId,
         orElse: () => {"id": -1, "name": ""},
       );
       selectedInstituteName.value = selected['name'];
-      print(selectedInstituteName.value);
     } else {
       selectedInstituteName.value = "";
     }
@@ -428,23 +428,6 @@ class RequestFormController extends GetxController {
   Future<void> fetchReqId() async {
     reqId.value = await Api.fetchNextReqMasId();
   }
-
-  void fetchDefaultValues(UserProfile member) {
-    email.value =
-        member.email ?? ''; // ✅ Use RxString instead of emailController.text
-    phone.value = member.mobileNo ?? '';
-    whatsapp.value = member.whatsappNo ?? '';
-
-    if (member.future != null && member.future!.isNotEmpty) {
-      classDegree.value = member.future!.first.subject ?? ''; // ✅ Use RxString
-      institution.value = member.future!.first.institute ?? '';
-
-      selectedCity.value = member.future!.first.city ?? 'Select City';
-      selectedSubject.value = member.future!.first.study ?? '';
-
-      update(); // ✅ Ensures UI updates in GetX
-    }
-  }
 }
 
 class RequestForm extends StatefulWidget {
@@ -464,8 +447,37 @@ class RequestFormState extends State<RequestForm> {
 
   @override
   void initState() {
-    controller.fetchDefaultValues(widget.member);
+    fetchDefaultValues(widget.member);
     super.initState();
+  }
+
+  void fetchDefaultValues(UserProfile member) {
+    controller.email.value = member.email ?? ''; // ✅ Use RxString instead of emailController.text
+    controller.phone.value = member.mobileNo ?? '';
+    controller.whatsapp.value = member.whatsappNo ?? '';
+
+    if (member.future != null && member.future!.isNotEmpty) {
+      controller.classDegree.value = member.future!.first.subject ?? ''; // ✅ Use RxString
+      controller.institution.value = member.future!.first.institute ?? '';
+
+      controller.selectedSubject.value = member.future!.first.study ?? '';
+
+      // Check if `selectedCity.value` already has a value
+      String? currentCity = controller.selectedCity.value.isNotEmpty && controller.selectedCity.value != 'Select City'
+          ? controller.selectedCity.value
+          : member.future!.first.city;
+
+      // Find matching city ID
+      int cityId = controller.cities.firstWhere(
+            (city) => city['name'] == currentCity,
+        orElse: () => {"id": -1}, // Default to -1 if not found
+      )['id'];
+
+      if (controller.selectedCity.value != (cityId == -1 ? "Select City" : currentCity!)) {
+        controller.selectCity(cityId); // ✅
+      }
+      controller.update();
+    }
   }
 
   @override

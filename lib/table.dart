@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:ows/api/api.dart';
 
 class TableScreen extends StatefulWidget {
+  const TableScreen({super.key});
+
   @override
-  _TableScreenState createState() => _TableScreenState();
+  TableScreenState createState() => TableScreenState();
 }
 
-class _TableScreenState extends State<TableScreen> {
+class TableScreenState extends State<TableScreen> {
   List<Map<String, dynamic>> requests = [];
   bool _isLoading = true;
 

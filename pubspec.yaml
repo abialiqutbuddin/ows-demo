@@ -44,6 +44,7 @@ dependencies:
   syncfusion_flutter_pdfviewer: ^28.1.41
   dropdown_button2: ^2.3.9
   dropdown_search: ^6.0.2
+  google_fonts: ^6.2.1
 
 dev_dependencies:
   flutter_test:
