@@ -11,13 +11,11 @@ import '../model/family_model.dart';
 class ProfilePDFScreenM extends StatefulWidget {
   final UserProfile member;
   final Family family;
-  //final Uint8List pdfData; // Pass the PDF data as Uint8List
 
   const ProfilePDFScreenM({
     super.key,
     required this.member,
     required this.family,
-    // required this.pdfData,
   });
 
   @override
@@ -37,7 +35,8 @@ class ProfilePDFScreenMState extends State<ProfilePDFScreenM> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
-          backgroundColor: Colors.brown,
+          backgroundColor: Color(0xfffffcf6),
+          surfaceTintColor: Colors.transparent,
           centerTitle: false,
           title: Text(
             'Profile Preview',
@@ -134,10 +133,13 @@ class ProfilePDFScreenMState extends State<ProfilePDFScreenM> {
             // Main content
             Obx(() {
               if (controller.pdfData.value == null) {
-                return Center(
-                  child: LoadingAnimationWidget.discreteCircle(
-                    color: Colors.white,
-                    size: 50,
+                return Container(
+                  color: Colors.black.withValues(alpha: 0.5),
+                  child: Center(
+                    child: LoadingAnimationWidget.discreteCircle(
+                      color: Colors.white,
+                      size: 50,
+                    ),
                   ),
                 );
               }

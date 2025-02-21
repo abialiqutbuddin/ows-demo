@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ows/constants/dummy_data.dart';
 import '../api/api.dart';
 import '../constants/constants.dart';
 import '../controller/profile_pdf_controller.dart';
@@ -76,6 +77,9 @@ class FamilyScreenMState extends State<FamilyScreenM> {
     });
     try {
       final userProfile = await Api.fetchUserProfile(itsId.toString()); // Add API call
+      //final userProfile = await Api.fetchProxiedData('https://paktalim.com/admin/ws_app/GetProfileEducation/$itsId?access_key=8803c22b50548c9d5b1401e3ab5854812c4dcacb&username=40459629&password=1107865253');
+      print(userProfile);
+      //final userProfile = userProfile1;
       // Call the API to fetch user profile
       if (userProfile != null) {
         Get.to(() => ProfilePDFScreen(

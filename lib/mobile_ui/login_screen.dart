@@ -15,7 +15,7 @@ class LoginPageM extends StatefulWidget {
 
 class LoginPageMState extends State<LoginPageM> {
 
-  final StateController statecontroller = Get.put(StateController());
+  final GlobalStateController statecontroller = Get.put(GlobalStateController());
   final TextEditingController itsIdController = TextEditingController();
 
   @override
@@ -158,7 +158,7 @@ class LoginPageMState extends State<LoginPageM> {
                                   );
                                   return;
                                 }
-                                loginLogic.fetchAndNavigate(itsId);
+                                loginLogic.performLogin(itsId);
                               },
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,

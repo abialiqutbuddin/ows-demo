@@ -76,41 +76,41 @@ class ProfilePDFScreenWState extends State<ProfilePDFScreenW> {
         Row(
           spacing: 16,
           children: [
-            SizedBox(
-              height: 35,
-              child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF008759),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                  ),
-                  onPressed: () {
-                    Get.to(() => ProfilePreview(member: widget.member, family: widget.family));
-                  },
-                  child: Text(
-                    "Profile Display",
-                    style: TextStyle(color: Colors.white),
-                  )),
-            ),
-            SizedBox(
-              width: 120,
-              height: 35,
-              child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF008759),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                  ),
-                  onPressed: () {
-                    Get.to(() => TableScreen());
-                  },
-                  child: Text(
-                    "Table",
-                    style: TextStyle(color: Colors.white),
-                  )),
-            ),
+            // SizedBox(
+            //   height: 35,
+            //   child: ElevatedButton(
+            //       style: ElevatedButton.styleFrom(
+            //         backgroundColor: const Color(0xFF008759),
+            //         shape: RoundedRectangleBorder(
+            //           borderRadius: BorderRadius.circular(5),
+            //         ),
+            //       ),
+            //       onPressed: () {
+            //         Get.to(() => ProfilePreview(member: widget.member, family: widget.family));
+            //       },
+            //       child: Text(
+            //         "Profile Display",
+            //         style: TextStyle(color: Colors.white),
+            //       )),
+            // ),
+            // SizedBox(
+            //   width: 120,
+            //   height: 35,
+            //   child: ElevatedButton(
+            //       style: ElevatedButton.styleFrom(
+            //         backgroundColor: const Color(0xFF008759),
+            //         shape: RoundedRectangleBorder(
+            //           borderRadius: BorderRadius.circular(5),
+            //         ),
+            //       ),
+            //       onPressed: () {
+            //         Get.to(() => TableScreen());
+            //       },
+            //       child: Text(
+            //         "Table",
+            //         style: TextStyle(color: Colors.white),
+            //       )),
+            // ),
             SizedBox(
               width: 120,
               height: 35,

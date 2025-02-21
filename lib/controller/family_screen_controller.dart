@@ -20,5 +20,4 @@ class FamilyScreenController extends StatelessWidget {
           : FamilyScreenW(family: family),
     );
   }
-
 }

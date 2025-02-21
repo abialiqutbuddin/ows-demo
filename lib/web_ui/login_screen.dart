@@ -9,7 +9,7 @@ import 'package:get/get.dart';
 class LoginPageW extends StatelessWidget {
   LoginPageW({super.key});
 
-  final StateController statecontroller = Get.put(StateController());
+  final GlobalStateController statecontroller = Get.put(GlobalStateController());
 
   @override
   Widget build(BuildContext context) {
@@ -171,7 +171,7 @@ class LoginPageW extends StatelessWidget {
 
                                             // Call the fetchAndNavigate function
                                             //loginLogic.performLogin();
-                                            loginLogic.fetchAndNavigate(itsId);
+                                            loginLogic.performLogin(itsId);
                                           },
                                           child: Row(
                                             mainAxisAlignment: MainAxisAlignment.center,

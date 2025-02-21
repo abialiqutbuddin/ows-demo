@@ -1,7 +1,13 @@
+import 'dart:async';
+
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:get/get.dart';
+import 'package:ows/controller/login_controller.dart';
+import 'package:ows/mobile_ui/forms/personal_info_screen.dart';
+import 'package:super_tooltip/super_tooltip.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../api/api.dart';
 import '../constants/constants.dart';
@@ -21,8 +27,11 @@ class RequestFormM extends StatefulWidget {
 
 class RequestFormMState extends State<RequestFormM> {
   final RequestFormController controller = Get.find<RequestFormController>();
-  final StateController statecontroller = Get.put(StateController());
+  final GlobalStateController statecontroller =
+      Get.put(GlobalStateController());
   late final UserProfile member;
+  late String? appliedByName;
+  late String? appliedbyIts;
 
   @override
   void initState() {
@@ -35,12 +44,60 @@ class RequestFormMState extends State<RequestFormM> {
       controller.isLoading.value = true;
     });
     member = widget.member;
-    controller.appliedbyIts = await Constants().getFromPrefs('appliedByIts');
-    controller.appliedByName = await Constants().getFromPrefs('appliedByName');
+    checkEducationStatus(widget.member);
+    // controller.appliedbyIts = await Constants().getFromPrefs('appliedByIts');
+    // controller.appliedByName = await Constants().getFromPrefs('appliedByName');
+    appliedByName = member.fullName;
+    appliedbyIts = "${member.itsId}";
     setState(() {
       controller.isLoading.value = false;
     });
   }
+
+  List<String> checkEducationStatus(UserProfile userProfile) {
+    List<String> statusList = [];
+
+    bool hasOngoingEducation = userProfile.marhalaOngoing == 1;
+    bool hasFutureEducation = userProfile.future?.isNotEmpty ?? false;
+
+    if (hasOngoingEducation) {
+      statusList.add("Apply For Ongoing");
+      statusList.add(
+          "Apply For Future Education"); // Always add future when ongoing is 1
+    } else if (!hasOngoingEducation && hasFutureEducation) {
+      statusList.add("Apply For Future Education");
+    } else {
+      statusList.add(
+          "Apply For Future Education"); // When no ongoing and no future, still allow future application
+    }
+
+    return statusList;
+  }
+
+  // List<String> checkEducationStatus(UserProfile userProfile) {
+  //   List<String> statusList = [];
+  //
+  //   Education? lastEducation = userProfile.education?.isNotEmpty == true
+  //       ? userProfile.education!.first
+  //       : null;
+  //
+  //   bool hasFutureEducation = userProfile.future?.isNotEmpty ?? false;
+  //
+  //   if (lastEducation != null) {
+  //     if (userProfile.marhalaOngoing == 1) {
+  //       statusList.add("Apply For Ongoing");
+  //     }
+  //     if (hasFutureEducation) {
+  //       statusList.add("Apply For Future Education");
+  //     }
+  //     if (userProfile.marhalaOngoing == 0 && hasFutureEducation == false) {
+  //       statusList.add("Please update your profile at PakTalim");
+  //     }
+  //   } else {
+  //     statusList.add("No education records found. Please update your profile.");
+  //   }
+  //   return statusList;
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +106,8 @@ class RequestFormMState extends State<RequestFormM> {
     return Scaffold(
       key: controller.scaffoldKey,
       appBar: AppBar(
-          backgroundColor: Colors.brown,
+          backgroundColor: Color(0xfffffcf6),
+          surfaceTintColor: Colors.transparent,
           centerTitle: false,
           title: Text(
             'Request Form',
@@ -81,7 +139,8 @@ class RequestFormMState extends State<RequestFormM> {
                         value: 'add_guardian',
                         child: Row(
                           children: const [
-                            Icon(Icons.person_rounded, size: 20, color: Colors.black),
+                            Icon(Icons.person_rounded,
+                                size: 20, color: Colors.black),
                             SizedBox(width: 10),
                             Text("Add Guardian"),
                           ],
@@ -102,7 +161,8 @@ class RequestFormMState extends State<RequestFormM> {
                         value: 'talabulilm',
                         child: Row(
                           children: const [
-                            Icon(Icons.open_in_browser_rounded, size: 20, color: Colors.black),
+                            Icon(Icons.open_in_browser_rounded,
+                                size: 20, color: Colors.black),
                             SizedBox(width: 10),
                             Text("Visit Talabulilm"),
                           ],
@@ -123,7 +183,7 @@ class RequestFormMState extends State<RequestFormM> {
                     onChanged: (value) async {
                       if (value == 'logout') {
                         //_logout(context);
-                        Get.back();
+                        Get.to(() => LoginController());
                       } else if (value == 'paktalim') {
                         //_openLink();
                         final url =
@@ -226,6 +286,9 @@ class RequestFormMState extends State<RequestFormM> {
         //headerSection(context),
         headerProfile(context),
         requestForm(context),
+        SizedBox(
+          height: 25,
+        ),
       ],
     );
   }
@@ -308,54 +371,88 @@ class RequestFormMState extends State<RequestFormM> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                spacing: controller.defSpacing,
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
+              Row(
+                spacing: 15,
                 children: [
-                  Row(
-                    spacing: controller.defSpacing,
-                    children: [
-                      Icon(Icons.location_on_rounded),
-                      Flexible(
-                          child: Text(
-                        member.address ?? '',
-                        softWrap: true,
-                        style: TextStyle(fontSize: fontSize),
-                      )),
-                    ],
+                  FaIcon(
+                    FontAwesomeIcons.locationDot,
+                    size: 18,
                   ),
-                  Row(
-                    spacing: controller.defSpacing,
-                    children: [
-                      Icon(Icons.location_on_rounded),
-                      Text(member.jamiaat ?? '',
-                          style: TextStyle(fontSize: fontSize)),
-                    ],
+                  Flexible(
+                      child: Text(
+                    member.address ?? '',
+                    softWrap: true,
+                    style: TextStyle(fontSize: fontSize),
+                  )),
+                ],
+              ),
+              Row(
+                spacing: controller.defSpacing,
+                children: [
+                  FaIcon(
+                    FontAwesomeIcons.house,
+                    size: 18,
                   ),
+                  Text(member.jamiaat ?? '',
+                      style: TextStyle(fontSize: fontSize)),
                 ],
               ),
               Column(
                 children: [
                   Row(
+                    //mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     spacing: 15,
                     children: [
-                      Row(
-                        spacing: controller.defSpacing,
-                        children: [
-                          Icon(Icons.calendar_month_rounded),
-                          Text(member.dob ?? '',
-                              style: TextStyle(fontSize: fontSize)),
-                        ],
+                      Flexible(
+                        child: Row(
+                          spacing: controller.defSpacing,
+                          children: [
+                            Icon(Icons.calendar_month_rounded),
+                            Text(member.dob ?? '',
+                                style: TextStyle(fontSize: fontSize)),
+                          ],
+                        ),
                       ),
-                      Row(
-                        spacing: controller.defSpacing,
-                        children: [
-                          Icon(Icons.calendar_month_rounded),
-                          Text(
-                              "${controller.calculateAge(member.dob ?? '')} years old",
-                              style: TextStyle(fontSize: fontSize)),
-                        ],
+                      Flexible(
+                        child: Row(
+                          spacing: controller.defSpacing,
+                          children: [
+                            Icon(Icons.calendar_month_rounded),
+                            Text(
+                                "${controller.calculateAge(member.dob ?? '')} years old",
+                                style: TextStyle(fontSize: fontSize)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  )
+                ],
+              ),
+              Column(
+                children: [
+                  Row(
+                    //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    spacing: 15,
+                    children: [
+                      Flexible(
+                        child: Row(
+                          spacing: controller.defSpacing,
+                          children: [
+                            Icon(Icons.phone),
+                            Text(member.mobileNo!,
+                                style: TextStyle(fontSize: fontSize)),
+                          ],
+                        ),
+                      ),
+                      Flexible(
+                        child: Row(
+                          spacing: controller.defSpacing,
+                          children: [
+                            FaIcon(FontAwesomeIcons.whatsapp),
+                            Text(member.whatsappNo!,
+                                style: TextStyle(fontSize: fontSize)),
+                          ],
+                        ),
                       ),
                     ],
                   )
@@ -375,31 +472,6 @@ class RequestFormMState extends State<RequestFormM> {
                   ),
                 ],
               ),
-              Column(
-                children: [
-                  Row(
-                    spacing: 15,
-                    children: [
-                      Row(
-                        spacing: controller.defSpacing,
-                        children: [
-                          Icon(Icons.phone),
-                          Text(member.mobileNo!,
-                              style: TextStyle(fontSize: fontSize)),
-                        ],
-                      ),
-                      Row(
-                        spacing: controller.defSpacing,
-                        children: [
-                          Icon(Icons.phone),
-                          Text(member.whatsappNo!,
-                              style: TextStyle(fontSize: fontSize)),
-                        ],
-                      ),
-                    ],
-                  )
-                ],
-              )
             ],
           ),
           SizedBox(
@@ -587,6 +659,8 @@ class RequestFormMState extends State<RequestFormM> {
   Widget requestForm(BuildContext context) {
     final double screenWidth = MediaQuery.of(context).size.width;
     double fontSize = screenWidth * 0.035;
+    RxString selectedStatus = "".obs;
+    List<String> statusOptions = checkEducationStatus(widget.member);
 
     return Container(
       padding: EdgeInsets.all(15),
@@ -601,26 +675,96 @@ class RequestFormMState extends State<RequestFormM> {
         children: [
           Constants().subHeading('Request for Education Assistance'),
           Divider(),
-          Row(
-            spacing: 10,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Text(
-                "${controller.reqNum}${controller.reqId}",
-                style:
-                    TextStyle(fontWeight: FontWeight.bold, fontSize: fontSize),
-              ),
-              Text("|", style: TextStyle(fontSize: fontSize)),
-              Text(
-                "Date: ${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}",
-                style:
-                    TextStyle(fontWeight: FontWeight.bold, fontSize: fontSize),
-              )
-            ],
+          // Row(
+          //   spacing: 10,
+          //   mainAxisAlignment: MainAxisAlignment.start,
+          //   children: [
+          //     Text(
+          //       "${controller.reqNum}${controller.reqId}",
+          //       style:
+          //           TextStyle(fontWeight: FontWeight.bold, fontSize: fontSize),
+          //     ),
+          //     Text("|", style: TextStyle(fontSize: fontSize)),
+          //     Text(
+          //       "Date: ${DateTime.now().year}-${DateTime.now().month}-${DateTime.now().day}",
+          //       style:
+          //           TextStyle(fontWeight: FontWeight.bold, fontSize: fontSize),
+          //     )
+          //   ],
+          // ),
+          SizedBox(),
+          Column(
+            spacing: 5,
+            children: statusOptions.first ==
+                    'Please update your profile at PakTalim'
+                ? [
+                    Center(
+                        child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 15.0),
+                      child: Text(
+                        "Please update your profile at PakTalim",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16),
+                      ),
+                    ))
+                  ]
+                : statusOptions.map((status) {
+                    return Container(
+                      decoration: BoxDecoration(
+                          color: const Color(0xfffffcf6),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.brown, width: 1)),
+                      child: Obx(() => RadioListTile<String>(
+                            title: Text(status,
+                                style: TextStyle(
+                                    fontSize: fontSize,
+                                    fontWeight: FontWeight.bold)),
+                            value: status,
+                            groupValue: selectedStatus.value,
+                            activeColor: Colors.brown,
+                            onChanged: (value) {
+                              selectedStatus.value = value!;
+                              controller.isButtonEnabled.value = true;
+                            },
+                          )),
+                    );
+                  }).toList(),
           ),
-          SizedBox(),
+          // ElevatedButton(onPressed: (){                        Get.to(() => FormScreen());
+          // }, child: Text("NEXT")),
+          // Obx(() => ElevatedButton(
+          //       onPressed: controller.isButtonEnabled.value
+          //           ? () {
+          //               Get.to(() => FormScreen());
+          //             }
+          //           : null, // Disabled if form is invalid
+          //       style: ElevatedButton.styleFrom(
+          //         backgroundColor: controller.isButtonEnabled.value
+          //             ? Constants().green
+          //             : Colors.grey,
+          //         padding: EdgeInsets.symmetric(vertical: 14),
+          //         shape: RoundedRectangleBorder(
+          //             borderRadius: BorderRadius.circular(8)),
+          //       ),
+          //       child: Row(
+          //         mainAxisAlignment: MainAxisAlignment.center,
+          //         children: [
+          //           Text(
+          //             "Apply",
+          //             style: TextStyle(
+          //                 fontSize: 18,
+          //                 fontWeight: FontWeight.bold,
+          //                 color: Colors.white),
+          //           ),
+          //           Icon(
+          //             Icons.navigate_next_rounded,
+          //             color: Colors.white,
+          //             size: 24,
+          //           )
+          //         ],
+          //       ),
+          //     )),
           _form(),
-          SizedBox(),
           _formFunds(),
           SizedBox(),
         ],
@@ -628,7 +772,6 @@ class RequestFormMState extends State<RequestFormM> {
     );
   }
 
-// Wrap the form sections inside a `Form` widget
   Widget _form() {
     return Form(
       key: controller.mainFormKey,
@@ -639,83 +782,93 @@ class RequestFormMState extends State<RequestFormM> {
           color: const Color(0xffffead1),
         ),
         child: Column(
+          spacing: 10,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Column(
-              spacing: 12,
-              children: [
-                _buildDropdown(
-                  label: "Marhala",
-                  selectedValue: controller.selectedMarhala,
-                  items: controller.predefinedMarhalas,
+            Obx(
+              () => _buildDropdown2(
+                label: "Marhala",
+                selectedValue: controller.selectedMarhala,
+                items: controller.predefinedMarhalas,
+                onChanged: (value) {
+                  controller.selectedMarhala.value = value!;
+                  controller.selectedMarhalaName.value = controller
+                      .predefinedMarhalas
+                      .firstWhere((element) => element['id'] == value)['name'];
+                  controller.filterStudies(value);
+                },
+                isEnabled: true,
+              ),
+            ),
+            Obx(
+              () => _buildDropdown2(
+                label: "Study",
+                selectedValue: controller.selectedStudy,
+                items: controller.filteredStudies,
+                onChanged: (value) {
+                  controller.selectedStudy.value = value!;
+                  controller.selectedStudyName.value =
+                      controller.filteredStudies.firstWhere(
+                    (element) => element['id'] == value,
+                    orElse: () => {
+                      'id': -1,
+                      'name': 'Unknown Study'
+                    }, // Handle missing cases
+                  )['name'];
+                  controller.filterFields(value);
+                  controller.updateDropdownState();
+                },
+                isEnabled: controller.isStudyEnabled.value,
+              ),
+            ),
+            Obx(() => _buildDropdown2(
+                  label: "Field",
+                  selectedValue: controller.selectedField,
+                  items: controller.filteredFields,
                   onChanged: (value) {
-                    controller.selectedMarhala.value = value!;
-                    controller.filterStudies(value);
+                    controller.selectedField.value = value!;
+                    controller.selectedSubject2.value =
+                        controller.filteredFields.firstWhere(
+                      (element) => element['id'] == value,
+                      orElse: () => {
+                        'id': -1,
+                        'name': 'Unknown Study'
+                      }, // Handle missing cases
+                    )['name'];
+                    print(controller.selectedSubject2);
+                    controller.updateDropdownState();
                   },
-                  isEnabled: true,
-                ),
-                Obx(
-                  () => _buildDropdown(
-                    label: "Study",
-                    selectedValue: controller.selectedStudy,
-                    items: controller.filteredStudies,
-                    onChanged: (value) {
-                      controller.selectedStudy.value = value!;
-                      controller.filterFields(value);
-                      controller
-                          .updateDropdownState(); // ✅ Update dropdown state
-                    },
-                    isEnabled: controller.isStudyEnabled.value,
-                  ),
-                ),
-                Obx(() => _buildDropdown(
-                      label: "Field",
-                      selectedValue: controller.selectedField,
-                      items: controller.filteredFields,
-                      onChanged: (value) {
-                        controller.selectedField.value = value!;
-                        controller.updateDropdownState();
-                      },
-                      isEnabled: controller.isFieldEnabled.value,
-                    )),
-                Obx(() {
-                  return _buildDropdown(
-                    label: "City",
-                    selectedValue: Rxn<int>(controller
-                        .selectedCityId.value), // ✅ Pass the matched city ID
-                    items: controller.cities,
-                    isEnabled: true,
-                    onChanged: (int? cityId) => controller.selectCity(cityId),
-                  );
-                }),
-                Obx(() => CustomDropdownSearch<String>(
-                      label: "Institute",
-                      itemsLoader: (filter, _) async {
-                        return controller.filteredInstitutes
-                            .map((e) => e['name'] as String)
-                            .toList();
-                      },
-                      selectedItem: controller.selectedInstituteName.value,
-                      isEnabled: controller.selectedCity.value.isNotEmpty &&
-                          controller.selectedCity.value != "Select City",
-                      onChanged: (String? institute) {
-                        if (institute != null) {
-                          controller.selectedInstituteName.value = institute;
-                        }
-                      },
-                    )),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Column(
-              spacing: 10,
-              children: [
-                _buildField1("Year", controller.year),
-                _buildField1("Email", controller.email),
-                _buildField1("Phone Number", controller.phone),
-                _buildField1("WhatsApp Number", controller.whatsapp),
-              ],
-            ),
+                  isEnabled: controller.isFieldEnabled.value,
+                )),
+            Obx(() {
+              return _buildDropdown2(
+                label: "City",
+                selectedValue: Rxn<int>(controller.selectedCityId.value),
+                items: controller.cities,
+                isEnabled: true,
+                onChanged: (int? cityId) => controller.selectCity(cityId),
+              );
+            }),
+            Obx(() => CustomDropdownSearch<String>(
+                  label: "Institute",
+                  itemsLoader: (filter, _) async {
+                    return controller.filteredInstitutes
+                        .map((e) => e['name'] as String)
+                        .toList();
+                  },
+                  selectedItem: controller.selectedInstituteName.value,
+                  isEnabled: controller.selectedCity.value.isNotEmpty &&
+                      controller.selectedCity.value != "Select City",
+                  onChanged: (String? institute) {
+                    if (institute != null) {
+                      controller.selectedInstituteName.value = institute;
+                    }
+                  },
+                )),
+            _buildField2("Year", controller.year),
+            _buildField2("Email", controller.email),
+            _buildField2("Phone Number", controller.phone),
+            _buildField2("WhatsApp Number", controller.whatsapp),
           ],
         ),
       ),
@@ -732,15 +885,10 @@ class RequestFormMState extends State<RequestFormM> {
           color: const Color(0xffffead1),
         ),
         child: Column(
+          spacing: 10,
           children: [
-            Column(
-              spacing: 12,
-              children: [
-                _buildField1("Funds", controller.funds),
-                _buildField1("Description", controller.description,
-                    height: 100),
-              ],
-            ),
+            _buildField2("Funds", controller.funds),
+            _buildField2("Description", controller.description, height: 100),
             const SizedBox(height: 16),
             Obx(
               () => SizedBox(
@@ -761,28 +909,44 @@ class RequestFormMState extends State<RequestFormM> {
                           if (controller.mainFormKey.currentState!.validate() &&
                               controller.fundsFormKey.currentState!
                                   .validate()) {
+                            print(controller.selectedMarhalaName);
+                            print(controller.selectedStudyName);
                             var newData = RequestFormModel(
-                              classDegree: controller
-                                  .classDegree.value, // ✅ Use RxString.value
-                              institution: controller.institution.value,
+                              ITS: widget.member.itsId.toString(),
+                              reqByITS: appliedbyIts.toString(),
+                              reqByName: appliedByName.toString(),
+                              mohalla: widget.member.tanzeem.toString(),
+                              address: widget.member.address.toString(),
+                              dob: widget.member.dob.toString(),
                               city: controller.selectedCity.value,
-                              study: controller.study.value,
-                              subject: controller.selectedSubject.value,
-                              year: controller.year.value,
+                              institution:
+                                  controller.selectedInstituteName.value!,
+                              classDegree: controller.selectedMarhalaName.value,
+                              fieldOfStudy: controller.selectedStudyName
+                                  .value, // 🔹 Renamed study → fieldOfStudy
+                              subjectCourse: controller.selectedSubject2
+                                  .value, // 🔹 Renamed subject → subjectCourse
+                              yearOfStart: controller
+                                  .year.value, // 🔹 Renamed year → yearOfStart
+                              grade: "", // 🔹 Add if applicable
                               email: controller.email.value,
-                              phoneNumber: controller.phone.value,
-                              whatsappNumber: controller.whatsapp.value,
-                              fundAmount: controller.funds.value,
-                              memberITS: controller.appliedbyIts.toString(),
-                              appliedbyIts: controller.appliedbyIts.toString(),
-                              appliedbyName:
-                                  controller.appliedByName.toString(),
-                              fundDescription: controller.description.value,
-                              mohalla: member.jamaatId.toString(),
-                              address: member.address ?? "",
-                              dob: member.dob ?? "",
-                              fullName: member.fullName ?? "",
-                              firstName: member.firstName ?? "",
+                              contactNo: controller.phone
+                                  .value, // 🔹 Renamed phoneNumber → contactNo
+                              whatsappNo: controller.whatsapp
+                                  .value, // 🔹 Renamed whatsappNumber → whatsappNo
+                              purpose: "", // 🔹 Add if applicable
+                              fundAsking: controller.funds
+                                  .value, // 🔹 Renamed fundAmount → fundAsking
+                              classification: "", // 🔹 Add if applicable
+                              organization: "", // 🔹 Add if applicable
+                              description: controller.description
+                                  .value, // 🔹 Renamed fundDescription → description
+                              currentStatus:
+                                  "", // 🔹 Default value, change if needed
+                              createdBy:
+                                  "", // 🔹 Renamed created_by → createdBy
+                              updatedBy:
+                                  "", // 🔹 Renamed updated_by → updatedBy
                               applyDate: DateTime.now().toString(),
                             );
 
@@ -794,6 +958,16 @@ class RequestFormMState extends State<RequestFormM> {
                             if (returnCode == 200) {
                               Get.snackbar("Success!",
                                   "Data successfully inserted in Database!");
+                              Api.sendEmail(
+                                  to: 'abialigadi@gmail.com',
+                                  subject: 'Request Received - OWS',
+                                  text:
+                                      "Afzal us Salam,\n\nYour request is received! Your request number is ${controller.reqId}.\n\nWassalam.",
+                                  html: """
+                                        <p>Afzal us Salam,</p>
+                                        <p>Your request is received! Your request number is <strong>${controller.reqId}</strong>.</p>
+                                        <p>Wassalam.</p>
+                                        """);
                             } else {
                               Get.snackbar("Error",
                                   "Failed to insert Data in Database!");
@@ -813,6 +987,436 @@ class RequestFormMState extends State<RequestFormM> {
       ),
     );
   }
+
+  Widget _buildField2(String label, RxString rxValue,
+      {double? height, bool? isEnabled}) {
+    bool isDescription = height != null;
+    SuperTooltipController tooltipController = SuperTooltipController();
+    Timer? hoverTimer;
+
+    return Obx(() {
+      String? error = controller.validateField(label, rxValue.value);
+      bool isEmpty = rxValue.value.trim().isEmpty;
+      bool isValid = error == null && !isEmpty;
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            height: height ?? 50,
+            child: TextFormField(
+              style: TextStyle(
+                  letterSpacing: 0, fontWeight: FontWeight.w600, fontSize: 14),
+              enabled: isEnabled ?? true,
+              textInputAction: TextInputAction.done,
+              cursorColor: Colors.brown,
+              controller: TextEditingController(text: rxValue.value)
+                ..selection =
+                    TextSelection.collapsed(offset: rxValue.value.length),
+              onChanged: (value) {
+                rxValue.value = value;
+                controller.validateForm();
+              },
+              textCapitalization: TextCapitalization.sentences,
+              maxLines: isDescription ? 3 : 1,
+              decoration: InputDecoration(
+                floatingLabelBehavior: FloatingLabelBehavior.always,
+                suffixIcon: isValid
+                    ? Icon(
+                        Icons.check_circle_rounded,
+                        color: Colors.green,
+                      )
+                    : GestureDetector(
+                        onTap: () async {
+                          if (!isValid && !isEmpty) {
+                            await tooltipController.showTooltip();
+                          }
+                        },
+                        child: SuperTooltip(
+                          elevation: 1,
+                          showBarrier: true,
+                          barrierColor: Colors.transparent,
+                          controller: tooltipController,
+                          arrowTipDistance: 10,
+                          arrowTipRadius: 2,
+                          arrowLength: 10,
+                          toggleOnTap: true,
+                          borderColor: isEmpty
+                              ? Colors.amber // ⚠️ Yellow for info
+                              : Colors.red, // ❌ Red for error
+                          borderWidth: 2,
+                          backgroundColor: isEmpty
+                              ? Colors.amber.withValues(alpha: 0.9) // ⚠️ Yellow
+                              : Colors.red.withValues(alpha: 0.9), // ❌ Red
+                          boxShadows: [
+                            BoxShadow(
+                              color: Colors.black
+                                  .withValues(alpha: 0.2), // Light shadow
+                              blurRadius: 6,
+                              spreadRadius: 2,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                          content: Text(
+                            isEmpty ? "This field is required" : error ?? "",
+                            style: const TextStyle(
+                                color: Colors.black, fontSize: 12),
+                          ),
+                          child: Container(
+                            padding: const EdgeInsets.all(
+                                10), // ✅ Expands hover area
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.transparent, // No background
+                            ),
+                            child: Icon(
+                              isEmpty
+                                  ? Icons.info_rounded
+                                  : Icons.error_rounded,
+                              color: isEmpty ? Colors.amber : Colors.red,
+                              size: 24, // ✅ Keep icon size normal
+                            ),
+                          ),
+                        ),
+                      ),
+                labelText: label,
+                labelStyle:
+                    TextStyle(fontWeight: FontWeight.bold, color: Colors.brown),
+                enabledBorder: const OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                  borderSide: BorderSide(width: 1, color: Colors.brown),
+                ),
+                disabledBorder: const OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                  borderSide: BorderSide(
+                      width: 1,
+                      color: Colors.grey), // Grey border when disabled
+                ),
+                focusedBorder: const OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                  borderSide: BorderSide(width: 1, color: Colors.brown),
+                ),
+                filled: true,
+                fillColor: (isEnabled ?? true)
+                    ? const Color(0xfffffcf6)
+                    : Colors.grey[
+                        300], // Lighter color for disabled                //contentPadding: EdgeInsets.zero
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              ),
+            ),
+          ),
+        ],
+      );
+    });
+  }
+
+  Widget _buildDropdown2({
+    required String label,
+    required Rxn<int> selectedValue,
+    required List<Map<String, dynamic>> items,
+    required ValueChanged<int?> onChanged,
+    required bool isEnabled,
+  }) {
+    SuperTooltipController tooltipController = SuperTooltipController();
+    String? error = controller.validateDropdown(label, selectedValue);
+    Timer? hoverTimer;
+
+    return Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+      Obx(() => SizedBox(
+            height: 50,
+            child: Row(
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField2<int>(
+                    style: TextStyle(
+                        letterSpacing: 0,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14),
+                    value: selectedValue.value,
+                    isExpanded: true,
+                    decoration: InputDecoration(
+                      suffixIcon: error == null
+                          ? Icon(
+                              Icons.check_circle_rounded,
+                              color: Colors.green,
+                            )
+                          : GestureDetector(
+                        onTap: () async {
+                          await tooltipController.showTooltip();
+                        },
+                            child: SuperTooltip(
+                            elevation: 1,
+                            showBarrier: true,
+                            barrierColor: Colors.transparent,
+                            controller: tooltipController,
+                            arrowTipDistance: 10,
+                            arrowTipRadius: 2,
+                            arrowLength: 10,
+                            toggleOnTap: true,
+                                borderColor: Color(0xffE9D502),
+                                borderWidth: 2,
+                                backgroundColor:
+                                    Color(0xffE9D502).withValues(alpha: 0.9),
+                                boxShadows: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(
+                                        alpha: 0.2), // Light shadow color
+                                    blurRadius: 6, // Soft blur effect
+                                    spreadRadius: 2,
+                                    offset: Offset(0, 4),
+                                  ),
+                                ],
+                                content: Text(error,
+                                    style: const TextStyle(
+                                        color: Colors.black, fontSize: 12)),
+                                child: Icon(
+                                  Icons.error,
+                                  color: Colors.amber,
+                                ),
+                              ),
+                          ),
+                      floatingLabelBehavior: FloatingLabelBehavior.always,
+                      label: Text(label),
+                      labelStyle: TextStyle(
+                          fontWeight: FontWeight.bold, color: Colors.brown),
+                      filled: true,
+                      enabled: isEnabled,
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                            width: 1,
+                            color: Colors.brown), // Removes the border
+                      ),
+                      disabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                        borderSide: BorderSide(
+                            width: 1, color: Colors.grey), // Removes the border
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
+                        borderSide: BorderSide(width: 1, color: Colors.brown),
+                      ),
+                      fillColor: const Color(0xfffffcf6), // Background color
+                      //contentPadding: EdgeInsets.zero
+                      //contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                    ),
+                    dropdownStyleData: DropdownStyleData(
+                        maxHeight: 200,
+                        decoration: BoxDecoration(
+                            color: Color(0xfffffcf6),
+                            borderRadius: BorderRadius.circular(8))),
+                    items: items.map((Map<String, dynamic> item) {
+                      return DropdownMenuItem<int>(
+                        value: item['id'],
+                        child: Text(item['name']),
+                      );
+                    }).toList(),
+                    onChanged: isEnabled
+                        ? (value) {
+                            selectedValue.value = value;
+                            onChanged(value);
+                            controller.validateForm();
+                          }
+                        : null, // Disable when needed
+                    //disabledHint: Text("Select ${_getDisabledHint(label)}"),
+                  ),
+                ),
+              ],
+            ),
+          )),
+    ]);
+  }
+
+// Wrap the form sections inside a `Form` widget
+//   Widget _form() {
+//     return Form(
+//       key: controller.mainFormKey,
+//       child: Container(
+//         padding: const EdgeInsets.all(20),
+//         decoration: BoxDecoration(
+//           borderRadius: BorderRadius.circular(10),
+//           color: const Color(0xffffead1),
+//         ),
+//         child: Column(
+//           crossAxisAlignment: CrossAxisAlignment.start,
+//           children: [
+//             Column(
+//               spacing: 12,
+//               children: [
+//                 _buildDropdown(
+//                   label: "Marhala",
+//                   selectedValue: controller.selectedMarhala,
+//                   items: controller.predefinedMarhalas,
+//                   onChanged: (value) {
+//                     controller.selectedMarhala.value = value!;
+//                     controller.filterStudies(value);
+//                   },
+//                   isEnabled: true,
+//                 ),
+//                 Obx(
+//                   () => _buildDropdown(
+//                     label: "Study",
+//                     selectedValue: controller.selectedStudy,
+//                     items: controller.filteredStudies,
+//                     onChanged: (value) {
+//                       controller.selectedStudy.value = value!;
+//                       controller.filterFields(value);
+//                       controller
+//                           .updateDropdownState(); // ✅ Update dropdown state
+//                     },
+//                     isEnabled: controller.isStudyEnabled.value,
+//                   ),
+//                 ),
+//                 Obx(() => _buildDropdown(
+//                       label: "Field",
+//                       selectedValue: controller.selectedField,
+//                       items: controller.filteredFields,
+//                       onChanged: (value) {
+//                         controller.selectedField.value = value!;
+//                         controller.updateDropdownState();
+//                       },
+//                       isEnabled: controller.isFieldEnabled.value,
+//                     )),
+//                 Obx(() {
+//                   return _buildDropdown(
+//                     label: "City",
+//                     selectedValue: Rxn<int>(controller
+//                         .selectedCityId.value), // ✅ Pass the matched city ID
+//                     items: controller.cities,
+//                     isEnabled: true,
+//                     onChanged: (int? cityId) => controller.selectCity(cityId),
+//                   );
+//                 }),
+//                 Obx(() => CustomDropdownSearch<String>(
+//                       label: "Institute",
+//                       itemsLoader: (filter, _) async {
+//                         return controller.filteredInstitutes
+//                             .map((e) => e['name'] as String)
+//                             .toList();
+//                       },
+//                       selectedItem: controller.selectedInstituteName.value,
+//                       isEnabled: controller.selectedCity.value.isNotEmpty &&
+//                           controller.selectedCity.value != "Select City",
+//                       onChanged: (String? institute) {
+//                         if (institute != null) {
+//                           controller.selectedInstituteName.value = institute;
+//                         }
+//                       },
+//                     )),
+//               ],
+//             ),
+//             const SizedBox(height: 16),
+//             Column(
+//               spacing: 10,
+//               children: [
+//                 _buildField1("Year", controller.year),
+//                 _buildField1("Email", controller.email),
+//                 _buildField1("Phone Number", controller.phone),
+//                 _buildField1("WhatsApp Number", controller.whatsapp),
+//               ],
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+
+  // Widget _formFunds() {
+  //   return Form(
+  //     key: controller.fundsFormKey,
+  //     child: Container(
+  //       padding: const EdgeInsets.all(20),
+  //       decoration: BoxDecoration(
+  //         borderRadius: BorderRadius.circular(10),
+  //         color: const Color(0xffffead1),
+  //       ),
+  //       child: Column(
+  //         children: [
+  //           Column(
+  //             spacing: 12,
+  //             children: [
+  //               _buildField1("Funds", controller.funds),
+  //               _buildField1("Description", controller.description,
+  //                   height: 100),
+  //             ],
+  //           ),
+  //           const SizedBox(height: 16),
+  //           Obx(
+  //             () => SizedBox(
+  //               width: 120,
+  //               height: 35,
+  //               child: ElevatedButton(
+  //                 style: ElevatedButton.styleFrom(
+  //                   backgroundColor: controller.isButtonEnabled.value
+  //                       ? const Color(0xFF008759)
+  //                       : Colors.grey, // Change color based on validation
+  //                   shape: RoundedRectangleBorder(
+  //                     borderRadius: BorderRadius.circular(5),
+  //                   ),
+  //                 ),
+  //                 onPressed: controller.isButtonEnabled.value
+  //                     ? () async {
+  //                         statecontroller.toggleLoading(true);
+  //                         if (controller.mainFormKey.currentState!.validate() &&
+  //                             controller.fundsFormKey.currentState!
+  //                                 .validate()) {
+  //                           var newData = RequestFormModel(
+  //                             ITS: widget.member.itsId.toString(),
+  //                             reqByITS: appliedbyIts.toString(),
+  //                             reqByName: appliedByName.toString(),
+  //                             city: controller.selectedCity.value,
+  //                             mohalla: "${widget.member.jamaatId}",
+  //                             address: widget.member.address.toString(),
+  //                             dob: widget.member.dob.toString(),
+  //                             institution: controller.selectedInstituteName.value!,
+  //                             classDegree: controller.classDegree.value,
+  //                             fieldOfStudy: controller.study.value, // 🔹 Renamed study → fieldOfStudy
+  //                             subjectCourse: controller.selectedSubject.value, // 🔹 Renamed subject → subjectCourse
+  //                             yearOfStart: controller.year.value, // 🔹 Renamed year → yearOfStart
+  //                             grade: "", // 🔹 Add if applicable
+  //                             email: controller.email.value,
+  //                             contactNo: controller.phone.value, // 🔹 Renamed phoneNumber → contactNo
+  //                             whatsappNo: controller.whatsapp.value, // 🔹 Renamed whatsappNumber → whatsappNo
+  //                             purpose: "", // 🔹 Add if applicable
+  //                             fundAsking: controller.funds.value, // 🔹 Renamed fundAmount → fundAsking
+  //                             classification: "", // 🔹 Add if applicable
+  //                             organization: "", // 🔹 Add if applicable
+  //                             description: controller.description.value, // 🔹 Renamed fundDescription → description
+  //                             currentStatus: "", // 🔹 Default value, change if needed
+  //                             createdBy: "", // 🔹 Renamed created_by → createdBy
+  //                             updatedBy: "", // 🔹 Renamed updated_by → updatedBy
+  //                             applyDate: DateTime.now().toString(),
+  //                           );
+  //
+  //                           // Call the API to add request
+  //                           int returnCode = await Api.addRequestForm(newData);
+  //                           await Future.delayed(const Duration(seconds: 2));
+  //                           statecontroller.toggleLoading(false);
+  //
+  //                           if (returnCode == 200) {
+  //                             Get.snackbar("Success!",
+  //                                 "Data successfully inserted in Database!");
+  //                           } else {
+  //                             Get.snackbar("Error",
+  //                                 "Failed to insert Data in Database!");
+  //                           }
+  //                         }
+  //                       }
+  //                     : null, // Disable the button when validation fails
+  //                 child: const Text(
+  //                   "Request",
+  //                   style: TextStyle(color: Colors.white),
+  //                 ),
+  //               ),
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Widget _buildField1(String label, RxString rxValue, {double? height}) {
     bool isDescription = height != null;

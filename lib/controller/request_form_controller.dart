@@ -34,6 +34,10 @@ class RequestFormController extends GetxController {
   // **Dropdown Selections**
   RxString selectedCity = "Select City".obs;
   RxString selectedSubject = "Select Subject".obs;
+  RxString selectedMarhalaName = "".obs;
+  RxString selectedStudyName = "".obs;
+  RxString selectedFieldOfStudy = "".obs;
+  RxString selectedSubject2 = "".obs;
   Rxn<String> selectedInstituteName = Rxn<String>();
   var allData = [].obs;
 
@@ -231,7 +235,7 @@ class RequestFormController extends GetxController {
   // Define validation logic here
   String? validateField(String label, String? value) {
     if (value == null || value.isEmpty) {
-      return "* $label is required";
+      return "$label is required";
     }
 
     switch (label.toLowerCase()) {

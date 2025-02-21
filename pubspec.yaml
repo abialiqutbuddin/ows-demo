@@ -45,6 +45,11 @@ dependencies:
   dropdown_button2: ^2.3.9
   dropdown_search: ^6.0.2
   google_fonts: ^6.2.1
+  get_storage: ^2.1.1
+  el_tooltip: ^2.2.1
+  super_tooltip: ^2.0.9
+  font_awesome_flutter: ^10.8.0
+  material_table_view: ^5.1.0
 
 dev_dependencies:
   flutter_test:

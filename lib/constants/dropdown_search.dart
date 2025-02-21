@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:super_tooltip/super_tooltip.dart';
 import '../controller/request_form_controller.dart';
 
 class CustomDropdownSearch<T> extends StatelessWidget {
@@ -27,7 +30,6 @@ class CustomDropdownSearch<T> extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(fontWeight: FontWeight.bold)),
         SizedBox(
           height: 40,
           child: IgnorePointer(
@@ -42,35 +44,79 @@ class CustomDropdownSearch<T> extends StatelessWidget {
               popupProps: PopupProps.menu(
                 showSearchBox: true,
                 menuProps: MenuProps(
-                  borderRadius: BorderRadius.circular(8),
+                  backgroundColor: const Color(0xfffffcf6),
                 ),
               ),
+              // ✅ Modify the style of the selected item in the dropdown
+              // dropdownBuilder: (BuildContext context, T? item) {
+              //   if (item == null) {
+              //     return const Text(
+              //       "Select City",
+              //       style: TextStyle(fontSize: 14, color: Colors.grey),
+              //     );
+              //   }
+              //   if (item is Map<String, dynamic>) {
+              //     return Text(
+              //       item["name"] ?? "Unknown",
+              //       style: const TextStyle(
+              //         fontSize: 16,
+              //         fontWeight: FontWeight.bold,
+              //         color: Colors.brown,
+              //       ),
+              //     );
+              //   } else {
+              //     return Text(
+              //       item.toString(),
+              //       style: const TextStyle(
+              //         fontSize: 16,
+              //         fontWeight: FontWeight.bold,
+              //         color: Colors.brown,
+              //       ),
+              //     );
+              //   }
+              // },
               decoratorProps: DropDownDecoratorProps(
+                baseStyle: TextStyle(fontWeight: FontWeight.w600,fontSize: 14,letterSpacing: 0),
                 decoration: InputDecoration(
+                  labelText: label,
+                  labelStyle: TextStyle(fontWeight: FontWeight.bold, color: Colors.brown),
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
                   hintText: isEnabled ? '' : "Select City First",
-                  hintStyle: TextStyle(color: Colors.grey),
+                  hintStyle: TextStyle(color: Colors.grey,fontSize: 14,letterSpacing: 0),
                   filled: true,
                   fillColor: const Color(0xfffffcf6),
                   suffixIcon: Icon(Icons.arrow_drop_down, color: isEnabled ? Colors.black : Colors.grey),
                   contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5),
-                      borderSide: BorderSide.none),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                        width: 1, color: Colors.brown), // Removes the border
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                        width: 1, color: Colors.brown), // Removes the border
+                  ),
+                  disabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide(
+                        width: 1, color: Colors.grey), // Removes the border
+                  ),
                 ),
               ),
             ),
           ),
         ),
-        Obx(() {
-          String? error = _validateDropdown(label, controller.selectedInstituteName);
-          return error != null
-              ? Text(
-            error,
-            style: const TextStyle(color: Colors.red, fontSize: 12),
-          )
-              : const SizedBox(
-              height: 17); // Reserve space for validation message
-        }),
+        // Obx(() {
+        //   String? error = _validateDropdown(label, controller.selectedInstituteName);
+        //   return error != null
+        //       ? Text(
+        //     error,
+        //     style: const TextStyle(color: Colors.red, fontSize: 12),
+        //   )
+        //       : const SizedBox(
+        //       height: 17); // Reserve space for validation message
+        // }),
       ],
     );
   }
