@@ -30,14 +30,13 @@ class PDFScreenController extends GetxController {
   }
 
 }
+
 class ProfilePDFScreen extends StatefulWidget {
   final UserProfile member;
-  final Family family;
 
   const ProfilePDFScreen({
     super.key,
     required this.member,
-    required this.family,
   });
 
   @override
@@ -67,13 +66,11 @@ class ProfilePDFScreenState extends State<ProfilePDFScreen> {
         backgroundColor: Color(0xffdbbb99),
         body: screenWidth <= mobileBreakpoint
               ? ProfilePDFScreenM(
-            family: widget.family,
             member: widget.member,
             //pdfData: pdfData,
           )
               :
           ProfilePDFScreenW(
-            family: widget.family,
             member: widget.member,
           ),
       );

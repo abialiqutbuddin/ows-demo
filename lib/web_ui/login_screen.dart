@@ -9,7 +9,7 @@ import 'package:get/get.dart';
 class LoginPageW extends StatelessWidget {
   LoginPageW({super.key});
 
-  final GlobalStateController statecontroller = Get.put(GlobalStateController());
+  final GlobalStateController statecontroller = Get.find<GlobalStateController>();
 
   @override
   Widget build(BuildContext context) {

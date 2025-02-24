@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:ows/controller/state_management/state_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../model/family_data2.dart';
 import '../model/family_model.dart';
 import '../model/member_model.dart';
 import '../model/permission_model.dart';
@@ -13,17 +14,47 @@ import 'package:get_storage/get_storage.dart';
 class Api {
   static const String baseUrl =
       //"http://36.50.12.171:3002";
-      // "http://localhost:3002";
-      "https://mode.imadiinnovations.com:3002";
+        // "http://localhost:3002";
+     "https://mode.imadiinnovations.com:3002";
 
-  static String? token = GetStorage().read("token");
-
-  static final GlobalStateController permissionsController =
-      Get.find<GlobalStateController>();
+  static final GlobalStateController permissionsController = Get.find<GlobalStateController>();
 
   static Future<List<dynamic>> loadData() async {
     final String response = await rootBundle.loadString('assets/data.json');
     return json.decode(response);
+  }
+
+  static Future<List<FamilyMember>?> fetchFamilyData2(String itsId) async {
+    final url = Uri.parse("$baseUrl/get-family-profile");
+    final headers = {
+      "Content-Type": "application/json",
+      'Authorization': 'Bearer ${permissionsController.token.value}'
+    };
+
+    final body = jsonEncode({"its_id": itsId});
+
+    try {
+      final response = await http.post(url, headers: headers, body: body);
+      print(response.body);
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+
+        if (jsonResponse['family_members'] != null) {
+          return (jsonResponse['family_members'] as List)
+              .map((member) => FamilyMember.fromJson(member))
+              .toList();
+        } else {
+          print("⚠️ No family members found.");
+          return [];
+        }
+      } else {
+        print("❌ Failed to fetch family data: ${response.statusCode}");
+        return null;
+      }
+    } catch (e) {
+      print("🚨 Error fetching family data: $e");
+      return null;
+    }
   }
 
   static Future<dynamic> fetchProxiedData(String targetUrl) async {
@@ -31,16 +62,13 @@ class Api {
     final Uri uri = Uri.parse('$baseUrl/get-url');
 
     try {
-      final response = await http.post(
-        uri,
-        headers: {
-          'Authorization': 'Bearer $token', // Add authentication if needed
-          'Content-Type': 'application/json',
-        },
-        body:json.encode({
-          'url':encodedUrl
-        })
-      );
+      final response = await http.post(uri,
+          headers: {
+            'Authorization':
+                'Bearer ${permissionsController.token.value}', // Add authentication if needed
+            'Content-Type': 'application/json',
+          },
+          body: json.encode({'url': encodedUrl}));
 
       if (response.statusCode == 200) {
         return UserProfile.fromJson(jsonDecode(response.body));
@@ -61,13 +89,14 @@ class Api {
         url,
         headers: {
           "Content-Type": "application/json",
-          'Authorization': 'Bearer $token', // Add authentication if needed
+          'Authorization':
+              'Bearer ${permissionsController.token.value}', // Add authentication if needed
         },
         body: jsonEncode(requestData),
       );
 
-      if (response.statusCode == 200) {
-        return 200;
+      if (response.statusCode == 201) {
+        return 201;
       } else {
         return 500;
       }
@@ -85,7 +114,7 @@ class Api {
         Uri.parse(url),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
+          'Authorization': 'Bearer ${permissionsController.token.value}',
         },
         body: json.encode({
           'its_id': itsId,
@@ -121,11 +150,9 @@ class Api {
         Uri.parse(url),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
+          'Authorization': 'Bearer ${permissionsController.token.value}',
         },
-        body: json.encode({
-          'itsId':itsId
-        }),
+        body: json.encode({'itsId': itsId}),
       );
 
       if (response.statusCode == 200) {
@@ -156,7 +183,7 @@ class Api {
         Uri.parse(url),
         headers: {
           'Content-Type': 'application/json',
-          "Authorization": "Bearer $token",
+          "Authorization": "Bearer ${permissionsController.token.value}",
         },
         body: json.encode({
           'its_id': itsId,
@@ -186,6 +213,30 @@ class Api {
     }
   }
 
+  static Future<List<Map<String, dynamic>>> runQuery() async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/run-query'),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"query": "SELECT * FROM owsReqForm"}),
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          print(List<Map<String, dynamic>>.from(data['data']));
+          return List<Map<String, dynamic>>.from(data['data']);
+        } else {
+          throw Exception("Failed to fetch data: ${data['message']}");
+        }
+      } else {
+        throw Exception("Server error: ${response.statusCode}");
+      }
+    } catch (e) {
+      throw Exception("Error fetching data: $e");
+    }
+  }
+
   static Future<int> fetchNextReqMasId() async {
     const apiUrl = "$baseUrl/get-last-req"; // Replace with your server URL
 
@@ -194,7 +245,7 @@ class Api {
         Uri.parse(apiUrl),
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Bearer $token",
+          "Authorization": "Bearer ${permissionsController.token.value}",
         },
       );
 
@@ -222,7 +273,8 @@ class Api {
         Uri.parse(url),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token', // ✅ Include Authorization header
+          'Authorization':
+              'Bearer ${permissionsController.token.value}', // ✅ Include Authorization header
         },
         body: json.encode({
           'its': its, // ✅ Pass ITS ID in the request body
@@ -300,16 +352,15 @@ class Api {
     final response = await http.post(
       Uri.parse("$baseUrl/auth/login"),
       headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"its_id": itsId, "password": "Abiali46@"}),
+      body: jsonEncode({"its_id": itsId, "password": itsId}),
     );
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
+      print(data);
       await GetStorage().write("token", data["token"]); // Store token
-      print(GetStorage().read("token"));
-      // Convert to Permission model list
+      permissionsController.token.value = GetStorage().read("token");
       List<dynamic> permissionsData = data['user']['permissions'];
-
       List<Permission> permissions = permissionsData.map((perm) {
         return Permission.fromJson(perm as Map<String, dynamic>);
       }).toList();
@@ -325,11 +376,10 @@ class Api {
 
   // ✅ Fetch User Permissions API
   static Future<void> getUserPermissions(String itsId) async {
-
     final response = await http.get(
       Uri.parse("$baseUrl/permissions"),
       headers: {
-        "Authorization": "Bearer $token",
+        "Authorization": "Bearer ${permissionsController.token.value}",
         "its": itsId,
       },
     );
@@ -344,18 +394,18 @@ class Api {
 
       // Set permissions in the GetX controller
       permissionsController.setPermissions(permissions);
-
     } else {
       throw Exception("Failed to fetch permissions");
     }
   }
 
   // ✅ Fetch Requests by Mohalla
-  static Future<List<RequestFormModel>> fetchRequestsByMohalla(String mohalla) async {
+  static Future<List<RequestFormModel>> fetchRequestsByMohalla(
+      String mohalla,String org) async {
     final response = await http.post(
       Uri.parse("$baseUrl/users-by-mohalla"),
       headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"mohalla": mohalla}),
+      body: jsonEncode({"mohalla": mohalla,"org":org}),
     );
 
     if (response.statusCode == 200) {
@@ -370,10 +420,12 @@ class Api {
   static Future<bool> updateRequestStatus(int reqId, String newStatus) async {
     final response = await http.post(
       Uri.parse("$baseUrl/update-request-status"),
-      headers: {"Content-Type": "application/json"},
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer ${permissionsController.token.value}",
+      },
       body: jsonEncode({"reqId": reqId, "newStatus": newStatus}),
     );
-
     return response.statusCode == 200;
   }
 

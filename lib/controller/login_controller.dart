@@ -26,26 +26,39 @@ class LoginController extends StatelessWidget {
     );
   }
 
-  final GlobalStateController stateController = Get.put(GlobalStateController());
+  final GlobalStateController stateController = Get.find<GlobalStateController>();
 
   // 🔹 Login Function
   Future<void> performLogin(String itsId) async {
     stateController.toggleLoading(true);
     try {
-
       var response = await Api.getToken(itsId);
-          if (response.containsKey('token')) {
+
+      print("here");
+
+      if (response.containsKey('token')) {
+        print("here");
+
         String token = response['token'];
-        stateController.userRole.value = response["user"]["role"];
+
+        String role = response["user"]["role"] ?? "user"; // Default to 'user' if null
+
+        String mohalla = response["user"]["mohalla"] ?? ""; // Ensure it's always a string
+
+        String umoor = response["user"]["umoor"] ?? ""; // Ensure it's always a string
+
+        stateController.userRole.value = role;
+        stateController.userMohalla.value = mohalla;
         stateController.userIts.value = itsId;
+        stateController.userUmoor.value = umoor;
+
         GetStorage().write("token", token);
-        await fetchAndNavigate(itsId,stateController.userRole.value);
-        Api.fetchProxiedData('http://192.168.52.58:8080/crc_live/backend/dist/mumineen/getFamilyDetails.php?user_name=umoor_talimiyah&password=UTalim2025&token=0a1d240f3f39c454e22b2402303aa2959d00b770d9802ed359d75cf07d2e2b65&its_id=30445124');
-          } else {
+
+        await fetchAndNavigate(itsId, role);
+      } else {
         throw Exception("Invalid ITS ID");
       }
     } catch (e) {
-      //await fetchAndNavigate(itsId);
       Get.snackbar("Login Failed", "Error: $e");
     } finally {
       stateController.toggleLoading(false);
@@ -55,9 +68,7 @@ class LoginController extends StatelessWidget {
   // 🔹 Fetch User Permissions & Navigate
   Future<void> fetchAndNavigate(String itsId,String role) async {
     stateController.toggleLoading(true);
-    //await Future.delayed(const Duration(seconds: 2)); // Simulate a delay
-    try {
-        Get.to(() => ModuleScreenController(its: itsId));
+    try { Get.to(() => ModuleScreenController(its: itsId));
     } catch (e) {
       Get.snackbar("Error", "Failed to fetch permissions: $e");
     } finally {

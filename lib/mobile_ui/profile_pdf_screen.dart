@@ -10,12 +10,10 @@ import '../model/family_model.dart';
 
 class ProfilePDFScreenM extends StatefulWidget {
   final UserProfile member;
-  final Family family;
 
   const ProfilePDFScreenM({
     super.key,
     required this.member,
-    required this.family,
   });
 
   @override

@@ -23,11 +23,11 @@ class ReqFormController extends GetxController {
   ].obs;
 
   // ✅ Fetch Requests by Mohalla
-  Future<void> fetchRequests(String mohalla) async {
+  Future<void> fetchRequests(String mohalla,String org) async {
     //isLoading(true);
     errorMessage('');
     try {
-      var results = await Api.fetchRequestsByMohalla(mohalla);
+      var results = await Api.fetchRequestsByMohalla(mohalla,org);
       print(results);
       reqForms.assignAll(results);
     } catch (e) {

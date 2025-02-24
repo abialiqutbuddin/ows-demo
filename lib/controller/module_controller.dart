@@ -1,10 +1,13 @@
+import 'dart:convert';
+
 import 'package:get/get.dart';
 import 'package:ows/controller/family_screen_controller.dart';
 import 'package:ows/controller/state_management/state_manager.dart';
 import 'package:ows/mobile_ui/module_screen.dart';
 import 'package:ows/web_ui/modules/view_requests.dart';
 import '../api/api.dart';
-import '../constants/table.dart';
+import '../constants/table_controller.dart';
+import '../model/family_data2.dart';
 import '../model/family_model.dart';
 import '../model/module_model.dart';
 import 'package:flutter/material.dart';
@@ -15,8 +18,7 @@ class ModuleController extends GetxController {
   var modules = <ModuleModel>[].obs;
   RxBool isLoading = false.obs;
 
-  final GlobalStateController permissionsController =
-      Get.find<GlobalStateController>();
+  final GlobalStateController globalController = Get.find<GlobalStateController>();
 
   void toggleLoading(bool value) {
     isLoading.value = value;
@@ -26,12 +28,13 @@ class ModuleController extends GetxController {
     try {
       var allModules = getAllModules();
       var moduleMap = <int, ModuleModel>{};
-      if (permissionsController.userRole.value == "admin") {
+      if (globalController.userRole.value == "admin") {
         moduleMap = allModules;
       } else {
-        var permissions = permissionsController.moduleFeaturesMap;
+        var permissions = globalController.moduleFeaturesMap;
 
         for (var moduleId in permissions.keys) {
+          print(moduleId);
           if (!allModules.containsKey(moduleId)) {
             print("Ignoring unknown module ID: $moduleId");
             continue;
@@ -58,7 +61,7 @@ class ModuleController extends GetxController {
         moduleTitle: "Education Assistance",
         icon: "📚",
         featureIds: [],
-        onModuleOpen: (featureIds, its,mohalla) async {
+        onModuleOpen: (featureIds, its, mohalla) async {
           navigateToModule(1, featureIds, its: its);
         },
       ),
@@ -69,7 +72,7 @@ class ModuleController extends GetxController {
         icon: "📊",
         featureIds: [],
         onModuleOpen: (featureIds, its, mohalla) async {
-          navigateToModule(2, featureIds, its: its,mohalla: mohalla);
+          navigateToModule(2, featureIds, its: its, mohalla: mohalla);
         },
       ),
       // 3: ModuleModel(
@@ -89,17 +92,33 @@ class ModuleController extends GetxController {
       {String? its, String? mohalla}) async {
     switch (moduleId) {
       case 1:
-        if(its!=null){
+        if (its != null) {
           isLoading.value = true;
-          //var family = await Api.fetchProxiedData('http://192.168.52.58:8080/crc_live/backend/dist/mumineen/getFamilyDetails.php?user_name=umoor_talimiyah&password=UTalim2025&token=0a1d240f3f39c454e22b2402303aa2959d00b770d9802ed359d75cf07d2e2b65&its_id=${its}');
-          //print(family);
-          Family? family = await Api.fetchFamilyProfileOld(its);
+
+          // Fetch the family data
+          List<FamilyMember>? familyMembers = await Api.fetchFamilyData2(its);
+
           isLoading.value = false;
-          Get.to(() => FamilyScreenController(family: family!));
+
+          if (familyMembers != null && familyMembers.isNotEmpty) {
+            // Navigate to FamilyScreenController with the list of family members
+            // String familyJson = Uri.encodeComponent(jsonEncode(familyMembers));
+            //
+            // // Navigate using Get.toNamed with query parameters
+            // Get.toNamed('/family-selection', arguments: familyMembers);
+
+            globalController.setUser(its, familyMembers);
+            Get.toNamed('/family-selection');
+
+            //Get.to(() => FamilyScreenController(familyMembers: familyMembers));
+          } else {
+            Get.snackbar("Error", "No family members found.");
+          }
         }
         break;
       case 2:
-        Get.to(() => ReqFormTable(mohalla: mohalla!));
+        Get.to(() =>
+            ReqFormTable(mohalla: globalController.userMohalla.value,featureIds: featureIds, org: globalController.userUmoor.value,));
         break;
       case 3:
         print("Opening Admin Panel Module with Features: $featureIds");
@@ -122,7 +141,7 @@ class ModuleScreenController extends StatelessWidget {
     const double mobileBreakpoint = 600;
 
     return screenWidth <= mobileBreakpoint
-          ? ModuleSelectionScreenM(its: its)
-          : ModuleSelectionScreenW(its: its);
+        ? ModuleSelectionScreenM(its: its)
+        : ModuleSelectionScreenW(its: its);
   }
 }

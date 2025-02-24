@@ -10,9 +10,142 @@ import '../model/member_model.dart';
 import '../web_ui/request_form.dart';
 
 class RequestFormController extends GetxController {
+
+  RxString selectedEducationType = "".obs; // Ongoing / Future
+  Rxn<int> selectedMarhala = Rxn<int>(); // 1 to 7
+  RxString selectedCategory = "".obs; // Dunyawi / Deeni
+  RxString selectedDeeniType = "".obs; // Madrasa / Hifz
+  RxString purpose = "".obs; // Madrasa / Hifz
+  RxString grade = "".obs; // Madrasa / Hifz
+
+  // Convert to Rxn<int> for dropdown selections
+  Rxn<int> standardIndex = Rxn<int>(null); // Standard dropdown (Marhala 2-3)
+  Rxn<int> fieldOfStudyIndex =
+  Rxn<int>(null); // Field of Study dropdown (Marhala 4-7)
+  Rxn<int> courseIndexPoint = Rxn<int>(null);
+  Rxn<int> degreeProgramIndex =
+  Rxn<int>(null); // Degree Program dropdown (Marhala 6-7)
+  Rxn<int> marhala4Index =
+  Rxn<int>(null); // Degree Program dropdown (Marhala 6-7)
+  Rxn<int> marhala5Index =
+  Rxn<int>(null); // Degree Program dropdown (Marhala 6-7)
+  Rxn<int> madrasaIndex =
+  Rxn<int>(null); // Degree Program dropdown (Marhala 6-7)
+  Rxn<int> hifzProgramIndex =
+  Rxn<int>(null); // Degree Program dropdown (Marhala 6-7)
+  Rxn<int> darajaIndex =
+  Rxn<int>(null); // Degree Program dropdown (Marhala 6-7)
+
+  RxList<Map<String, dynamic>> degreePrograms = [
+    {"id": 1, "name": "Associated Degree Programs"},
+    {"id": 2, "name": "Bachelors Degree Programs"},
+    {"id": 3, "name": "Professional Programs"},
+    {"id": 4, "name": "Diploma / Vocational Training"},
+  ].obs;
+  RxList<Map<String, dynamic>> marhala4Class = [
+    {"id": 1, "name": "9th Grade"},
+    {"id": 2, "name": "10th Grade"},
+    {"id": 3, "name": "Not Applicable"},
+  ].obs;
+
+  RxList<Map<String, dynamic>> marhala5Class = [
+    {"id": 1, "name": "11th Grade"},
+    {"id": 2, "name": "12th Grade"},
+    {"id": 3, "name": "Not Applicable"},
+  ].obs;
+
+  RxList<Map<String, dynamic>> madrasas = [
+    {"id": 1, "name": "Madrasa Hamidiyah"},
+    {"id": 2, "name": "Madrasa Taheriyah (Sadar)"},
+    {"id": 3, "name": "Zaini Madrasa"},
+    {"id": 4, "name": "Hakimi Madrasa (Mahalat Mohammediyah)"},
+    {"id": 5, "name": "Madrasa Ezziyah (Burhani Mohalla)"},
+    {"id": 6, "name": "Madrasa Burhaniyah (Essa Mohallah)"},
+    {"id": 7, "name": "Najmi Madrasa"},
+    {"id": 8, "name": "Madrasa Tayyebiyah (Hasani Mohallah)"},
+    {"id": 9, "name": "Madrasa Najmiyah (Husaini Mohallah)"},
+    {"id": 10, "name": "Madrasa Jamaliyah (Ibrahim Mohallah)"},
+    {"id": 11, "name": "Madrasa (UP More MahalatBurhaniyah)"},
+    {"id": 12, "name": "Madrasa Taheriyah (Mohammadi Mohallah)"},
+    {"id": 13, "name": "Madrasa Hakimiyah (Qutbi Mohallah)"},
+    {"id": 14, "name": "Madrasa Saifiyah (Saifee Mohallah)"},
+    {"id": 15, "name": "Madrasa Wajihiyah"},
+    {"id": 16, "name": "Madrasa Badriyah (MahalatBurhaniyah)"},
+    {"id": 17, "name": "Madrasa Fakhriyah (Saleh Mohallah)"},
+    {"id": 18, "name": "Madrasa Husamiyah (Taheri Mohallah)"},
+    {"id": 19, "name": "Madrasa Mohammediyah (Adam Mohallah)"},
+    {"id": 20, "name": "Madrasa QuaidJohar (Yusufi Mohallah)"},
+    {"id": 21, "name": "Madrasa Qutbiyah (MahalatBurhaniyah)"},
+    {"id": 22, "name": "Husami Madrasa"},
+    {"id": 23, "name": "Madrasa Fatemiyah"},
+  ].obs;
+
+  RxList<Map<String, dynamic>> hifzPrograms = [
+    {"id": 1, "name": "Tahfeez al-Kibar - Mohallah"},
+    {"id": 2, "name": "Tahfeez al-Atfal - Mohallah"},
+    {"id": 3, "name": "Barnamaj al-Taiseer - Mohallah"},
+    {"id": 4, "name": "Tahfeez al-Mujtahedin - School [Mukhayyam]"},
+    {"id": 5, "name": "Tahfeez al-Atfal - Imani School"},
+    {"id": 6, "name": "Tahfeez E-Learning Quran"},
+  ].obs;
+
+  RxList<Map<String, dynamic>> madrasaDarajat = [
+    {"id": 0, "name": "ATFAAL", "marhala_id": 1},
+    {"id": 1, "name": "Daraja 1", "marhala_id": 2},
+    {"id": 2, "name": "Daraja 2", "marhala_id": 2},
+    {"id": 3, "name": "Daraja 3", "marhala_id": 2},
+    {"id": 4, "name": "Daraja 4", "marhala_id": 2},
+    {"id": 5, "name": "Daraja 5", "marhala_id": 3},
+    {"id": 6, "name": "Daraja 6", "marhala_id": 3},
+    {"id": 7, "name": "Daraja 7", "marhala_id": 3},
+    {"id": 8, "name": "Daraja 8", "marhala_id": 3},
+    {"id": 9, "name": "Daraja 9", "marhala_id": 4},
+    {"id": 10, "name": "Daraja 10", "marhala_id": 4},
+  ].obs;
+
+  RxList<Map<String, dynamic>> filteredDarajat = <Map<String, dynamic>>[].obs;
+
+  // Form Fields (Strings)
+  RxString standard = "".obs;
+  RxString fieldOfStudy = "".obs;
+  RxString className = "".obs;
+ RxString subject = "".obs;
+  //RxString degreeProgram = "".obs;
+  RxString course = "".obs;
+  RxString madrasaName = "".obs;
+  RxString darajaName = "".obs;
+  RxString hifzProgress = "".obs;
+  RxString hifzProgramName = "".obs;
+
+  void resetFields(){
+    madrasaName.value = "";
+    darajaName.value = "";
+    hifzProgress.value = "";
+    hifzProgramName.value = "";
+    grade.value = "";
+    purpose.value = "";
+    fieldOfStudyIndex.value = null;
+    courseIndexPoint.value = null;
+    degreeProgramIndex.value = null;
+    standardIndex.value = null;
+    marhala4Index.value = null;
+    marhala5Index.value = null;
+    darajaIndex.value = null;
+    hifzProgramIndex.value = null;
+    madrasaIndex.value = null;
+  }
+
+  RxList<Map<String, dynamic>> studyOptions = <Map<String, dynamic>>[].obs;
+  RxList<Map<String, dynamic>> courseOptions = <Map<String, dynamic>>[].obs;
+
+  void filterDarajaByMarhala(int marhalaId) {
+    filteredDarajat.value =
+        madrasaDarajat.where((e) => e["marhala_id"] == marhalaId).toList();
+  }
+
   // **State Management**
   RxBool isLoading = true.obs;
-  RxBool isButtonEnabled = false.obs;
+  RxBool isButtonEnabled = true.obs;
 
   final double defSpacing = 8;
 
@@ -27,10 +160,6 @@ class RequestFormController extends GetxController {
   RxList<Map<String, dynamic>> filteredInstitutes =
       <Map<String, dynamic>>[].obs;
 
-  // **Form Keys**
-  final GlobalKey<FormState> mainFormKey = GlobalKey<FormState>();
-  final GlobalKey<FormState> fundsFormKey = GlobalKey<FormState>();
-
   // **Dropdown Selections**
   RxString selectedCity = "Select City".obs;
   RxString selectedSubject = "Select Subject".obs;
@@ -43,29 +172,46 @@ class RequestFormController extends GetxController {
 
   // Define Marhalas
   final List<Map<String, dynamic>> predefinedMarhalas = [
-    {'id': 4, 'name': 'Middle School (9th - 10th)'},
-    {'id': 5, 'name': 'Higher Studies (11th - 12th)'},
-    {'id': 6, 'name': 'Undergraduate'},
-    {'id': 7, 'name': 'Postgraduate'},
+    {'id': 1, 'marhala': 'Marhala 1','name': 'Pre Primary'},
+    {'id': 2, 'marhala': 'Marhala 2 ','name': '1st - 4th'},
+    {'id': 3, 'marhala': 'Marhala 3 ','name': '5th - 8th'},
+    {'id': 4, 'marhala': 'Marhala 4 ','name': '9th - 10th'},
+    {'id': 5, 'marhala': 'Marhala 5 ','name': '11th - 12th'},
+    {'id': 6, 'marhala': 'Marhala 6 ','name': 'Undergraduate'},
+    {'id': 7, 'marhala': 'Marhala 7 ','name': 'Postgraduate'},
   ];
 
+
+  void resetSelections({bool resetCategoryOnly = false}) {
+    standardIndex.value = null;
+    selectedCategory.value = '';
+    if (resetCategoryOnly) {
+      fieldOfStudyIndex.value = null;
+      courseIndexPoint.value = null;
+      degreeProgramIndex.value = null;
+      marhala4Index.value = null;
+      marhala5Index.value = null;
+      darajaIndex.value = null;
+      hifzProgramIndex.value = null;
+      madrasaIndex.value = null;
+    }
+  }
+
+
+  var isDeeniSelected = false.obs;
   var filteredStudies = <Map<String, dynamic>>[].obs;
   var filteredFields = <Map<String, dynamic>>[].obs;
 
-  var selectedMarhala = Rxn<int>();
+  //var selectedMarhala = Rxn<int>();
   var selectedStudy = Rxn<int>();
   var selectedField = Rxn<int>();
   var selectedCityId = Rxn<int>();
   var selectedInstitute = Rxn<int>();
 
   RxBool isStudyEnabled = false.obs;
-  RxBool isFieldEnabled = false.obs;
+  //RxBool isFieldEnabled = false.obs;
 
   void updateDropdownState() {
-    isStudyEnabled.value =
-        selectedMarhala.value != null && filteredStudies.isNotEmpty;
-    isFieldEnabled.value =
-        selectedStudy.value != null && filteredFields.isNotEmpty;
     update();
   }
 
@@ -74,7 +220,7 @@ class RequestFormController extends GetxController {
     final data = json.decode(response);
     allData.assignAll(data);
 
-    reqId.value = await Api.fetchNextReqMasId();
+    //reqId.value = await Api.fetchNextReqMasId();
     // Set default university list
   }
 
@@ -123,18 +269,22 @@ class RequestFormController extends GetxController {
     update();
   }
 
+
+
   void filterStudies(int marhalaId) {
-    filteredStudies.assignAll(
+    if(marhalaId>3) {
+      studyOptions.assignAll(
       _extractUniqueValues(
         allData.where((item) => item['marhala_id'] == marhalaId).toList(),
         'study_id',
         (item) => {'id': item['study_id'], 'name': item['study']},
       ),
     );
-    selectedStudy.value = null;
-    filteredFields.clear();
-    selectedField.value = null;
-    updateDropdownState();
+    }
+    //selectedStudy.value = null;
+    //filteredFields.clear();
+    //selectedField.value = null;
+    //updateDropdownState();
   }
 
   void filterFields(int studyId) {
@@ -225,11 +375,6 @@ class RequestFormController extends GetxController {
         funds.value.isNotEmpty &&
         _validateFunds(funds.value) == null && // ✅ Validate funds
         description.value.isNotEmpty;
-
-    if (isValid != isButtonEnabled.value) {
-      isButtonEnabled.value = isValid;
-      update();
-    }
   }
 
   // Define validation logic here

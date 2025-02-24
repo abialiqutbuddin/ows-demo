@@ -14,8 +14,8 @@ class ModuleSelectionScreenW extends StatefulWidget {
 }
 
 class ModuleSelectionScreenState extends State<ModuleSelectionScreenW> {
-  final ModuleController controller = Get.put(ModuleController());
-  final GlobalStateController globalController = Get.put(GlobalStateController());
+  final ModuleController controller = Get.find<ModuleController>();
+  final GlobalStateController statecontroller = Get.find<GlobalStateController>();
   late final String its;
 
   @override
@@ -94,7 +94,7 @@ class ModuleSelectionScreenState extends State<ModuleSelectionScreenW> {
       onEnter: (_) => setState(() => module.isHovered = true),
       onExit: (_) => setState(() => module.isHovered = false),
       child: GestureDetector(
-        onTap: () => module.onModuleOpen?.call(module.featureIds, globalController.userIts.value,"KHI (AL-MAHALAT-TUL-BURHANIYAH)"),
+        onTap: () => module.onModuleOpen?.call(module.featureIds, statecontroller.userIts.value,"KHI (AL-MAHALAT-TUL-BURHANIYAH)"),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
           curve: Curves.easeInOut,

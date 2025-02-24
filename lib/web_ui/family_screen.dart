@@ -1,91 +1,42 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../api/api.dart';
 import '../constants/constants.dart';
 import '../controller/profile_pdf_controller.dart';
-import '../model/family_model.dart';
+import 'dart:typed_data';
+import '../controller/state_management/state_manager.dart';
 
 class FamilyScreenW extends StatefulWidget {
-  final Family family;
+  //final List<FamilyMember> familyMembers;
 
-  const FamilyScreenW({super.key, required this.family});
+  const FamilyScreenW({super.key,});
 
   @override
   FamilyScreenWState createState() => FamilyScreenWState();
 }
 
 class FamilyScreenWState extends State<FamilyScreenW> {
-  int? _selectedIndex; // Track the currently selected index
-  late List<Map<String, dynamic>> familyMembers; // Unified list for all members
+  int? _selectedIndex; // Track the selected family member
   bool _isLoading = false;
+  late final GlobalStateController stateController;
 
   @override
   void initState() {
     super.initState();
-    // Combine family details into a unified list
-    familyMembers = [
-      if (widget.family.father != null)
-        {
-          'type': 'Father',
-          'member': widget.family.father,
-        },
-      if (widget.family.mother != null)
-        {
-          'type': 'Mother',
-          'member': widget.family.mother,
-        },
-      {
-        'type': 'Child',
-        'member': widget.family,
-      },
-    ];
-  }
+    stateController = Get.find<GlobalStateController>();
 
-  Widget headerSection(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        Row(
-          spacing: 16,
-          children: [
-            SizedBox(
-              height: 35,
-              child: ElevatedButton(
-                style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.resolveWith<Color>(
-                        (Set<WidgetState> states) {
-                      if (states.contains(WidgetState.hovered)) {
-                        return Colors.transparent; // No hover effect
-                      }
-                      return Colors.transparent; // Default color
-                    },
-                  ),
-                  overlayColor: WidgetStateProperty.all(Colors.transparent), // No ripple effect
-                  shape: WidgetStateProperty.all(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
-                      side: BorderSide(
-                        color: const Color(0xFF008759),
-                        width: 2, // Green border
-                      ),
-                    ),
-                  ),
-                  elevation: WidgetStateProperty.all(0), // Flat button
-                ),
-                onPressed: () async {
-                  Constants().Logout();
-                },
-                child: Text(
-                  "Logout",
-                  style: TextStyle(
-                      color: Colors.black, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ],
-        )
-      ],
-    );
+    /// **Wait for data before accessing familyMembers**
+    if (stateController.familyMembers.isEmpty) {
+      stateController.loadFromStorage();
+    }
+
+    /// **Avoid accessing before ensuring data is loaded**
+    if (stateController.familyMembers.isNotEmpty) {
+      print(stateController.familyMembers.first.fullName);
+    } else {
+      print("No family members loaded yet.");
+    }
   }
 
   Future<void> fetchUserProfile(String itsId) async {
@@ -93,25 +44,10 @@ class FamilyScreenWState extends State<FamilyScreenW> {
       _isLoading = true;
     });
     try {
-      // Call the API to fetch user profile
-      final userProfile = await Api.fetchUserProfile(itsId.toString()); // Add API call
-      //final userProfile = userProfile1;
+      final userProfile = await Api.fetchUserProfile(itsId);
       if (userProfile != null) {
-        if (userProfile.isDelete==1){
-          Get.snackbar("Error", "User Invalid");
-          return;
-        }
-        // Get.to(() => ProfilePreview(
-        //   member: userProfile,
-        //   family: widget.family,
-        // ));
-        // Get.to(() => ProfilePreview(
-        //   member: userProfile1,
-        //   family: widget.family,
-        // ));
         Get.to(() => ProfilePDFScreen(
           member: userProfile,
-          family: widget.family,
         ));
       } else {
         Get.snackbar("Error", "Profile not found for ITS ID: $itsId");
@@ -125,196 +61,175 @@ class FamilyScreenWState extends State<FamilyScreenW> {
     }
   }
 
+  /// **🔹 Function to Handle Base64 Image Conversion**
+  Widget _buildProfileImage(String? base64String) {
+    if (base64String == null || base64String.isEmpty) {
+      return Container(
+        height: 90,
+        width: 70,
+        color: Colors.grey,
+        child: const Icon(Icons.person, color: Colors.white, size: 40),
+      );
+    }
+
+    try {
+      /// **🔄 Remove "data:image/jpeg;base64," prefix before decoding**
+      String base64Data = base64String.split(',').last;
+      Uint8List imageBytes = base64Decode(base64Data);
+
+      return Image.memory(
+        imageBytes,
+        height: 90,
+        width: 70,
+        fit: BoxFit.cover,
+      );
+    } catch (e) {
+      print("🚨 Error decoding Base64 image: $e");
+      return Container(
+        height: 90,
+        width: 70,
+        color: Colors.grey,
+        child: const Icon(Icons.error, color: Colors.white, size: 40),
+      );
+    }
+  }
+
+  Widget headerSection(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        ElevatedButton(
+          style: ButtonStyle(
+            backgroundColor: WidgetStateProperty.all(Colors.transparent),
+            shape: WidgetStateProperty.all(
+              RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(5),
+                side: BorderSide(color: const Color(0xFF008759), width: 2),
+              ),
+            ),
+            elevation: WidgetStateProperty.all(0),
+          ),
+          onPressed: () => Constants().Logout(),
+          child: Text("Logout", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final double screenHeight = MediaQuery.of(context).size.height;
-    final double screenWidth = MediaQuery.of(context).size.width;
-
     return Container(
-        decoration: BoxDecoration(
-          color: Color(0xffffead1),
-        ),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(15.0),
-              child: headerSection(context),
-            ),
-            Expanded(
-              child: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Color(0xFFFFF7EC), // Background color
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withValues(alpha: 0.1),
-                          spreadRadius: 3,
-                          blurRadius: 5,
-                          offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        spacing: 16,
-                        children: [
-                          Container(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              'Education Assistance Form For:',
-                              style: const TextStyle(
-                                  fontSize: 22, fontWeight: FontWeight.bold),
-                            ),
+      decoration: BoxDecoration(color: Color(0xffffead1)),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(15.0),
+            child: headerSection(context),
+          ),
+          Expanded(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Color(0xFFFFF7EC), // Background color
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.1),
+                        spreadRadius: 3,
+                        blurRadius: 5,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Education Assistance Form For:',
+                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(height: 16),
+                      Expanded(
+                        child: GridView.builder(
+                          shrinkWrap: true,
+                          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                            maxCrossAxisExtent: 500,
+                            crossAxisSpacing: 16,
+                            mainAxisSpacing: 16,
+                            mainAxisExtent: 120,
+                            childAspectRatio: 8.5 / 2,
                           ),
-                          // Grid view for family members
-                          GridView.builder(
-                            shrinkWrap: true,
-                            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                              maxCrossAxisExtent: 500, // Maximum width of each item
-                              crossAxisSpacing: 16, // Spacing between columns
-                              mainAxisSpacing: 16, // Spacing between rows
-                              mainAxisExtent: 120,
-                              childAspectRatio:
-                                  8.5 / 2, // Aspect ratio for item (width:height)
-                            ),
-                            itemCount: familyMembers.length,
-                            itemBuilder: (context, index) {
-                              final item = familyMembers[index];
-                              final member =
-                                  item['member']; // Cast to the Family model
-              
-                              return GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    _selectedIndex =
-                                        index == _selectedIndex ? null : index;
-                                  });
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Color(0xffffead1),
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: _selectedIndex == index
-                                          ? Colors.green
-                                          : Colors.transparent,
-                                      width: 2,
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: Image.network(
-                                        Api.fetchImage((member is Parent ? member.image : (member as Family).image) ?? '').toString(),
-                                          height: 150,
-                                          width: 110,
-                                          fit: BoxFit.contain,
-                                          loadingBuilder: (context, child, loadingProgress) {
-                                            if (loadingProgress == null) return child;
-                                            return const Center(
-                                              child: CircularProgressIndicator(),
-                                            );
-                                          },
-                                          errorBuilder: (context, error, stackTrace) {
-                                            return Container(
-                                              height: screenHeight*0.1,
-                                              width: screenWidth*0.08,
-                                              color: Colors.grey,
-                                              child: const Icon(
-                                                Icons.error,
-                                                color: Colors.white,
-                                                size: 40,
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                      // Member details
-                                      Flexible(
-                                        flex: 1,
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Container(
-                                              alignment: Alignment.centerRight,
-                                              child: _selectedIndex == index
-                                                  ? Icon(
-                                                      Icons.check_circle,
-                                                      color: Colors.green,
-                                                      size: 20,
-                                                    )
-                                                  : const Icon(
-                                                      Icons.check_circle,
-                                                      color: Colors.transparent,
-                                                      size: 20,
-                                                    ),
-                                            ),
-                                            Padding(
-                                              padding: EdgeInsets.only(left: 10),
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    (member is Parent
-                                                            ? member.fullName
-                                                            : (member as Family)
-                                                                .fullName) ??
-                                                        '',
-                                                    softWrap: false,
-                                                    overflow: TextOverflow.ellipsis,
-                                                    style: const TextStyle(
-                                                      fontSize: 16,
-                                                      fontWeight: FontWeight.bold,
-                                                    ),
-                                                    textAlign: TextAlign.start,
-                                                  ),
-                                                  const SizedBox(height: 4),
-                                                  Text(
-                                                    (member is Parent
-                                                            ? member.its
-                                                            : (member as Family).its)
-                                                        .toString(),
-                                                    style:
-                                                        const TextStyle(fontSize: 14),
-                                                  ),
-                                                ],
-                                              ),
-                                            )
-                                            // Tick icon
-                                          ],
-                                        ),
-                                      ),
-                                    ],
+                          itemCount: stateController.familyMembers.length,
+                          itemBuilder: (context, index) {
+                            final member = stateController.familyMembers[index];
+
+                            return GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  _selectedIndex = index == _selectedIndex ? null : index;
+                                });
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(12),
+                                decoration: BoxDecoration(
+                                  color: Color(0xffffead1),
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: _selectedIndex == index ? Colors.green : Colors.transparent,
+                                    width: 2,
                                   ),
                                 ),
-                              );
-                            },
-                          ),
-                          // Continue button
+                                child: Row(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: _buildProfileImage(member.profileImage),
+                                    ),
+                                    SizedBox(width: 10),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Container(
+                                            alignment: Alignment.centerRight,
+                                            child: _selectedIndex == index
+                                                ? Icon(Icons.check_circle, color: Colors.green, size: 20)
+                                                : Icon(Icons.check_circle, color: Colors.transparent, size: 20),
+                                          ),
+                                          Text(
+                                            member.fullName ?? '',
+                                            softWrap: false,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                          ),
+                                          SizedBox(height: 4),
+                                          Text(
+                                            member.itsNumber.toString(),
+                                            style: TextStyle(fontSize: 14),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      SizedBox(height: 16),
                       SizedBox(
                         width: 300,
                         height: 50,
                         child: ElevatedButton(
                           onPressed: _selectedIndex != null && !_isLoading
                               ? () {
-                            final selectedMember =
-                            familyMembers[_selectedIndex!]['member'];
-                            final itsId = (selectedMember is Parent
-                                ? selectedMember.its
-                                : (selectedMember as Family).its) ??
-                                0;
-                            fetchUserProfile(itsId.toString());
+                            final selectedMember = stateController.familyMembers[_selectedIndex!];
+                            fetchUserProfile(selectedMember.itsNumber.toString());
                           }
                               : null,
                           style: ElevatedButton.styleFrom(
@@ -324,26 +239,18 @@ class FamilyScreenWState extends State<FamilyScreenW> {
                             ),
                           ),
                           child: _isLoading
-                              ? const CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                                Colors.white),
-                          )
-                              : const Text(
-                            'Continue',
-                            style: TextStyle(
-                                fontSize: 18, color: Colors.white),
-                          ),
+                              ? CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.white))
+                              : Text('Continue', style: TextStyle(fontSize: 18, color: Colors.white)),
                         ),
                       ),
-                        ],
-                      ),
-                    ),
+                    ],
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
+      ),
     );
   }
 }

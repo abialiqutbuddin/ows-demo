@@ -14,8 +14,8 @@ class ModuleSelectionScreenM extends StatefulWidget {
 }
 
 class ModuleSelectionScreenState extends State<ModuleSelectionScreenM> {
-  final ModuleController controller = Get.put(ModuleController());
-  final GlobalStateController globalController = Get.put(GlobalStateController());
+  final ModuleController controller = Get.find<ModuleController>();
+  final GlobalStateController globalController = Get.find<GlobalStateController>();
   late final String its;
 
   @override

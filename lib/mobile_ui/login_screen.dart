@@ -15,7 +15,7 @@ class LoginPageM extends StatefulWidget {
 
 class LoginPageMState extends State<LoginPageM> {
 
-  final GlobalStateController statecontroller = Get.put(GlobalStateController());
+  final GlobalStateController statecontroller = Get.find<GlobalStateController>();
   final TextEditingController itsIdController = TextEditingController();
 
   @override
