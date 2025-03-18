@@ -2,6 +2,8 @@
 class RequestFormModel {
   int? reqId;
   String ITS;
+  String studentFirstName;
+  String studentFullName;
   String reqByITS;
   String reqByName;
   String city;
@@ -30,6 +32,8 @@ class RequestFormModel {
   RequestFormModel({
     this.reqId,
     required this.ITS,
+    required this.studentFirstName,
+    required this.studentFullName,
     required this.reqByITS,
     required this.reqByName,
     required this.city,
@@ -60,6 +64,7 @@ class RequestFormModel {
   RequestFormModel copyWith({
     int? reqId,
     String? ITS,
+    String? studentName,
     String? reqByITS,
     String? reqByName,
     String? city,
@@ -88,6 +93,8 @@ class RequestFormModel {
     return RequestFormModel(
       reqId: reqId ?? this.reqId,
       ITS: ITS ?? this.ITS,
+      studentFirstName: ITS ?? this.studentFirstName,
+      studentFullName: ITS ?? this.studentFullName,
       reqByITS: reqByITS ?? this.reqByITS,
       reqByName: reqByName ?? this.reqByName,
       city: city ?? this.city,
@@ -143,6 +150,8 @@ class RequestFormModel {
       mohalla: json['mohalla'] ?? '',
       address: json['address'],
       dob: json['dob'],
+      studentFirstName: json['studentFirstName'] ?? '',
+      studentFullName: json['studentFullName'] ?? '',
     );
   }
 
@@ -150,6 +159,8 @@ class RequestFormModel {
   Map<String, dynamic> toJson() {
     return {
       'ITS': ITS,
+      'studentFirstName': studentFirstName,
+      'studentFullName': studentFullName,
       'reqByITS': reqByITS,
       'reqByName': reqByName,
       'city': city,
@@ -182,6 +193,8 @@ class RequestFormModel {
     return '''
 RequestFormModel(
   ITS: $ITS,
+  studentFirstName: $studentFirstName,
+  studentFullName: $studentFullName,
   reqByITS: $reqByITS,
   reqByName: $reqByName,
   city: $city,

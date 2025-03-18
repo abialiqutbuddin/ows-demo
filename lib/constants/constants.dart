@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-import '../controller/login_controller.dart';
+import 'package:url_launcher/url_launcher.dart';
+//import 'dart:html' as html; // Only works for Flutter Web
+import '../controller/module_controller.dart';
+import '../controller/profile_pdf_controller.dart';
+import '../controller/request_form_controller.dart';
+import '../controller/state_management/state_manager.dart';
 
 class Constants {
   Color green = Color(0xFF008759);
@@ -41,9 +45,21 @@ class Constants {
     await prefs.clear();
   }
 
-  void Logout(){
+  void Logout() async {
     clearSharedPreferences();
-    Get.to(() => LoginController());
+    //GetStorage().
+    Get.delete<RequestFormController>();
+    Get.delete<PDFScreenController>();
+    Get.delete<GlobalStateController>();
+    Get.delete<ModuleController>();
+
+    // Redirect to external website
+    const String url = "https://www.its52.com";
+    if (GetPlatform.isWeb) {
+      //html.window.location.href = url;
+    } else {
+      launchUrl(Uri.parse(url), mode: LaunchMode.inAppWebView); // Opens inside the app (Mobile)
+    }
   }
 
 }

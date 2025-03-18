@@ -2,33 +2,956 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:super_tooltip/super_tooltip.dart';
+import '../../api/api.dart';
 import '../../controller/forms/form_screen_controller.dart';
 
-class StudentEducation extends StatefulWidget {
-  const StudentEducation({super.key});
+class StudentEducationM extends StatefulWidget {
+  const StudentEducationM({super.key});
 
   @override
-  State<StudentEducation> createState() => _StudentEducationState();
+  State<StudentEducationM> createState() => _StudentEducationState();
 }
 
-class _StudentEducationState extends State<StudentEducation> {
+class _StudentEducationState extends State<StudentEducationM> {
   String itsId = '30445124';
-  final FormController controller = Get.put(FormController());
+  final FormController controller = Get.find<FormController>();
   late SuperTooltipController tooltipControllers;
+  List<Map<String, dynamic>> goodsList = [];
+  List<int> selectedGoods = [];
 
   @override
   void initState() {
     super.initState();
+    fetchGoods();
     //Api.fetchProxiedData(
     //  'https://paktalim.com/admin/ws_app/GetProfileEducation/${itsId}?access_key=8803c22b50548c9d5b1401e3ab5854812c4dcacb&username=40459629&password=1107865253');
   }
 
   // RxBool to track expanded state
-  final RxBool isFinancialExpanded = false.obs;
-  final RxBool isPersonalAssetsExpanded = false.obs;
+  final RxBool isstudentEduExpanded = false.obs;
+  final RxBool isStandardofLivingExpanded = false.obs;
   final RxBool isBusinessAssetExpanded = false.obs;
-  final RxBool isFamilyEduExpanded = false.obs;
-  final RxInt selectedRadio = 0.obs; // Default: No radio selected
+  final RxBool isTravellingExpanded = false.obs;
+  final RxBool isDependentsExpanded = false.obs;
+  final RxBool isLiabilitiesExpanded = false.obs;
+  final RxBool isEnayatExpanded = false.obs;
+  final RxBool isAppliedSectionExpanded = false.obs;
+  final RxBool isPaymentsSectionExpanded = false.obs;
+  final RxBool isRepaymentsSectionExpanded = false.obs;
+
+  Future<void> fetchGoods() async {
+    try {
+      final goods = await Api.fetchGoods();
+      setState(() {
+        goodsList = goods;
+      });
+    } catch (e) {
+      print("Error fetching goods: $e");
+    }
+  }
+
+  // Handle selection
+  void toggleSelection(int id) {
+    setState(() {
+      if (selectedGoods.contains(id)) {
+        selectedGoods.remove(id);
+      } else {
+        selectedGoods.add(id);
+      }
+    });
+  }
+
+  Widget travellingSection() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 15),
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          //color: const Color(0xffffead1),
+          color: Color(0xffecdacc)
+          //border: Border.all(color:Colors.grey,width: 1)
+          ),
+      child: Column(
+        spacing: 15,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Places",
+            style: TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 16, color: Colors.brown),
+          ),
+          Row(
+            children: [
+              Obx(() => Radio(
+                    value: 1,
+                    toggleable: true,
+                    groupValue: controller.travelledInt.value,
+                    onChanged: (value) {
+                      if (value == null) {
+                        controller.travelledInt.value = 0;
+                      } else {
+                        controller.travelledInt.value = value;
+                        controller.validateTravellingsFields();
+                      }
+                    },
+                  )),
+              Text(
+                "Not Travelled",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              )
+            ],
+          ),
+          if (controller.travelledInt.value != 1)
+            Obx(() => Column(
+                  children:
+                      List.generate(controller.travelling.length, (index) {
+                    RxString place = controller.travelling[index]["place"];
+                    RxString year = controller.travelling[index]["year"];
+                    RxString purpose = controller.travelling[index]["purpose"];
+
+                    return Column(
+                      spacing: 8,
+                      children: [
+                        SizedBox(
+                            width: double.infinity,
+                            child: Text(
+                              "${index + 1}.",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            )),
+                        Row(
+                          spacing: 5,
+                          children: [
+                            Flexible(
+                                flex: 4,
+                                child: _buildField("Place", place,
+                                    isEnabled: true,
+                                    function: () => controller
+                                        .validateTravellingsFields())),
+                            Flexible(
+                                flex: 2,
+                                child: _buildField("Year", year,
+                                    isEnabled: true,
+                                    function: () => controller
+                                        .validateTravellingsFields())),
+                          ],
+                        ),
+                        _buildField("Purpose", purpose,
+                            isEnabled: true,
+                            function: () =>
+                                controller.validateTravellingsFields()),
+                        IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            controller.travelling.removeAt(index);
+                            controller.validateTravellingsFields();
+                          },
+                        ),
+                        //Divider(thickness: 1, color: Colors.brown),
+                      ],
+                    );
+                  }),
+                )),
+          if (controller.travelledInt.value != 1)
+            TextButton.icon(
+              onPressed: () {
+                bool allValid = controller.travelling.every((entry) =>
+                    entry["place"].value.isNotEmpty &&
+                    entry["year"].value.isNotEmpty &&
+                    entry["purpose"].value.isNotEmpty);
+                if (!allValid) {
+                  return;
+                }
+                controller.travelling.add({
+                  "place": "".obs,
+                  "year": "".obs,
+                  "purpose": "".obs,
+                });
+                controller.validateTravellingsFields();
+              },
+              icon: Icon(
+                Icons.add,
+                color: Colors.green,
+                size: 20,
+              ),
+              label: Text(
+                "Add New",
+                style: TextStyle(
+                    color: Colors.green,
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget dependentsSection() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 15),
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          //color: const Color(0xffffead1),
+          color: Color(0xffecdacc)
+          //border: Border.all(color:Colors.grey,width: 1)
+          ),
+      child: Column(
+        spacing: 15,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Dependents",
+            style: TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 16, color: Colors.brown),
+          ),
+          Row(
+            children: [
+              Obx(() => Radio(
+                    value: 1,
+                    toggleable: true,
+                    groupValue: controller.dependentsInt.value,
+                    onChanged: (value) {
+                      if (value == null) {
+                        controller.dependentsInt.value = 0;
+                      } else {
+                        controller.dependentsInt.value = value;
+                        controller.validateDependentsFields();
+                      }
+                    },
+                  )),
+              Text(
+                "No Dependents",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              )
+            ],
+          ),
+          if (controller.dependentsInt.value != 1)
+            Obx(() => Column(
+                  children:
+                      List.generate(controller.dependents.length, (index) {
+                    RxString place = controller.dependents[index]["name"];
+                    RxString year = controller.dependents[index]["relation"];
+                    RxString purpose = controller.dependents[index]["age"];
+
+                    return Column(
+                      spacing: 8,
+                      children: [
+                        SizedBox(
+                            width: double.infinity,
+                            child: Text(
+                              "${index + 1}.",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            )),
+                        _buildField("Name", place,
+                            isEnabled: true,
+                            function: () =>
+                                controller.validateDependentsFields()),
+                        _buildField("Relation", year,
+                            isEnabled: true,
+                            function: () =>
+                                controller.validateDependentsFields()),
+                        _buildField("Age", purpose,
+                            isEnabled: true,
+                            function: () =>
+                                controller.validateDependentsFields()),
+                        IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            controller.dependents.removeAt(index);
+                            controller.validateDependentsFields();
+                          },
+                        ),
+                        //Divider(thickness: 1, color: Colors.brown),
+                      ],
+                    );
+                  }),
+                )),
+          if (controller.dependentsInt.value != 1)
+            TextButton.icon(
+              onPressed: () {
+                bool allValid = controller.dependents.every((entry) =>
+                    entry["name"].value.isNotEmpty &&
+                    entry["relation"].value.isNotEmpty &&
+                    entry["age"].value.isNotEmpty);
+                if (!allValid) {
+                  return;
+                }
+                controller.dependents.add({
+                  "name": "".obs,
+                  "relation": "".obs,
+                  "age": "".obs,
+                });
+                controller.validateDependentsFields();
+              },
+              icon: Icon(
+                Icons.add,
+                color: Colors.green,
+                size: 20,
+              ),
+              label: Text(
+                "Add New",
+                style: TextStyle(
+                    color: Colors.green,
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget liabilitiesSection() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 15),
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          //color: const Color(0xffffead1),
+          color: Color(0xffecdacc)
+          //border: Border.all(color:Colors.grey,width: 1)
+          ),
+      child: Column(
+        spacing: 15,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Liabilities",
+            style: TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 16, color: Colors.brown),
+          ),
+          Row(
+            children: [
+              Obx(() => Radio(
+                    value: 1,
+                    toggleable: true,
+                    groupValue: controller.liabilitiesInt.value,
+                    onChanged: (value) {
+                      if (value == null) {
+                        controller.liabilitiesInt.value = 0;
+                      } else {
+                        controller.liabilitiesInt.value = value;
+                        controller.validateLiabilitiesFields();
+                      }
+                    },
+                  )),
+              Text(
+                "No Liabilities",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              )
+            ],
+          ),
+          if (controller.liabilitiesInt.value != 1)
+            Obx(() => Column(
+                  children:
+                      List.generate(controller.liabilities.length, (index) {
+                    RxString type = controller.liabilities[index]["type"];
+                    RxString its = controller.liabilities[index]["its"];
+                    RxString purpose = controller.liabilities[index]["purpose"];
+                    RxString amount = controller.liabilities[index]["amount"];
+                    RxString balance = controller.liabilities[index]["balance"];
+                    RxString status = controller.liabilities[index]["status"];
+                    RxString reason = controller.liabilities[index]["reason"];
+
+                    return Column(
+                      spacing: 8,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Flexible(
+                              child: SizedBox(
+                                  width: double.infinity,
+                                  child: Text(
+                                    "${index + 1}.",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18),
+                                  )),
+                            ),
+                            Flexible(
+                              child: IconButton(
+                                icon: Icon(Icons.delete, color: Colors.red),
+                                onPressed: () {
+                                  controller.liabilities.removeAt(index);
+                                  controller.validateLiabilitiesFields();
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        _buildField("QH Type / From", type,
+                            isEnabled: true,
+                            function: () =>
+                                controller.validateLiabilitiesFields()),
+                        _buildField("ITS (Mother / Father)", its,
+                            isEnabled: true,
+                            function: () =>
+                                controller.validateLiabilitiesFields()),
+                        _buildField("Purpose", purpose,
+                            isEnabled: true,
+                            function: () =>
+                                controller.validateLiabilitiesFields()),
+                        _buildField("Amount", amount,
+                            isEnabled: true,
+                            function: () =>
+                                controller.validateLiabilitiesFields()),
+                        _buildField("Balance", balance,
+                            isEnabled: true,
+                            function: () =>
+                                controller.validateLiabilitiesFields()),
+                        _buildField("Status", status,
+                            isEnabled: true,
+                            function: () =>
+                                controller.validateLiabilitiesFields()),
+                        _buildField("Reason if delay in Payment", reason,
+                            isEnabled: true,
+                            function: () =>
+                                controller.validateLiabilitiesFields()),
+                        //Divider(thickness: 1, color: Colors.brown),
+                      ],
+                    );
+                  }),
+                )),
+          if (controller.liabilitiesInt.value != 1)
+            TextButton.icon(
+              onPressed: () {
+                bool allValid = controller.liabilities.every((entry) =>
+                    entry["type"].value.isNotEmpty &&
+                    entry["its"].value.isNotEmpty &&
+                    entry["purpose"].value.isNotEmpty &&
+                    entry["amount"].value.isNotEmpty &&
+                    entry["balance"].value.isNotEmpty &&
+                    entry["status"].value.isNotEmpty);
+                if (!allValid) {
+                  return;
+                }
+                controller.liabilities.add({
+                  "type": "".obs,
+                  "its": "".obs,
+                  "purpose": "".obs,
+                  "amount": "".obs,
+                  "balance": "".obs,
+                  "status": "".obs,
+                  "reason": "".obs,
+                });
+                controller.validateLiabilitiesFields();
+              },
+              icon: Icon(
+                Icons.add,
+                color: Colors.green,
+                size: 20,
+              ),
+              label: Text(
+                "Add New",
+                style: TextStyle(
+                    color: Colors.green,
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget enayatSection() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 15),
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          //color: const Color(0xffffead1),
+          color: Color(0xffecdacc)
+          //border: Border.all(color:Colors.grey,width: 1)
+          ),
+      child: Column(
+        spacing: 15,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Enayat",
+            style: TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 16, color: Colors.brown),
+          ),
+          Row(
+            children: [
+              Obx(() => Radio(
+                    value: 1,
+                    toggleable: true,
+                    groupValue: controller.enayatInt.value,
+                    onChanged: (value) {
+                      if (value == null) {
+                        controller.enayatInt.value = 0;
+                      } else {
+                        controller.enayatInt.value = value;
+                        controller.validateEnayatFromFields();
+                      }
+                    },
+                  )),
+              Text(
+                "No Previous Enayat",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              )
+            ],
+          ),
+          if (controller.enayatInt.value != 1)
+            Obx(() => Column(
+                  children: List.generate(controller.enayat.length, (index) {
+                    RxString its = controller.enayat[index]["its"];
+                    RxString purpose = controller.enayat[index]["purpose"];
+                    RxString amount = controller.enayat[index]["amount"];
+                    RxString date = controller.enayat[index]["date"];
+
+                    return Column(
+                      spacing: 8,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Flexible(
+                              child: SizedBox(
+                                  width: double.infinity,
+                                  child: Text(
+                                    "${index + 1}.",
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 18),
+                                  )),
+                            ),
+                            Flexible(
+                              child: IconButton(
+                                icon: Icon(Icons.delete, color: Colors.red),
+                                onPressed: () {
+                                  controller.enayat.removeAt(index);
+                                  controller.validateEnayatFromFields();
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                        _buildField("ITS", its,
+                            isEnabled: true,
+                            function: () =>
+                                controller.validateEnayatFromFields()),
+                        _buildField("Purpose", purpose,
+                            isEnabled: true,
+                            function: () =>
+                                controller.validateEnayatFromFields()),
+                        _buildField("Amount", amount,
+                            isEnabled: true,
+                            function: () =>
+                                controller.validateEnayatFromFields()),
+                        _buildField("Date", date,
+                            isEnabled: true,
+                            function: () =>
+                                controller.validateEnayatFromFields()),
+                        //Divider(thickness: 1, color: Colors.brown),
+                      ],
+                    );
+                  }),
+                )),
+          if (controller.enayatInt.value != 1)
+            TextButton.icon(
+              onPressed: () {
+                bool allValid = controller.enayat.every((entry) =>
+                    entry["its"].value.isNotEmpty &&
+                    entry["purpose"].value.isNotEmpty &&
+                    entry["amount"].value.isNotEmpty &&
+                    entry["date"].value.isNotEmpty);
+                if (!allValid) {
+                  return;
+                }
+                controller.enayat.add({
+                  "its": "".obs,
+                  "purpose": "".obs,
+                  "amount": "".obs,
+                  "date": "".obs,
+                });
+                controller.validateEnayatFromFields();
+              },
+              icon: Icon(
+                Icons.add,
+                color: Colors.green,
+                size: 20,
+              ),
+              label: Text(
+                "Add New",
+                style: TextStyle(
+                    color: Colors.green,
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget qhAppliedSection() {
+    return Column(
+      spacing: 8,
+      children: [
+        Row(
+          children: [
+            Obx(() => Radio(
+                  value: 1,
+                  toggleable: true,
+                  groupValue: controller.qhappliedInt.value,
+                  onChanged: (value) {
+                    if (value == null) {
+                      controller.qhappliedInt.value = 0;
+                    } else {
+                      controller.qhappliedInt.value = value;
+                      controller.validateQHAppliedFields();
+                    }
+                  },
+                )),
+            Text(
+              "No Previously QH Taken",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            )
+          ],
+        ),
+        if (controller.qhappliedInt.value != 1)
+          _buildField("QH Applied", controller.appliedAmount,
+              isEnabled: true,
+              function: () => controller.validateQHAppliedFields()),
+        if (controller.qhappliedInt.value != 1)
+          _buildField("Amanat", controller.amanat,
+              isEnabled: true,
+              function: () => controller.validateQHAppliedFields()),
+        if (controller.qhappliedInt.value != 1)
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 15),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                //color: const Color(0xffffead1),
+                color: Color(0xffecdacc)
+                //border: Border.all(color:Colors.grey,width: 1)
+                ),
+            child: Column(
+              spacing: 15,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Guarantors",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.brown),
+                ),
+                Obx(() => Column(
+                      children:
+                          List.generate(controller.guarantor.length, (index) {
+                        RxString name = controller.guarantor[index]["name"];
+                        RxString its = controller.guarantor[index]["its"];
+                        RxString mobile = controller.guarantor[index]["mobile"];
+
+                        return Column(
+                          spacing: 8,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Flexible(
+                                  child: SizedBox(
+                                      width: double.infinity,
+                                      child: Text(
+                                        "${index + 1}.",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18),
+                                      )),
+                                ),
+                                Flexible(
+                                  child: IconButton(
+                                    icon: Icon(Icons.delete, color: Colors.red),
+                                    onPressed: () {
+                                      controller.guarantor.removeAt(index);
+                                      controller.validateQHAppliedFields();
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            _buildField("Name", name,
+                                isEnabled: true,
+                                function: () =>
+                                    controller.validateQHAppliedFields()),
+                            _buildField("ITS", its,
+                                isEnabled: true,
+                                function: () =>
+                                    controller.validateQHAppliedFields()),
+                            _buildField("Mobile Number", mobile,
+                                isEnabled: true,
+                                function: () =>
+                                    controller.validateQHAppliedFields()),
+                            //Divider(thickness: 1, color: Colors.brown),
+                          ],
+                        );
+                      }),
+                    )),
+                TextButton.icon(
+                  onPressed: () {
+                    bool allValid = controller.guarantor.every((entry) =>
+                        entry["name"].value.isNotEmpty &&
+                        entry["its"].value.isNotEmpty &&
+                        entry["mobile"].value.isNotEmpty);
+                    if (!allValid) {
+                      return;
+                    }
+                    controller.guarantor.add({
+                      "name": "".obs,
+                      "its": "".obs,
+                      "mobile": "".obs,
+                    });
+                    controller.validateQHAppliedFields();
+                  },
+                  icon: Icon(
+                    Icons.add,
+                    color: Colors.green,
+                    size: 20,
+                  ),
+                  label: Text(
+                    "Add New",
+                    style: TextStyle(
+                        color: Colors.green,
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget paymentsSection() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 15),
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          //color: const Color(0xffffead1),
+          color: Color(0xffecdacc)
+          //border: Border.all(color:Colors.grey,width: 1)
+          ),
+      child: Column(
+        spacing: 15,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Payments",
+            style: TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 16, color: Colors.brown),
+          ),
+          Obx(() => Column(
+                children: List.generate(controller.payments.length, (index) {
+                  RxString amount = controller.payments[index]["amount"];
+                  RxString date = controller.payments[index]["date"];
+
+                  return Column(
+                    spacing: 8,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Flexible(
+                            child: SizedBox(
+                                width: double.infinity,
+                                child: Text(
+                                  "Semester ${index + 1} Class",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18),
+                                )),
+                          ),
+                          Flexible(
+                            child: IconButton(
+                              icon: Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                controller.payments.removeAt(index);
+                                controller.validatePaymentsFields();
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      _buildField("Amount", amount,
+                          isEnabled: true,
+                          function: () => controller.validatePaymentsFields()),
+                      _buildField("Date", date,
+                          isEnabled: true,
+                          function: () => controller.validatePaymentsFields()),
+                      //Divider(thickness: 1, color: Colors.brown),
+                    ],
+                  );
+                }),
+              )),
+          TextButton.icon(
+            onPressed: () {
+              bool allValid = controller.payments.every((entry) =>
+                  entry["amount"].value.isNotEmpty &&
+                  entry["date"].value.isNotEmpty);
+              if (!allValid) {
+                return;
+              }
+              controller.payments.add({
+                "amount": "".obs,
+                "date": "".obs,
+              });
+              controller.validatePaymentsFields();
+            },
+            icon: Icon(
+              Icons.add,
+              color: Colors.green,
+              size: 20,
+            ),
+            label: Text(
+              "Add New",
+              style: TextStyle(
+                  color: Colors.green,
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget repaymentsSection() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 15),
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          //color: const Color(0xffffead1),
+          color: Color(0xffecdacc)
+          //border: Border.all(color:Colors.grey,width: 1)
+          ),
+      child: Column(
+        spacing: 15,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            "Repayments",
+            style: TextStyle(
+                fontWeight: FontWeight.bold, fontSize: 16, color: Colors.brown),
+          ),
+          Obx(() => Column(
+                children: List.generate(controller.repayments.length, (index) {
+                  RxString amount = controller.repayments[index]["amount"];
+                  RxString date = controller.repayments[index]["date"];
+                  RxString total = controller.repayments[index]["total"];
+                  RxString balance = controller.repayments[index]["balance"];
+
+                  return Column(
+                    spacing: 8,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Flexible(
+                            child: SizedBox(
+                                width: double.infinity,
+                                child: Text(
+                                  "${index + 1}.",
+                                  style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18),
+                                )),
+                          ),
+                          Flexible(
+                            child: IconButton(
+                              icon: Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                controller.repayments.removeAt(index);
+                                controller.validateRePaymentsFields();
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      _buildField("Amount", amount,
+                          isEnabled: true,
+                          function: () =>
+                              controller.validateRePaymentsFields()),
+                      _buildField("Date", date,
+                          isEnabled: true,
+                          function: () =>
+                              controller.validateRePaymentsFields()),
+                      _buildField("Total", total,
+                          isEnabled: true,
+                          function: () =>
+                              controller.validateRePaymentsFields()),
+                      _buildField("Balance", balance,
+                          isEnabled: true,
+                          function: () =>
+                              controller.validateRePaymentsFields()),
+                      //Divider(thickness: 1, color: Colors.brown),
+                    ],
+                  );
+                }),
+              )),
+          TextButton.icon(
+            onPressed: () {
+              bool allValid = controller.repayments.every((entry) =>
+                  entry["amount"].value.isNotEmpty &&
+                  entry["date"].value.isNotEmpty &&
+                  entry["total"].value.isNotEmpty &&
+                  entry["balance"].value.isNotEmpty);
+              if (!allValid) {
+                return;
+              }
+              controller.repayments.add({
+                "amount": "".obs,
+                "date": "".obs,
+                "total": "".obs,
+                "balance": "".obs,
+              });
+              controller.validateRePaymentsFields();
+            },
+            icon: Icon(
+              Icons.add,
+              color: Colors.green,
+              size: 20,
+            ),
+            label: Text(
+              "Add New",
+              style: TextStyle(
+                  color: Colors.green,
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget goods() {
+    return SizedBox(
+      height: 400,
+      width: double.infinity,
+      child: ListView.builder(
+        itemCount: goodsList.length,
+        itemBuilder: (context, index) {
+          final good = goodsList[index];
+          return CheckboxListTile(
+            title: Text(good['description']),
+            value: selectedGoods.contains(good['good_id']),
+            onChanged: (_) => toggleSelection(good['good_id']),
+          );
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,11 +967,42 @@ class _StudentEducationState extends State<StudentEducation> {
       backgroundColor: Color(0xfffffcf6),
       body: ListView(
         children: [
+          //_buildCollapsibleSection("Student Education", isstudentEduExpanded, studentEducation),
+          if (controller.organization.value == 'AIUT') ...[
+            _buildCollapsibleSection(
+                "Standard of living", isStandardofLivingExpanded, goods,
+                complete: controller.isSOLComplete),
+          ],
+          _buildCollapsibleSection("Travelling (Last 5 Years)",
+              isTravellingExpanded, travellingSection,
+              complete: controller.isTravellingComplete),
           _buildCollapsibleSection(
-              "Student Education", isFinancialExpanded, studentEducation),
-          //  _buildCollapsibleSection("Personal Assets", isPersonalAssetsExpanded, personalAssetsInfo),
-          //_buildCollapsibleSection("Business Assets", isBusinessAssetExpanded, _businessAssetSection),
-          //_buildCollapsibleSection("Family Education", isFamilyEduExpanded, _familyEducationSection),
+              "Dependents", isDependentsExpanded, dependentsSection,
+              complete: controller.isDependentsComplete),
+          if(controller.organization.value == 'STSMF')...[
+          _buildCollapsibleSection(
+              "Liabilities", isLiabilitiesExpanded, liabilitiesSection,
+              complete: controller.isLiabilitesComplete),
+            _buildCollapsibleSection(
+                "Previously Taken (PENDING)", isEnayatExpanded, enayatSection,
+                complete: controller.isEnayatComplete),
+          ],
+          if(controller.organization.value == 'STSMF' || controller.organization.value == 'AIUT')...[
+          _buildCollapsibleSection(
+              "Enayat From", isEnayatExpanded, enayatSection,
+              complete: controller.isEnayatComplete),
+          ],
+          if(controller.organization.value == 'STMSF')...[
+          _buildCollapsibleSection(
+              "QH Applied", isAppliedSectionExpanded, qhAppliedSection,
+              complete: controller.isQHAppliedComplete),
+          _buildCollapsibleSection(
+              "Payments", isPaymentsSectionExpanded, paymentsSection,
+              complete: controller.isPaymentsComplete),
+          _buildCollapsibleSection(
+              "Repayments", isRepaymentsSectionExpanded, repaymentsSection,
+              complete: controller.isRepaymentsComplete),
+          ],
           Obx(() => Padding(
                 padding: EdgeInsets.all(16.0),
                 child: ElevatedButton(
@@ -91,63 +1045,87 @@ class _StudentEducationState extends State<StudentEducation> {
 
   /// **Function to build collapsible sections with animation**
   Widget _buildCollapsibleSection(
-      String title, RxBool isExpanded, Widget Function() content) {
-    return Obx(() => Container(
-          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          margin: EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            color: Color(0xffffead1),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  isExpanded.value = !isExpanded.value;
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 10,
+      String title, RxBool isExpanded, Widget Function() content,
+      {RxBool? complete}) {
+    return Obx(() => Stack(
+          children: [
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              margin: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: Color(0xffffead1),
+                  border: Border.all(
+                      color:
+                          complete!.value ? Colors.green : Colors.transparent,
+                      width: 2)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      isExpanded.value = !isExpanded.value;
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(title,
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                                color: Colors.brown)),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        AnimatedRotation(
-                          turns: isExpanded.value
-                              ? 0.5
-                              : 0.0, // Rotates 180° when expanded
-                          duration: Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                          child: Icon(
-                            Icons.keyboard_arrow_down,
-                            // Keep only one icon and rotate it
-                            color: Colors.brown,
-                          ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: 10,
+                          children: [
+                            Text(title,
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 20,
+                                    color: Colors.brown)),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            AnimatedRotation(
+                              turns: isExpanded.value
+                                  ? 0.5
+                                  : 0.0, // Rotates 180° when expanded
+                              duration: Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                              child: Icon(
+                                Icons.keyboard_arrow_down,
+                                // Keep only one icon and rotate it
+                                color: Colors.brown,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
+                  ),
+                  Divider(height: 20, color: Colors.white, thickness: 2),
+                  AnimatedSize(
+                    alignment: Alignment.topCenter,
+                    duration: Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                    child: isExpanded.value ? content() : SizedBox.shrink(),
+                  ),
+                ],
+              ),
+            ),
+            if (complete.value)
+              Positioned(
+                top: 0,
+                right: 25,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.green,
+                    borderRadius: BorderRadius.all(Radius.circular(50)),
+                  ),
+                  child: Text(
+                    "Completed",
+                    style: TextStyle(color: Colors.white, fontSize: 12),
+                  ),
                 ),
               ),
-              Divider(height: 20, color: Colors.white, thickness: 2),
-              AnimatedSize(
-                alignment: Alignment.topCenter,
-                duration: Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                child: isExpanded.value ? content() : SizedBox.shrink(),
-              ),
-            ],
-          ),
+          ],
         ));
   }
 
@@ -495,7 +1473,7 @@ class _StudentEducationState extends State<StudentEducation> {
   }
 
   Widget _buildField(String label, RxString rxValue,
-      {double? height, bool? isEnabled}) {
+      {double? height, bool? isEnabled, Function()? function}) {
     bool isDescription = height != null;
     SuperTooltipController tooltipController = SuperTooltipController();
 
@@ -519,6 +1497,7 @@ class _StudentEducationState extends State<StudentEducation> {
               onChanged: (value) {
                 rxValue.value = value;
                 controller.validateForm();
+                function?.call();
               },
               textCapitalization: TextCapitalization.sentences,
               maxLines: isDescription ? 3 : 1,

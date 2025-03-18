@@ -4,8 +4,9 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:ows/model/member_model.dart';
 import 'package:ows/constants/constants.dart';
+import 'package:ows/constants/custom_dialog.dart';
+import 'package:ows/controller/profile_pdf_controller.dart';
 import 'package:ows/model/request_form_model.dart';
 import 'package:super_tooltip/super_tooltip.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -14,10 +15,10 @@ import 'package:get/get.dart';
 import '../controller/request_form_controller.dart';
 import '../controller/state_management/state_manager.dart';
 import '../constants/dropdown_search.dart';
+import '../model/funding_record_model.dart';
 
 class RequestFormW extends StatefulWidget {
-  final UserProfile member;
-  const RequestFormW({super.key, required this.member});
+  const RequestFormW({super.key});
 
   @override
   RequestFormWState createState() => RequestFormWState();
@@ -25,16 +26,11 @@ class RequestFormW extends StatefulWidget {
 
 class RequestFormWState extends State<RequestFormW> {
   final double defSpacing = 8;
-  late final RequestFormController controller;
-  late final GlobalStateController statecontroller;
 
-  final GlobalKey<FormState> mainFormKey = GlobalKey<FormState>();
-  final GlobalKey<FormState> fundsFormKey = GlobalKey<FormState>();
+  RequestFormController controller = Get.find<RequestFormController>();
+  GlobalStateController statecontroller = Get.find<GlobalStateController>();
 
-  late final UserProfile member;
   bool isLoading = true; // Track loading state
-  late String? appliedByName;
-  late String? appliedbyIts;
 
   List<dynamic> allData = [];
   List<dynamic> filteredStudies = [];
@@ -46,87 +42,27 @@ class RequestFormWState extends State<RequestFormW> {
 
   late List<String> statusOptions;
 
-  List<String> checkEducationStatus(UserProfile userProfile) {
-    List<String> statusList = [];
-
-    bool hasOngoingEducation = userProfile.marhalaOngoing == 1;
-    bool hasFutureEducation = userProfile.future?.isNotEmpty ?? false;
-
-    if (hasOngoingEducation) {
-      statusList.add("Apply For Ongoing");
-      statusList.add(
-          "Apply For Future Education"); // Always add future when ongoing is 1
-    } else if (!hasOngoingEducation && hasFutureEducation) {
-      statusList.add("Apply For Future Education");
-    } else {
-      statusList.add(
-          "Apply For Future Education"); // When no ongoing and no future, still allow future application
-    }
-    return statusList;
-  }
-
   @override
   void initState() {
     super.initState();
-    controller = Get.find<RequestFormController>();
-    statecontroller = Get.find<GlobalStateController>();
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    //   showCustomDialog(title: 'Alert',
+    //       message: 'An ongoing Imdad talimi application already exists with this profile. Kindly contact your respective Imdad talimi institution for further guidance.',
+    //       confirmText: 'Ok',
+    //       onConfirm: (){
+    //         Get.back();
+    //         Get.back();
+    //       }
+    //   );
+    // });
     initializeMember();
-    statusOptions = checkEducationStatus(widget.member);
-
+    //statusOptions = checkEducationStatus(widget.member);
+    fetchRecords();
     Api.loadData().then((data) {
       setState(() {
         allData = data;
       });
     });
-  }
-
-  void filterStudies(int marhalaId) {
-    setState(() {
-      filteredStudies = allData
-          .where((item) => item['marhala_id'] == marhalaId)
-          .map((item) => {
-                'id': item['study_id'],
-                'name': item['study'],
-              })
-          .toSet()
-          .toList(); // Remove duplicates
-      selectedStudy = null;
-      filteredNames = [];
-      selectedName = null;
-    });
-  }
-
-  void filterNames(int studyId) {
-    setState(() {
-      filteredNames = allData
-          .where((item) => item['study_id'] == studyId)
-          .map((item) => {
-                'id': item['id'],
-                'name': item['name'],
-              })
-          .toList();
-      selectedName = null;
-    });
-  }
-
-  Future<void> initializeMember() async {
-
-    setState(() {
-      isLoading = true;
-      appliedByName = widget.member.fullName;
-      appliedbyIts = "${widget.member.itsId}";
-    });
-
-    member = widget.member;
-
-    setState(() {
-      isLoading = false;
-    });
-
-    // appliedbyIts = await Constants().getFromPrefs('appliedByIts');
-    // appliedByName = await Constants().getFromPrefs('appliedByName');
-    controller.reqId.value = await Api.fetchNextReqMasId();
-
   }
 
   @override
@@ -196,15 +132,266 @@ class RequestFormWState extends State<RequestFormW> {
       children: [
         headerSection(context),
         headerProfile(context),
+        buildAiutRecord(context),
         requestForm(context),
       ],
     );
   }
 
+  // List<String> checkEducationStatus(UserProfile userProfile) {
+  //   List<String> statusList = [];
+  //
+  //   bool hasOngoingEducation = userProfile.marhalaOngoing == 1;
+  //   bool hasFutureEducation = userProfile.future?.isNotEmpty ?? false;
+  //
+  //   if (hasOngoingEducation) {
+  //     statusList.add("Apply For Ongoing");
+  //     statusList.add(
+  //         "Apply For Future Education"); // Always add future when ongoing is 1
+  //   } else if (!hasOngoingEducation && hasFutureEducation) {
+  //     statusList.add("Apply For Future Education");
+  //   } else {
+  //     statusList.add(
+  //         "Apply For Future Education"); // When no ongoing and no future, still allow future application
+  //   }
+  //   return statusList;
+  // }
+
+  String errorMessage = "";
+  List<FundingRecords> records = [];
+
+  Future<void> fetchRecords() async {
+    try {
+      List<FundingRecords> fetchedRecords =
+          await Api.fetchRecords(statecontroller.user.value.itsId.toString());
+      //List<FundingRecords> fetchedRecords = await Api.fetchRecords('50493600');
+      setState(() {
+        records = fetchedRecords;
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        errorMessage = "Failed to load records";
+        isLoading = false;
+      });
+    }
+  }
+
+  Widget buildAiutRecord(BuildContext context) {
+    return records.isEmpty
+        ? SizedBox.shrink()
+        : Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Container(
+              padding: const EdgeInsets.all(16.0),
+              decoration: BoxDecoration(
+                color: Color(0xfffff7ec),
+                borderRadius: BorderRadius.circular(5),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withValues(alpha: 0.5),
+                    spreadRadius: 2,
+                    blurRadius: 5,
+                    offset: Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : records.isEmpty
+                      ? SizedBox.shrink()
+                      : SizedBox(
+                          width: double.infinity,
+                          child: Column(
+                            spacing: 10,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Previously Taking Imdaad Talimi",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 16),
+                              ),
+                              // Table Header
+                              Divider(),
+                              Container(
+                                padding: EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: Color(0xffdbbb99),
+                                  borderRadius: BorderRadius.circular(5),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    tableHeaderCell("School"),
+                                    tableHeaderCell("Organization"),
+                                    tableHeaderCell("Percentage"),
+                                    tableHeaderCell("Amount"),
+                                    tableHeaderCell("Status"),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(height: 5),
+                              // Table Data
+                              Column(
+                                children: records
+                                    .map((record) => tableRow(record))
+                                    .toList(),
+                              ),
+                            ],
+                          ),
+                        ),
+            ),
+          );
+  }
+
+  // Function to Determine Date Status
+  String getDateStatus(String date, List<FundingRecords> allRecords) {
+    bool has2024 = allRecords.any((r) => r.date.contains("2024"));
+    bool has2025 = allRecords.any((r) => r.date.contains("2025"));
+
+    if (date.contains("2025")) {
+      return has2024 ? "Current" : "Current"; // 2025 is always Current
+    } else if (date.contains("2024")) {
+      return has2025
+          ? "Last Years"
+          : "Current"; // 2024 is Current only if 2025 is not present
+    } else {
+      return "Last Years"; // Any year before 2024 is Last Years
+    }
+  }
+
+// Table Header Cell
+  Widget tableHeaderCell(String title) {
+    return Expanded(
+      child: Container(
+        alignment: Alignment.center,
+        //width: width,
+        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+        child: Text(
+          title,
+          style: TextStyle(
+              fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+        ),
+      ),
+    );
+  }
+
+// Table Row Widget
+  Widget tableRow(FundingRecords record) {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+      decoration: BoxDecoration(
+        color: getDateStatus(record.date.toString(), records) != 'Current'
+            ? Colors.transparent
+            : Colors.white,
+        boxShadow: getDateStatus(record.date.toString(), records) != 'Current'
+            ? []
+            : [
+                BoxShadow(
+                  color: Colors.grey.withValues(alpha: 0.5),
+                  spreadRadius: 2,
+                  blurRadius: 5,
+                  offset: Offset(0, 2),
+                ),
+              ],
+        borderRadius: BorderRadius.circular(5),
+        border:
+            Border(bottom: BorderSide(color: Colors.grey.shade300, width: 1)),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          tableDataCell(record.school),
+          tableDataCell(record.org),
+          tableDataCell(record.orgP.toString()),
+          tableDataCell(record.amount.toString()),
+          tableDataCell(getDateStatus(record.date, records)),
+        ],
+      ),
+    );
+  }
+
+// Table Data Cell
+  Widget tableDataCell(String text) {
+    return Expanded(
+      child: Container(
+        alignment: Alignment.center,
+        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.brown,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+    );
+  }
+
+  void filterStudies(int marhalaId) {
+    setState(() {
+      filteredStudies = allData
+          .where((item) => item['marhala_id'] == marhalaId)
+          .map((item) => {
+                'id': item['study_id'],
+                'name': item['study'],
+              })
+          .toSet()
+          .toList(); // Remove duplicates
+      selectedStudy = null;
+      filteredNames = [];
+      selectedName = null;
+    });
+  }
+
+  void filterNames(int studyId) {
+    setState(() {
+      filteredNames = allData
+          .where((item) => item['study_id'] == studyId)
+          .map((item) => {
+                'id': item['id'],
+                'name': item['name'],
+              })
+          .toList();
+      selectedName = null;
+    });
+  }
+
+  Future<void> initializeMember() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    //member = statecontroller.user.value;
+
+    setState(() {
+      isLoading = false;
+    });
+
+    // appliedbyIts = await Constants().getFromPrefs('appliedByIts');
+    // appliedByName = await Constants().getFromPrefs('appliedByName');
+    controller.reqId.value = await Api.fetchNextReqMasId();
+  }
+
   Widget headerSection(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(15),
-      decoration: BoxDecoration(color: Color(0xffdbbb99)),
+      decoration: BoxDecoration(
+        color: Color(
+          0xffdbbb99,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withValues(alpha: 0.5),
+            spreadRadius: 2,
+            blurRadius: 5,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -225,7 +412,7 @@ class RequestFormWState extends State<RequestFormW> {
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {
-                          return GuardianFormDialog();
+                          return GuardianFormDialog(ITS:statecontroller.user.value.itsId.toString());
                         },
                       );
                     },
@@ -354,37 +541,37 @@ class RequestFormWState extends State<RequestFormW> {
     );
   }
 
-  Widget checkStatus() {
-    RxString selectedStatus = "".obs;
-    List<String> statusOptions = checkEducationStatus(widget.member);
-
-    return Column(
-      spacing: 5,
-      children: statusOptions
-          .map((status) => Container(
-                decoration: BoxDecoration(
-                  color: const Color(0xfffffcf6),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.brown, width: 1),
-                ),
-                child: Obx(() => RadioListTile<String>(
-                      title: Text(
-                        status,
-                        style: TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.bold),
-                      ),
-                      value: status,
-                      groupValue: selectedStatus.value,
-                      activeColor: Colors.brown,
-                      onChanged: (value) {
-                        selectedStatus.value = value!;
-                        //controller.isButtonEnabled.value = true;
-                      },
-                    )),
-              ))
-          .toList(), // ✅ Convert map() result into a List<Widget>
-    );
-  }
+  // Widget checkStatus() {
+  //   RxString selectedStatus = "".obs;
+  //   //List<String> statusOptions = checkEducationStatus(widget.member);
+  //
+  //   return Column(
+  //     spacing: 5,
+  //     children: statusOptions
+  //         .map((status) => Container(
+  //               decoration: BoxDecoration(
+  //                 color: const Color(0xfffffcf6),
+  //                 borderRadius: BorderRadius.circular(8),
+  //                 border: Border.all(color: Colors.brown, width: 1),
+  //               ),
+  //               child: Obx(() => RadioListTile<String>(
+  //                     title: Text(
+  //                       status,
+  //                       style: TextStyle(
+  //                           fontSize: 14, fontWeight: FontWeight.bold),
+  //                     ),
+  //                     value: status,
+  //                     groupValue: selectedStatus.value,
+  //                     activeColor: Colors.brown,
+  //                     onChanged: (value) {
+  //                       selectedStatus.value = value!;
+  //                       //controller.isButtonEnabled.value = true;
+  //                     },
+  //                   )),
+  //             ))
+  //         .toList(), // ✅ Convert map() result into a List<Widget>
+  //   );
+  // }
 
   Widget headerProfile(BuildContext context) {
     return Container(
@@ -392,6 +579,14 @@ class RequestFormWState extends State<RequestFormW> {
       margin: EdgeInsets.all(15),
       decoration: BoxDecoration(
           color: Color(0xfffff7ec),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withValues(alpha: 0.5),
+              spreadRadius: 2,
+              blurRadius: 5,
+              offset: Offset(0, 2),
+            ),
+          ],
           borderRadius: BorderRadius.all(Radius.circular(5))),
       child: Column(
         spacing: 10,
@@ -404,7 +599,7 @@ class RequestFormWState extends State<RequestFormW> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(5),
                 child: Image.network(
-                  Api.fetchImage(member.imageUrl!),
+                  Api.fetchImage(statecontroller.user.value.imageUrl!),
                   width: 100,
                   fit: BoxFit.cover,
                 ),
@@ -421,12 +616,12 @@ class RequestFormWState extends State<RequestFormW> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          member.fullName ?? '',
+                          statecontroller.user.value.fullName ?? '',
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         Text(' | '),
                         Text(
-                          member.itsId.toString(),
+                          statecontroller.user.value.itsId.toString(),
                           style: TextStyle(fontWeight: FontWeight.bold),
                         )
                       ],
@@ -441,7 +636,9 @@ class RequestFormWState extends State<RequestFormW> {
                           children: [
                             Icon(Icons.location_on_rounded),
                             SizedBox(
-                                width: 600, child: Text(member.address ?? '')),
+                                width: 600,
+                                child: Text(
+                                    statecontroller.user.value.address ?? '')),
                           ],
                         ),
                         Row(
@@ -449,7 +646,7 @@ class RequestFormWState extends State<RequestFormW> {
                           children: [
                             Icon(Icons.location_on_rounded),
                             Text(
-                              member.jamiaat ?? '',
+                              statecontroller.user.value.jamiaat ?? '',
                             ),
                           ],
                         ),
@@ -464,7 +661,7 @@ class RequestFormWState extends State<RequestFormW> {
                           spacing: defSpacing,
                           children: [
                             Icon(Icons.calendar_month_rounded),
-                            Text(member.dob ?? ''),
+                            Text(statecontroller.user.value.dob ?? ''),
                           ],
                         ),
                         Row(
@@ -472,28 +669,28 @@ class RequestFormWState extends State<RequestFormW> {
                           children: [
                             Icon(Icons.calendar_month_rounded),
                             Text(
-                                "${controller.calculateAge(member.dob ?? '')} years old"),
+                                "${controller.calculateAge(statecontroller.user.value.dob ?? '')} years old"),
                           ],
                         ),
                         Row(
                           spacing: defSpacing,
                           children: [
                             Icon(Icons.email),
-                            Text(member.email!),
+                            Text(statecontroller.user.value.email!),
                           ],
                         ),
                         Row(
                           spacing: defSpacing,
                           children: [
                             Icon(Icons.phone),
-                            Text(member.mobileNo!),
+                            Text(statecontroller.user.value.mobileNo!),
                           ],
                         ),
                         Row(
                           spacing: defSpacing,
                           children: [
                             Icon(Icons.phone),
-                            Text(member.whatsappNo!),
+                            Text(statecontroller.user.value.whatsappNo!),
                           ],
                         ),
                       ],
@@ -520,7 +717,8 @@ class RequestFormWState extends State<RequestFormW> {
   }
 
   Widget lastEducation() {
-    if (member.education == null || member.education!.isEmpty) {
+    if (statecontroller.user.value.education == null ||
+        statecontroller.user.value.education!.isEmpty) {
       return Padding(
         padding: const EdgeInsets.only(top: 10.0),
         child: Column(
@@ -549,13 +747,14 @@ class RequestFormWState extends State<RequestFormW> {
             spacing: 20, // Space between items
             runSpacing: 10, // Space between lines when wrapped
             children: [
+              buildEducationRow("Class/ Degree Program: ",
+                  statecontroller.user.value.education![0].className),
+              buildEducationRow("Institution: ",
+                  statecontroller.user.value.education![0].institute),
+              buildEducationRow("Field of Study: ",
+                  statecontroller.user.value.education![0].subject),
               buildEducationRow(
-                  "Class/ Degree Program: ", member.education![0].className),
-              buildEducationRow(
-                  "Institution: ", member.education![0].institute),
-              buildEducationRow(
-                  "Field of Study: ", member.education![0].subject),
-              buildEducationRow("City: ", member.education![0].city),
+                  "City: ", statecontroller.user.value.education![0].city),
             ],
           ),
           SizedBox()
@@ -583,9 +782,9 @@ class RequestFormWState extends State<RequestFormW> {
 
   Widget profileBox(String title, String value, BuildContext context) {
     if (value == 'ITS') {
-      value = appliedbyIts ?? '';
+      value = statecontroller.appliedByITS.value;
     } else {
-      value = appliedByName ?? '';
+      value = statecontroller.appliedByName.value;
     }
     return Container(
       alignment: Alignment.centerLeft,
@@ -615,6 +814,14 @@ class RequestFormWState extends State<RequestFormW> {
       margin: EdgeInsets.all(15),
       decoration: BoxDecoration(
           color: Color(0xfffff7ec),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withValues(alpha: 0.5),
+              spreadRadius: 2,
+              blurRadius: 5,
+              offset: Offset(0, 2),
+            ),
+          ],
           borderRadius: BorderRadius.all(Radius.circular(5))),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
@@ -823,10 +1030,8 @@ class RequestFormWState extends State<RequestFormW> {
   // Determine Organization based on Request Type and Conditions
   String determineOrganization() {
     if (controller.selectedCategory.value == "Deeni") {
-      return widget.member.tanzeem?.toString() ?? "";
+      return statecontroller.user.value.tanzeem?.toString() ?? "";
     }
-
-    print(controller.selectedMarhala.value);
 
     List<String> fiveMohalla = [
       "KHI (AL-MAHALAT-TUL-BURHANIYAH)",
@@ -834,183 +1039,204 @@ class RequestFormWState extends State<RequestFormW> {
       "KHI (AL-MAHALLATUL-FAKHRIYAH)",
       "KHI (BURHANI BAUGH)",
       "KHI (JAMALI MOHALLA - MAHALAT BURHANIYAH)",
-      "KHI (KHI (EZZY MOHALLA))",
+      "KHI (EZZY MOHALLA)",
     ];
 
-    if ((controller.selectedMarhala.value == 5) &&
-        fiveMohalla.contains(widget.member.tanzeem?.toString())) {
+    // Marhala 1 to 4 -> AIUT
+    if (controller.selectedMarhala.value! >= 1 &&
+        controller.selectedMarhala.value! <= 4) {
+      return "AIUT";
+    }
+
+    // Marhala 5 (class 11th & 12th) - AMBT for specific Mohallas
+    if (controller.selectedMarhala.value == 5 &&
+        fiveMohalla.contains(statecontroller.user.value.tanzeem?.toString())) {
       return "AMBT";
     }
 
-    if ((controller.selectedMarhala.value == 4 ||
-            controller.selectedMarhala.value == 5 ||
-            controller.selectedMarhala.value == 6 ||
-            controller.selectedMarhala.value == 7) &&
-        !fiveMohalla.contains(widget.member.tanzeem?.toString())) {
+    // Marhala 5 (class 11th & 12th) - STSMF for other Mohallas
+    if (controller.selectedMarhala.value == 5 &&
+        !fiveMohalla.contains(statecontroller.user.value.tanzeem?.toString())) {
       return "STSMF";
     }
 
-    if (controller.selectedMarhala.value == 1 ||
-        controller.selectedMarhala.value == 2 ||
-        controller.selectedMarhala.value == 3 ||
-        controller.selectedMarhala.value == 4)  {
-      return "AIUT";
+    // Marhala 6-7 -> STSMF
+    if (controller.selectedMarhala.value == 6 ||
+        controller.selectedMarhala.value == 7) {
+      return "STSMF";
     }
 
     return "";
   }
 
   Widget _formFunds() {
-    return Form(
-      key: fundsFormKey,
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          color: const Color(0xffffead1),
-        ),
-        child: Column(
-          children: [
-            Row(
-              spacing: 10,
-              children: [
-                Flexible(
-                    flex: 2, child: _buildField2("Funds", controller.funds)),
-                Flexible(
-                  flex: 5,
-                  child: _buildField2("Description", controller.description,
-                      height: 100),
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: const Color(0xffffead1),
+      ),
+      child: Column(
+        children: [
+          Row(
+            spacing: 10,
+            children: [
+              Flexible(
+                  flex: 2, child: _buildField2("Funds", controller.funds)),
+              Flexible(
+                flex: 5,
+                child: _buildField2("Description", controller.description,
+                    height: 100),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: 120,
+            height: 35,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF008759),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
                 ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: 120,
-              height: 35,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF008759),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-                onPressed: () async {
-                  statecontroller.toggleLoading(true);
+              ),
+              onPressed: () async {
+                if (!controller.isSubmitEnabled.value) {
+                  Get.snackbar("Error", "Missing Fields",
+                      backgroundColor: Colors.red);
+                  return;
+                }
+                statecontroller.toggleLoading(true);
 
-                  //print(determineOrganization());
+                String? classDegree;
+                if (controller.marhala4Index.value != null) {
+                  classDegree = controller.marhala4Class.firstWhere((e) =>
+                      e["id"] == controller.marhala4Index.value)["name"];
+                } else if (controller.marhala5Index.value != null) {
+                  classDegree = controller.marhala5Class.firstWhere((e) =>
+                      e["id"] == controller.marhala5Index.value)["name"];
+                } else if (controller.degreeProgramIndex.value != null) {
+                  classDegree = controller.degreePrograms.firstWhere((e) =>
+                      e["id"] == controller.degreeProgramIndex.value)["name"];
+                }
 
-                  //print(controller.selectedMarhalaName);
-                  //print(controller.selectedStudyName);
+                // 🔹 **Dynamically determine fieldOfStudy**
+                String? fieldOfStudy;
+                if (controller.fieldOfStudyIndex.value != null) {
+                  fieldOfStudy = controller.studyOptions.firstWhere((e) =>
+                      e["id"] == controller.fieldOfStudyIndex.value)["name"];
+                }
 
-                  // 🔹 **Dynamically determine classDegree**
-                  String? classDegree;
-                  if (controller.marhala4Index.value != null) {
-                    classDegree = controller.marhala4Class.firstWhere((e) =>
-                        e["id"] == controller.marhala4Index.value)["name"];
-                  } else if (controller.marhala5Index.value != null) {
-                    classDegree = controller.marhala5Class.firstWhere((e) =>
-                        e["id"] == controller.marhala5Index.value)["name"];
-                  } else if (controller.degreeProgramIndex.value != null) {
-                    classDegree = controller.degreePrograms.firstWhere((e) =>
-                        e["id"] == controller.degreeProgramIndex.value)["name"];
+                // 🔹 **Dynamically determine subjectCourse**
+                String? subjectCourse;
+                if (controller.courseIndexPoint.value != null) {
+                  subjectCourse = controller.courseOptions.firstWhere((e) =>
+                      e["id"] == controller.courseIndexPoint.value)["name"];
+                }
+
+                String org = determineOrganization();
+
+                if (org.isEmpty) {
+                  Get.snackbar("Error", "Failed to determine organziation",
+                      colorText: Colors.white, backgroundColor: Colors.red);
+                }
+
+                RequestFormModel requestData;
+
+                if (controller.selectedCategory.value == "Dunyawi") {
+                  requestData = RequestFormModel(
+                    ITS: statecontroller.user.value.itsId.toString(),
+                    studentFirstName: statecontroller.user.value.firstName.toString(),
+                    studentFullName: statecontroller.user.value.fullName.toString(),
+                    reqByITS: statecontroller.appliedByITS.value,
+                    reqByName: statecontroller.appliedByName.value,
+                    mohalla:
+                        statecontroller.user.value.tanzeem?.toString() ?? "",
+                    address:
+                        statecontroller.user.value.address?.toString() ?? "",
+                    dob: statecontroller.user.value.dob?.toString() ?? "",
+                    city: controller.selectedCity.value,
+                    institution: controller.selectedInstituteName.value!,
+                    classDegree: classDegree ?? "",
+                    fieldOfStudy: fieldOfStudy ?? "",
+                    subjectCourse: subjectCourse ?? "",
+                    yearOfStart: controller.year.value,
+                    email: controller.email.value,
+                    contactNo: controller.phone.value,
+                    whatsappNo: controller.whatsapp.value,
+                    fundAsking: controller.funds.value,
+                    description: controller.description.value,
+                    applyDate: DateTime.now().toString(),
+                    grade: controller.grade.value,
+                    purpose: controller.purpose.value,
+                    classification: "",
+                    organization: org,
+                    currentStatus: "",
+                    createdBy: "",
+                    updatedBy: "",
+                  );
+                } else {
+                  if (org.isEmpty) {
+                    Get.snackbar("Error", "Failed to determine organziation",
+                        colorText: Colors.white, backgroundColor: Colors.red);
                   }
 
-                  // 🔹 **Dynamically determine fieldOfStudy**
-                  String? fieldOfStudy;
-                  if (controller.fieldOfStudyIndex.value != null) {
-                    fieldOfStudy = controller.studyOptions.firstWhere((e) =>
-                        e["id"] == controller.fieldOfStudyIndex.value)["name"];
-                  }
-
-                  // 🔹 **Dynamically determine subjectCourse**
-                  String? subjectCourse;
-                  if (controller.courseIndexPoint.value != null) {
-                    subjectCourse = controller.courseOptions.firstWhere((e) =>
-                        e["id"] == controller.courseIndexPoint.value)["name"];
-                  }
-
-                  String org = determineOrganization();
-
-
-                  if(org.isEmpty){
-                    Get.snackbar("Error", "Failed to determine organziation");
-                  }
-
-                  RequestFormModel requestData;
-
-                  if (controller.selectedCategory.value == "Dunyawi") {
-                    requestData = RequestFormModel(
-                      ITS: widget.member.itsId.toString(),
-                      reqByITS: appliedbyIts.toString(),
-                      reqByName: appliedByName.toString(),
-                      mohalla: widget.member.tanzeem?.toString() ?? "",
-                      address: widget.member.address?.toString() ?? "",
-                      dob: widget.member.dob?.toString() ?? "",
-                      city: controller.selectedCity.value,
-                      institution: controller.selectedInstituteName.value!,
-                      classDegree: classDegree ?? "",
-                      fieldOfStudy: fieldOfStudy ?? "",
-                      subjectCourse: subjectCourse ?? "",
-                      yearOfStart: controller.year.value,
-                      email: controller.email.value,
-                      contactNo: controller.phone.value,
-                      whatsappNo: controller.whatsapp.value,
-                      fundAsking: controller.funds.value,
-                      description: controller.description.value,
-                      applyDate: DateTime.now().toString(),
-                      grade: controller.grade.value,
-                      purpose: controller.purpose.value,
-                      classification: "",
-                      organization: org,
-                      currentStatus: "",
-                      createdBy: "",
-                      updatedBy: "",
-                    );
-
-
-                  } else {
-
-                    if(org.isEmpty || org == null){
-                      Get.snackbar("Error", "Failed to determine organziation");
-                    }
-
-                    // 🔹 **Create request for Deeni**
-                    requestData = RequestFormModel(
-                      ITS: widget.member.itsId.toString(),
-                      reqByITS: appliedbyIts.toString(),
-                      reqByName: appliedByName.toString(),
-                      mohalla: widget.member.tanzeem?.toString() ?? "",
-                      address: widget.member.address?.toString() ?? "",
-                      dob: widget.member.dob?.toString() ?? "",
-                      city: "",
-                      institution: controller.madrasaName.value,
-                      classDegree: controller.darajaName.value,
-                      fieldOfStudy: controller.hifzProgramName.value,
-                      subjectCourse: "",
-                      yearOfStart: controller.year.value,
-                      email: controller.email.value,
-                      contactNo: controller.phone.value,
-                      whatsappNo: controller.whatsapp.value,
-                      fundAsking: controller.funds.value,
-                      description: controller.description.value,
-                      applyDate: DateTime.now().toString(),
-                      grade: "",
-                      purpose: controller.purpose.value,
-                      classification: "",
-                      organization: org,
-                      currentStatus: "",
-                      createdBy: "",
-                      updatedBy: "",
-                    );
-                  }
-                  int returnCode = await Api.addRequestForm(requestData);
-                  statecontroller.toggleLoading(false);
-
-                  if (returnCode == 201) {
-                    Get.snackbar(
-                        "Success!", "Your request was successfully submitted!");
-
-                    // 🔹 **Send confirmation email**
+                  requestData = RequestFormModel(
+                    ITS: statecontroller.user.value.itsId.toString(),
+                    studentFirstName: statecontroller.user.value.firstName.toString(),
+                    studentFullName: statecontroller.user.value.fullName.toString(),
+                    reqByITS: statecontroller.appliedByITS.value,
+                    reqByName: statecontroller.appliedByName.value,
+                    mohalla:
+                        statecontroller.user.value.tanzeem?.toString() ?? "",
+                    address:
+                        statecontroller.user.value.address?.toString() ?? "",
+                    dob: statecontroller.user.value.dob?.toString() ?? "",
+                    city: "",
+                    institution: controller.madrasaName.value,
+                    classDegree: controller.darajaName.value,
+                    fieldOfStudy: controller.hifzProgramName.value,
+                    subjectCourse: "",
+                    yearOfStart: controller.year.value,
+                    email: controller.email.value,
+                    contactNo: controller.phone.value,
+                    whatsappNo: controller.whatsapp.value,
+                    fundAsking: controller.funds.value,
+                    description: controller.description.value,
+                    applyDate: DateTime.now().toString(),
+                    grade: "",
+                    purpose: controller.purpose.value,
+                    classification: "",
+                    organization: org,
+                    currentStatus: "",
+                    createdBy: "",
+                    updatedBy: "",
+                  );
+                }
+                int returnCode = await Api.addRequestForm(requestData);
+                await Future.delayed(Duration(seconds: 1));
+                statecontroller.toggleLoading(false);
+                if (returnCode == 201) {
+                  controller.selectedMarhala.value = null;
+                  controller.resetFields();
+                  controller.resetSelections();
+                  controller.studyOptions.clear();
+                  controller.filteredStudies.clear();
+                  controller.courseOptions.clear();
+                  controller.selectedInstitute.value = null;
+                  controller.selectedCity.value = 'Select City';
+                  controller.selectedInstituteName.value = '';
+                  controller.year.value = '';
+                  controller.selectedCityId.value = null;
+                  controller.resetSelections();
+                  controller.funds.value = '';
+                  controller.description.value = '';
+                  controller.selectedMarhala.value == null;
+                  Get.snackbar(
+                      "Success!", "Your request was successfully submitted!",
+                      colorText: Colors.white, backgroundColor: Colors.green);
+                  // 🔹 **Send confirmation email**
                   //   Api.sendEmail(
                   //     to: 'abialigadi@gmail.com',
                   //     subject: 'Request Received - OWS',
@@ -1022,19 +1248,33 @@ class RequestFormWState extends State<RequestFormW> {
                   //   <p>Wassalam.</p>
                   // """,
                   //   );
-                  } else {
-                    Get.snackbar(
-                        "Error", "Failed to submit request. Please try again!");
-                  }
-                }, // Disable button when validation fails
-                child: const Text(
-                  "Submit",
-                  style: TextStyle(color: Colors.white),
-                ),
+                } else {
+                  // controller.selectedMarhala.value=null;
+                  // controller.resetFields();
+                  // controller.resetSelections();
+                  // controller.studyOptions.clear();
+                  // controller.filteredStudies.clear();
+                  // controller.courseOptions.clear();
+                  // controller.selectedInstitute.value=null;
+                  // controller.selectedCity.value='Select City';
+                  // controller.selectedInstituteName.value='';
+                  // controller.year.value='';
+                  // controller.selectedCityId.value=null;
+                  // controller.resetSelections();
+                  // controller.funds.value='';
+                  // controller.description.value='';
+                  Get.snackbar(
+                      "Error", "Failed to submit request. Please try again!",
+                      colorText: Colors.white, backgroundColor: Colors.red);
+                }
+              },
+              child: const Text(
+                "Submit",
+                style: TextStyle(color: Colors.white),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -1419,18 +1659,31 @@ class RequestFormWState extends State<RequestFormW> {
                           // Using Rxn<int>
                           items: controller.predefinedMarhalas
                               .map((marhala) => {
-                            "id": marhala['id'],
-                            "name": "${marhala['marhala']} (${marhala['name']})"
-                          })
+                                    "id": marhala['id'],
+                                    "name":
+                                        "${marhala['marhala']} (${marhala['name']})"
+                                  })
                               .toList(),
                           onChanged: (value) {
+                            controller.isMarhalaSelected.value = true;
+                            controller.isStandardBetween1_3.value =
+                                (controller.selectedMarhala.value! >= 1 &&
+                                    controller.selectedMarhala.value! <= 3);
+                            controller.isStandardBetween4_5.value =
+                                (controller.selectedMarhala.value! >= 4 &&
+                                    controller.selectedMarhala.value! <= 5);
+                            controller.isStandardBetween6_7.value =
+                                (controller.selectedMarhala.value! >= 6 &&
+                                    controller.selectedMarhala.value! <= 7);
                             controller.selectedMarhala.value = value;
                             controller.resetFields();
-                            controller.resetSelections(resetCategoryOnly: true);
+                            controller.resetSelections();
                             controller.studyOptions.clear();
                             controller.filteredStudies.clear();
                             controller.courseOptions.clear();
                             filterStudyOptions(value!);
+                            controller.filterDarajaByMarhala(
+                                controller.selectedMarhala.value!);
                           },
                           isEnabled:
                               controller.selectedEducationType.value.isNotEmpty,
@@ -1594,14 +1847,42 @@ class RequestFormWState extends State<RequestFormW> {
                     isEnabled: true,
                   ),
                 ),
+
                 Flexible(
-                    child: _buildDropdown2(
-                  label: "City",
-                  selectedValue: controller.selectedCityId,
-                  items: controller.cities,
-                  isEnabled: true,
-                  onChanged: (int? cityId) => controller.selectCity(cityId),
-                )),
+                  child: CustomDropdownSearch<String>(
+                    label: "City",
+                    itemsLoader: (filter, _) async {
+                      return controller.cities
+                          .map((e) => e['name'] as String) // Extract city names
+                          .toList();
+                    },
+                    selectedItem:
+                        controller.selectedCity.value, // Bind selected city
+                    isEnabled: controller.cities
+                        .isNotEmpty, // Enable only if cities are available
+                    onChanged: (String? cityName) {
+                      if (cityName != null) {
+                        //controller.selectedCity.value = cityName;
+                        // Find city ID based on name and update selectedCityId
+                        final selectedCityData = controller.cities.firstWhere(
+                          (city) => city['name'] == cityName,
+                          orElse: () =>
+                              {"id": null}, // Ensure it returns a valid default
+                        );
+                        controller.selectCity(selectedCityData["id"]);
+                      }
+                    },
+                  ),
+                ),
+
+                // Flexible(
+                //     child: _buildDropdown2(
+                //   label: "City",
+                //   selectedValue: controller.selectedCityId,
+                //   items: controller.cities,
+                //   isEnabled: true,
+                //   onChanged: (int? cityId) => controller.selectCity(cityId),
+                // )),
                 Flexible(
                     child: CustomDropdownSearch<String>(
                   label: "Institute",
@@ -1651,13 +1932,31 @@ class RequestFormWState extends State<RequestFormW> {
                   ),
                 ),
                 Flexible(
-                    child: _buildDropdown2(
-                  label: "City",
-                  selectedValue: controller.selectedCityId,
-                  items: controller.cities,
-                  isEnabled: true,
-                  onChanged: (int? cityId) => controller.selectCity(cityId),
-                )),
+                  child: CustomDropdownSearch<String>(
+                    label: "City",
+                    itemsLoader: (filter, _) async {
+                      return controller.cities
+                          .map((e) => e['name'] as String) // Extract city names
+                          .toList();
+                    },
+                    selectedItem:
+                        controller.selectedCity.value, // Bind selected city
+                    isEnabled: controller.cities
+                        .isNotEmpty, // Enable only if cities are available
+                    onChanged: (String? cityName) {
+                      if (cityName != null) {
+                        //controller.selectedCity.value = cityName;
+                        // Find city ID based on name and update selectedCityId
+                        final selectedCityData = controller.cities.firstWhere(
+                          (city) => city['name'] == cityName,
+                          orElse: () =>
+                              {"id": null}, // Ensure it returns a valid default
+                        );
+                        controller.selectCity(selectedCityData["id"]);
+                      }
+                    },
+                  ),
+                ),
                 Flexible(
                     child: CustomDropdownSearch<String>(
                   label: "Institute",
@@ -1705,13 +2004,31 @@ class RequestFormWState extends State<RequestFormW> {
                   ),
                 ),
                 Flexible(
-                    child: _buildDropdown2(
-                  label: "City",
-                  selectedValue: controller.selectedCityId,
-                  items: controller.cities,
-                  isEnabled: true,
-                  onChanged: (int? cityId) => controller.selectCity(cityId),
-                )),
+                  child: CustomDropdownSearch<String>(
+                    label: "City",
+                    itemsLoader: (filter, _) async {
+                      return controller.cities
+                          .map((e) => e['name'] as String) // Extract city names
+                          .toList();
+                    },
+                    selectedItem:
+                        controller.selectedCity.value, // Bind selected city
+                    isEnabled: controller.cities
+                        .isNotEmpty, // Enable only if cities are available
+                    onChanged: (String? cityName) {
+                      if (cityName != null) {
+                        //controller.selectedCity.value = cityName;
+                        // Find city ID based on name and update selectedCityId
+                        final selectedCityData = controller.cities.firstWhere(
+                          (city) => city['name'] == cityName,
+                          orElse: () =>
+                              {"id": null}, // Ensure it returns a valid default
+                        );
+                        controller.selectCity(selectedCityData["id"]);
+                      }
+                    },
+                  ),
+                ),
                 Flexible(
                   child: Obx(() => CustomDropdownSearch<String>(
                         label: "Institute",
@@ -1973,14 +2290,39 @@ class RequestFormWState extends State<RequestFormW> {
     return Row(
       spacing: 10,
       children: [
+        // Flexible(
+        //     child: _buildDropdown2(
+        //   label: "City",
+        //   selectedValue: controller.selectedCityId,
+        //   items: controller.cities,
+        //   isEnabled: true,
+        //   onChanged: (int? cityId) => controller.selectCity(cityId),
+        // )),
         Flexible(
-            child: _buildDropdown2(
-          label: "City",
-          selectedValue: controller.selectedCityId,
-          items: controller.cities,
-          isEnabled: true,
-          onChanged: (int? cityId) => controller.selectCity(cityId),
-        )),
+          child: CustomDropdownSearch<String>(
+            label: "City",
+            itemsLoader: (filter, _) async {
+              return controller.cities
+                  .map((e) => e['name'] as String) // Extract city names
+                  .toList();
+            },
+            selectedItem: controller.selectedCity.value, // Bind selected city
+            isEnabled: controller
+                .cities.isNotEmpty, // Enable only if cities are available
+            onChanged: (String? cityName) {
+              if (cityName != null) {
+                //controller.selectedCity.value = cityName;
+                // Find city ID based on name and update selectedCityId
+                final selectedCityData = controller.cities.firstWhere(
+                  (city) => city['name'] == cityName,
+                  orElse: () =>
+                      {"id": null}, // Ensure it returns a valid default
+                );
+                controller.selectCity(selectedCityData["id"]);
+              }
+            },
+          ),
+        ),
         Flexible(
             child: CustomDropdownSearch<String>(
           label: "Institute",
@@ -2041,76 +2383,80 @@ class RequestFormWState extends State<RequestFormW> {
         borderRadius: BorderRadius.circular(10),
         color: const Color(0xffffead1),
       ),
-      child: Column(
+      child: Row(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
-          spacing: 15,
+          spacing: 10,
           children: [
             if (controller.selectedDeeniType.value == "Madrasa") ...[
-              _buildDropdown2(
-                label: "Madrasa",
-                selectedValue: controller.madrasaIndex,
-                // Use Rxn<int>
-                items: [
-                  // {"id": -1, "name": "Select an option"}, // Ensuring a null option
-                  ...controller.madrasas
-                      .map((e) => {"id": e["id"], "name": e["name"]})
-                ],
-                onChanged: (value) {
-                  controller.madrasaIndex.value = value;
-                  if (controller.madrasaIndex.value != null) {
-                    controller.madrasaName.value = controller.madrasas
-                        .firstWhere((e) => e["id"] == value)["name"];
-                  }
-                },
-                isEnabled: true,
+              Flexible(
+                child: _buildDropdown2(
+                  label: "Madrasa",
+                  selectedValue: controller.madrasaIndex,
+                  // Use Rxn<int>
+                  items: [
+                    // {"id": -1, "name": "Select an option"}, // Ensuring a null option
+                    ...controller.madrasas
+                        .map((e) => {"id": e["id"], "name": e["name"]})
+                  ],
+                  onChanged: (value) {
+                    controller.madrasaIndex.value = value;
+                    if (controller.madrasaIndex.value != null) {
+                      controller.madrasaName.value = controller.madrasas
+                          .firstWhere((e) => e["id"] == value)["name"];
+                    }
+                  },
+                  isEnabled: true,
+                ),
               ),
-              _buildDropdown2(
-                label: "Daraja",
-                selectedValue: controller.darajaIndex,
-                // Use Rxn<int>
-                items: [
-                  // {"id": -1, "name": "Select an option"}, // Ensuring a null option
-                  ...controller.filteredDarajat
-                      .map((e) => {"id": e["id"], "name": e["name"]})
-                ],
-                onChanged: (value) {
-                  controller.darajaIndex.value = value;
-                  if (controller.darajaIndex.value != null) {
-                    controller.darajaName.value = controller.filteredDarajat
-                        .firstWhere((e) => e["id"] == value)["name"];
-                  }
-                  // courseOptions.value = value != null
-                  //     ? courseOptions.firstWhere((element) => element["study_id"] == value)["name"]
-                  //     : "";
-                },
-                isEnabled: true,
+              Flexible(
+                child: Obx(
+                  () => _buildDropdown2(
+                    label: "Daraja",
+                    selectedValue: controller.darajaIndex,
+                    // Use Rxn<int>
+                    items: [
+                      ...controller.filteredDarajat
+                          .map((e) => {"id": e["id"], "name": e["name"]})
+                    ],
+                    onChanged: (value) {
+                      controller.darajaIndex.value = value;
+                      if (controller.darajaIndex.value != null) {
+                        controller.darajaName.value = controller.filteredDarajat
+                            .firstWhere((e) => e["id"] == value)["name"];
+                      }
+                    },
+                    isEnabled: true,
+                  ),
+                ),
               ),
-              _buildField2("Year", controller.year),
+              Flexible(child: _buildField2("Year", controller.year)),
             ],
             if (controller.selectedDeeniType.value == "Hifz") ...[
-              _buildDropdown2(
-                label: "Hifz Program",
-                selectedValue: controller.hifzProgramIndex,
-                // Use Rxn<int>
-                items: [
-                  // {"id": -1, "name": "Select an option"}, // Ensuring a null option
-                  ...controller.hifzPrograms
-                      .map((e) => {"id": e["id"], "name": e["name"]})
-                ],
-                onChanged: (value) {
-                  controller.hifzProgramIndex.value = value;
-                  if (controller.hifzProgramIndex.value != null) {
-                    controller.hifzProgramName.value = controller.hifzPrograms
-                        .firstWhere((e) => e["id"] == value)["name"];
-                  }
-                  // courseOptions.value = value != null
-                  //     ? courseOptions.firstWhere((element) => element["study_id"] == value)["name"]
-                  //     : "";
-                },
-                isEnabled: true,
+              Flexible(
+                child: _buildDropdown2(
+                  label: "Hifz Program",
+                  selectedValue: controller.hifzProgramIndex,
+                  // Use Rxn<int>
+                  items: [
+                    // {"id": -1, "name": "Select an option"}, // Ensuring a null option
+                    ...controller.hifzPrograms
+                        .map((e) => {"id": e["id"], "name": e["name"]})
+                  ],
+                  onChanged: (value) {
+                    controller.hifzProgramIndex.value = value;
+                    if (controller.hifzProgramIndex.value != null) {
+                      controller.hifzProgramName.value = controller.hifzPrograms
+                          .firstWhere((e) => e["id"] == value)["name"];
+                    }
+                    // courseOptions.value = value != null
+                    //     ? courseOptions.firstWhere((element) => element["study_id"] == value)["name"]
+                    //     : "";
+                  },
+                  isEnabled: true,
+                ),
               ),
-              _buildField2("Year", controller.year),
+              Flexible(child: _buildField2("Year", controller.year)),
             ],
           ]),
     );
@@ -2127,21 +2473,32 @@ class RequestFormWState extends State<RequestFormW> {
                 value: label,
                 groupValue: controllerVariable.value,
                 onChanged: (value) {
-                  controller.resetFields();
-                  if (label == 'Apply For Ongoing') {
-                    controller.purpose.value = "Ongoing Education";
-                  } else {
-                    controller.purpose.value = "Future Education";
-                  }
-                  if (label == 'Dunyawi') {
-                    controller.isDeeniSelected.value = false;
-                  } else {
-                    controller.isDeeniSelected.value = true;
-                  }
                   controllerVariable.value = value!;
-                  controller
-                      .filterDarajaByMarhala(controller.selectedMarhala.value!);
-                  filterStudyOptions(controller.selectedMarhala.value!);
+                  if (value == 'Apply for Ongoing') {
+                    controller.selectedMarhala.value = null;
+                    //controller.resetFields();
+                    controller.purpose.value = "Ongoing Education";
+                  } else if (value == 'Apply for Future') {
+                    controller.selectedMarhala.value = null;
+                    //controller.resetFields();
+                    controller.purpose.value = "Future Education";
+                  } else if (value == 'Dunyawi') {
+                    controller.isDunyawiSelected.value = true;
+                    controller.isDeeniiSelected.value = false;
+                    controller.isDeeniSelected.value = false;
+                  } else if (value == 'Deeni') {
+                    controller.isDunyawiSelected.value = false;
+                    controller.isDeeniiSelected.value = true;
+                    controller.isDeeniSelected.value = true;
+                  } else if (value == 'Madrasa') {
+                    controller.isMadrasaSelected.value = true;
+                    controller.isHifzSelected.value = false;
+                    controller.filterDarajaByMarhala(
+                        controller.selectedMarhala.value!);
+                  } else if (value == 'Hifz') {
+                    controller.isMadrasaSelected.value = false;
+                    controller.isHifzSelected.value = true;
+                  }
                 }),
             Text(
               label,
@@ -2182,7 +2539,7 @@ class RequestFormWState extends State<RequestFormW> {
                               Icons.check_circle_rounded,
                               color: Colors.green,
                             )
-                          : SuperTooltip(
+                          : error=='' ? SuperTooltip(
                               elevation: 1,
                               barrierColor: Colors.transparent,
                               // Keep it visible without dark overlay
@@ -2226,7 +2583,7 @@ class RequestFormWState extends State<RequestFormW> {
                                   color: Colors.amber,
                                 ),
                               ),
-                            ),
+                            ) : SizedBox.shrink(),
                       floatingLabelBehavior: FloatingLabelBehavior.always,
                       label: Text(label),
                       labelStyle: TextStyle(
@@ -2282,18 +2639,18 @@ class RequestFormWState extends State<RequestFormW> {
 }
 
 class GuardianFormDialog extends StatefulWidget {
-  const GuardianFormDialog({super.key});
+  final String ITS;
+   const GuardianFormDialog({super.key, required this.ITS});
 
   @override
   GuardianFormDialogState createState() => GuardianFormDialogState();
 }
 
 class GuardianFormDialogState extends State<GuardianFormDialog> {
-  final GlobalKey<FormState> _formKey1 = GlobalKey<FormState>();
-  final GlobalKey<FormState> _formKey2 = GlobalKey<FormState>();
   final TextEditingController itsController = TextEditingController();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController contactController = TextEditingController();
+  final TextEditingController relationController = TextEditingController();
 
   @override
   void dispose() {
@@ -2341,6 +2698,35 @@ class GuardianFormDialogState extends State<GuardianFormDialog> {
     return null;
   }
 
+  String? _validateGuardian(String? value) {
+    if (value == null || value.isEmpty) {
+      return "Guardian is required";
+    }
+
+    // Check for length
+    if (value.length < 3) {
+      return "Guardian must be at least 3 characters long";
+    }
+
+    // Check for special characters or numbers
+    final regex = RegExp(r'^[a-zA-Z\s]+$');
+    if (!regex.hasMatch(value)) {
+      return "Guardian can only contain alphabets and spaces";
+    }
+
+    // Check for multiple spaces
+    if (value.contains(RegExp(r'\s{2,}'))) {
+      return "Guardian cannot contain consecutive spaces";
+    }
+
+    // Check if the name starts or ends with spaces
+    if (value.startsWith(' ') || value.endsWith(' ')) {
+      return "Guardian cannot start or end with spaces";
+    }
+
+    return null;
+  }
+
   String? _validateContact(String? value) {
     if (value == null || value.isEmpty) {
       return "Contact Info is required";
@@ -2358,161 +2744,188 @@ class GuardianFormDialogState extends State<GuardianFormDialog> {
       child: Container(
         padding: const EdgeInsets.all(20.0),
         width: 450,
-        child: Form(
-          key: _formKey1,
-          child: Column(
-            spacing: 5,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "Add Guardian",
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+        child: Column(
+          spacing: 5,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              "Add Guardian",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 10),
+            SizedBox(
+              height: 50,
+              child: TextFormField(
+                controller: itsController,
+                maxLength: 8,
+                keyboardType: TextInputType.number,
+                validator: _validateITS,
+                decoration: InputDecoration(
+                  hintText: "Enter Guardian ITS ID",
+                  counterText: "",
+                  enabledBorder: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                    borderSide: BorderSide(
+                        color: Color(0xFF008759),
+                        width: 2), // Removes the border
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color: Color(0xFF008759),
+                        width: 2), // No border when focused
+                  ),
+                  filled: true,
+                  fillColor: const Color(0xfffffcf6),
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 10),
                 ),
               ),
-              const SizedBox(height: 10),
-              SizedBox(
-                height: 50,
-                child: TextFormField(
-                  controller: itsController,
-                  maxLength: 8,
-                  keyboardType: TextInputType.number,
-                  validator: _validateITS,
-                  decoration: InputDecoration(
-                    hintText: "Enter Guardian ITS ID",
-                    counterText: "",
-                    enabledBorder: const OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                      borderSide: BorderSide(
-                          color: Color(0xFF008759),
-                          width: 2), // Removes the border
+            ),
+            // TextFormField(
+            //   controller: itsController,
+            //   decoration: InputDecoration(
+            //     labelText: "ITS (8 digits)",
+            //     border: OutlineInputBorder(),
+            //   ),
+            //   validator: _validateITS,
+            // ),
+            SizedBox(
+              height: 50,
+              child: TextFormField(
+                controller: nameController,
+                validator: _validateName,
+                decoration: InputDecoration(
+                  hintText: "Enter Guardian Name",
+                  counterText: "",
+                  enabledBorder: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                    borderSide: BorderSide(
+                        color: Color(0xFF008759),
+                        width: 2), // Removes the border
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color: Color(0xFF008759),
+                        width: 2), // No border when focused
+                  ),
+                  filled: true,
+                  fillColor: const Color(0xfffffcf6),
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 10),
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 50,
+              child: TextFormField(
+                controller: contactController,
+                validator: _validateContact,
+                decoration: InputDecoration(
+                  hintText: "Enter Guardian Contact",
+                  counterText: "",
+                  enabledBorder: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                    borderSide: BorderSide(
+                        color: Color(0xFF008759),
+                        width: 2), // Removes the border
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color: Color(0xFF008759),
+                        width: 2), // No border when focused
+                  ),
+                  filled: true,
+                  fillColor: const Color(0xfffffcf6),
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 10),
+                ),
+              ),
+            ),
+            SizedBox(
+              height: 50,
+              child: TextFormField(
+                controller: relationController,
+                validator: _validateGuardian,
+                decoration: InputDecoration(
+                  hintText: "Enter Relation to Guardian",
+                  counterText: "",
+                  enabledBorder: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                    borderSide: BorderSide(
+                        color: Color(0xFF008759),
+                        width: 2), // Removes the border
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderSide: BorderSide(
+                        color: Color(0xFF008759),
+                        width: 2), // No border when focused
+                  ),
+                  filled: true,
+                  fillColor: const Color(0xfffffcf6),
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 10),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context); // Close the dialog
+                  },
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(8), // Smooth rounded edges
+                      side: BorderSide(
+                          color: Colors.redAccent), // Add a red border
                     ),
-                    focusedBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(
-                          color: Color(0xFF008759),
-                          width: 2), // No border when focused
+                    backgroundColor: Colors.red
+                        .withValues(alpha: 0.1), // Light red background
+                  ),
+                  child: Text(
+                    "Cancel",
+                    style: TextStyle(
+                      color: Colors.redAccent, // Red text color
+                      fontWeight:
+                          FontWeight.bold, // Bold text for better visibility
                     ),
-                    filled: true,
-                    fillColor: const Color(0xfffffcf6),
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 10),
                   ),
                 ),
-              ),
-              // TextFormField(
-              //   controller: itsController,
-              //   decoration: InputDecoration(
-              //     labelText: "ITS (8 digits)",
-              //     border: OutlineInputBorder(),
-              //   ),
-              //   validator: _validateITS,
-              // ),
-              SizedBox(
-                height: 50,
-                child: TextFormField(
-                  controller: nameController,
-                  validator: _validateName,
-                  decoration: InputDecoration(
-                    hintText: "Enter Guardian Name",
-                    counterText: "",
-                    enabledBorder: const OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                      borderSide: BorderSide(
-                          color: Color(0xFF008759),
-                          width: 2), // Removes the border
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF008759),
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(8), // Smooth rounded edges
+                      side: BorderSide.none, // Add a red border
                     ),
-                    focusedBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(
-                          color: Color(0xFF008759),
-                          width: 2), // No border when focused
-                    ),
-                    filled: true,
-                    fillColor: const Color(0xfffffcf6),
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 10),
                   ),
-                ),
-              ),
-              SizedBox(
-                height: 50,
-                child: TextFormField(
-                  controller: contactController,
-                  validator: _validateContact,
-                  decoration: InputDecoration(
-                    hintText: "Enter Guardian Contact",
-                    counterText: "",
-                    enabledBorder: const OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                      borderSide: BorderSide(
-                          color: Color(0xFF008759),
-                          width: 2), // Removes the border
-                    ),
-                    focusedBorder: const OutlineInputBorder(
-                      borderSide: BorderSide(
-                          color: Color(0xFF008759),
-                          width: 2), // No border when focused
-                    ),
-                    filled: true,
-                    fillColor: const Color(0xfffffcf6),
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 10, vertical: 10),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton(
-                    onPressed: () {
+                  onPressed: () {
+                    //if (_formKey1.currentState!.validate()) {
+                      Api.updateGuardian(its: itsController.text,
+                          name: nameController.text,
+                          contact: contactController.text,
+                          relation: relationController.text,
+                          studentIts: widget.ITS);
                       Navigator.pop(context); // Close the dialog
-                    },
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 20, vertical: 10),
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(8), // Smooth rounded edges
-                        side: BorderSide(
-                            color: Colors.redAccent), // Add a red border
-                      ),
-                      backgroundColor: Colors.red
-                          .withValues(alpha: 0.1), // Light red background
-                    ),
-                    child: Text(
-                      "Cancel",
-                      style: TextStyle(
-                        color: Colors.redAccent, // Red text color
-                        fontWeight:
-                            FontWeight.bold, // Bold text for better visibility
-                      ),
-                    ),
+                    //}
+                  },
+                  child: Text(
+                    "Submit",
+                    style: TextStyle(color: Colors.white),
                   ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF008759),
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(8), // Smooth rounded edges
-                        side: BorderSide.none, // Add a red border
-                      ),
-                    ),
-                    onPressed: () {
-                      if (_formKey2.currentState!.validate()) {
-                        // Handle form submission
-                        Navigator.pop(context); // Close the dialog
-                      }
-                    },
-                    child: Text(
-                      "Submit",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );

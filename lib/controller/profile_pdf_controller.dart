@@ -25,7 +25,9 @@ class PDFScreenController extends GetxController {
       pdfData.value = fetchedData;
 
     } catch (e) {
-      Get.snackbar("Notice", "Failed to Load PDF.");
+      if (Get.overlayContext != null) {
+        Get.snackbar("Notice", "Failed to Load PDF.");
+      }
     }
   }
 

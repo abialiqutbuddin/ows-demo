@@ -1,29 +1,37 @@
+import 'dart:io';
+import 'package:path/path.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:ows/api/api.dart';
 import 'package:ows/constants/constants.dart';
+import 'package:ows/controller/state_management/state_manager.dart';
 import 'package:super_tooltip/super_tooltip.dart';
+import '../../api/api.dart';
 import '../../controller/forms/form_screen_controller.dart';
-import '../../demo.dart';
-import 'financials.dart';
+import '../../mobile_ui/forms/financials.dart';
+import '../../model/document.dart';
 
-class FormScreenM extends StatefulWidget {
-  const FormScreenM({super.key});
+class FormScreenW extends StatefulWidget {
+  const FormScreenW({super.key});
 
   @override
-  State<FormScreenM> createState() => _FormScreenState();
+  State<FormScreenW> createState() => _FormScreenState();
 }
 
-class _FormScreenState extends State<FormScreenM> {
+class _FormScreenState extends State<FormScreenW> {
   String itsId = '30445124';
   final FormController controller = Get.find<FormController>();
+  final GlobalStateController gController = Get.find<GlobalStateController>();
   late SuperTooltipController tooltipControllers;
 
   // RxBool to track expanded state
   final RxBool isPersonalExpanded = false.obs;
   final RxBool isStudentExpanded = false.obs;
   final RxBool isFamilyExpanded = false.obs;
+  final RxBool isOccupationExpanded = false.obs;
+  final bool isFCNIC = false;
+  final bool isMCNIC = false;
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +50,7 @@ class _FormScreenState extends State<FormScreenM> {
           _buildCollapsibleSection(
               "Student Info", isStudentExpanded, studentInfo,complete: controller.isStudentInfoComplete),
           _buildCollapsibleSection("Family Info", isFamilyExpanded, familyInfo,complete: controller.isFamilyInfoComplete),
+          _buildCollapsibleSection("Main Occupation", isOccupationExpanded, mainOccupation,complete: controller.isMainOccupationComplete),
           Obx(() => Padding(
             padding: EdgeInsets.all(16.0),
             child: ElevatedButton(
@@ -108,57 +117,57 @@ class _FormScreenState extends State<FormScreenM> {
     return Obx(() => Stack(
       children: [
         Container(
-              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-              margin: EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                color: Color(0xffffead1),
-                border: Border.all(
+          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+          margin: EdgeInsets.all(12),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              color: Color(0xffffead1),
+              border: Border.all(
                   color: complete!.value ? Colors.green : Colors.transparent,
                   width: 2
-                )
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  GestureDetector(
-                    onTap: () {
-                      isExpanded.value =
-                          !isExpanded.value; // Toggle expand/collapse
-                    },
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(title,
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                                color: Colors.brown)),
-                        AnimatedRotation(
-                          turns: isExpanded.value
-                              ? 0.5
-                              : 0.0, // Rotates 180° when expanded
-                          duration: Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                          child: Icon(
-                            Icons
-                                .keyboard_arrow_down, // Keep only one icon and rotate it
-                            color: Colors.brown,
-                          ),
-                        ),
-                      ],
+              )
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  isExpanded.value =
+                  !isExpanded.value; // Toggle expand/collapse
+                },
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(title,
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                            color: Colors.brown)),
+                    AnimatedRotation(
+                      turns: isExpanded.value
+                          ? 0.5
+                          : 0.0, // Rotates 180° when expanded
+                      duration: Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                      child: Icon(
+                        Icons
+                            .keyboard_arrow_down, // Keep only one icon and rotate it
+                        color: Colors.brown,
+                      ),
                     ),
-                  ),
-                  Divider(height: 10, color: Colors.white, thickness: 2),
-                  AnimatedSize(
-                    alignment: Alignment.topCenter,
-                    duration: Duration(milliseconds: 300),
-                    curve: Curves.easeInOut,
-                    child: isExpanded.value ? content() : SizedBox.shrink(),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
+              Divider(height: 10, color: Colors.white, thickness: 2),
+              AnimatedSize(
+                alignment: Alignment.topCenter,
+                duration: Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                child: isExpanded.value ? content() : SizedBox.shrink(),
+              ),
+            ],
+          ),
+        ),
         if (complete.value)
           Positioned(
             top: 0,
@@ -183,39 +192,46 @@ class _FormScreenState extends State<FormScreenM> {
 
   Widget personalInfo() {
     return Container(
-        //padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
-        margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 12),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          color: const Color(0xffffead1),
-        ),
-        child: Column(
-          spacing: 15,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              spacing: 8,
-              children: [
-                Flexible(child: _buildField("SF No.", controller.sfNo)),
-                Flexible(child: _buildField("HOF ITS", controller.hofIts)),
-              ],
-            ),
-            _buildDropdown(
-              label: "Mohalla",
-              selectedValue: controller.selectedMohalla,
-              items: controller.mohalla,
-              onChanged: (value) {
-                controller.selectedMohalla.value = value!;
-                controller.selectedMohalla(value);
-                controller.mohallaName.value = controller.mohalla.firstWhere((e) =>
-                e["id"] == controller.selectedMohalla.value)["name"];
-
-              },
-              isEnabled: true,
-            ),
-            _buildField("Family Surname", controller.familySurname,function: () => controller.validatePersonalInfoFields()),
-          ],
-        ),
+      //padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
+      margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        color: const Color(0xffffead1),
+      ),
+      child: Column(
+        spacing: 15,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            spacing: 8,
+            children: [
+              Flexible(child: _buildField("SF No.", controller.sfNo)),
+              Flexible(child: _buildField("HOF ITS", controller.hofIts)),
+            ],
+          ),
+          Row(
+            spacing: 8,
+            children: [
+              Flexible(
+                child: _buildDropdown(
+                  label: "Mohalla",
+                  selectedValue: controller.selectedMohalla,
+                  items: controller.mohalla,
+                  onChanged: (value) {
+                    controller.selectedMohalla.value = value!;
+                    controller.selectedMohalla(value);
+                    controller.mohallaName.value = controller.mohalla.firstWhere((e) =>
+                    e["id"] == controller.selectedMohalla.value)["name"];
+                
+                  },
+                  isEnabled: true,
+                ),
+              ),
+              Flexible(child: _buildField("Family Surname", controller.familySurname,function: () => controller.validatePersonalInfoFields())),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -230,17 +246,22 @@ class _FormScreenState extends State<FormScreenM> {
         spacing: 15,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildField("Full Name", controller.fullName,function: ()=> controller.validateStudentInfoFields()),
-          _buildField("CNIC", controller.cnic,function: ()=> controller.validateStudentInfoFields()),
-          _buildField("Date of Birth", controller.dateOfBirth,function: ()=> controller.validateStudentInfoFields()),
+          Row(
+            spacing: 8,
+            children: [
+              Flexible(child: _buildField("CNIC", controller.cnic,function: ()=> controller.validateStudentInfoFields())),
+              Flexible(child: _buildField("Date of Birth", controller.dateOfBirth,function: ()=> controller.validateStudentInfoFields())),
+              Flexible(child: _buildField("Full Name", controller.fullName,function: ()=> controller.validateStudentInfoFields())),
+            ],
+          ),
           Row(
             spacing: 8,
             children: [
               Flexible(child: _buildField("Mobile No.", controller.mobileNo,function: ()=> controller.validateStudentInfoFields())),
               Flexible(child: _buildField("WhatsApp No.", controller.whatsappNo,function: ()=> controller.validateStudentInfoFields())),
+              Flexible(child: _buildField("Email", controller.email,function: ()=> controller.validateStudentInfoFields())),
             ],
           ),
-          _buildField("Email", controller.email,function: ()=> controller.validateStudentInfoFields()),
           _buildField("Residential Address", controller.residentialAddress, height: 120,function: ()=> controller.validateStudentInfoFields()),
         ],
       ),
@@ -264,8 +285,8 @@ class _FormScreenState extends State<FormScreenM> {
                   borderRadius: BorderRadius.circular(8),
                   //color: const Color(0xffffead1),
                   color: Color(0xffecdacc)
-                  //border: Border.all(color:Colors.grey,width: 1)
-                  ),
+                //border: Border.all(color:Colors.grey,width: 1)
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 15,
@@ -277,18 +298,25 @@ class _FormScreenState extends State<FormScreenM> {
                         fontSize: 16,
                         color: Colors.brown),
                   ),
-                  _buildField("Name", controller.fatherName,function: ()=> controller.validateFamilyInfoFields()),
-                  _buildField("CNIC", controller.fatherCnic,function: ()=> controller.validateFamilyInfoFields()),
+                  Row(
+                    spacing: 8,
+                    children: [
+                      Flexible(child: _buildField("Name", controller.fatherName,function: ()=> controller.validateFamilyInfoFields())),
+                    Flexible(child: _buildField("CNIC", controller.fatherCnic,function: ()=> controller.validateFamilyInfoFields())),
+
+                    ],
+                  ),
                   Container(
                     width: double.infinity,
-                    height: 150,
+                    height: 170,
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
                         //color: const Color(0xffffead1),
                         color: Color(0xfffffcf6)
-                        //border: Border.all(color:Colors.grey,width: 1)
-                        ),
-                    child: Icon(Icons.upload_file_outlined,size: 50,color: Constants().green,),
+                      //border: Border.all(color:Colors.grey,width: 1)
+                    ),
+                    child:uploadSection('father_cnic', gController.user.value.itsId.toString(), '81'),
+
                   ),
 
                 ],
@@ -299,8 +327,8 @@ class _FormScreenState extends State<FormScreenM> {
                   borderRadius: BorderRadius.circular(8),
                   //color: const Color(0xffffead1),
                   color: Color(0xffecdacc)
-                  //border: Border.all(color:Colors.grey,width: 1)
-                  ),
+                //border: Border.all(color:Colors.grey,width: 1)
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 15,
@@ -312,18 +340,23 @@ class _FormScreenState extends State<FormScreenM> {
                         fontSize: 16,
                         color: Colors.brown),
                   ),
-                  _buildField("Name", controller.motherName,function: ()=> controller.validateFamilyInfoFields()),
-                  _buildField("CNIC", controller.motherCnic,function: ()=> controller.validateFamilyInfoFields()),
+                  Row(
+                    spacing: 8,
+                    children: [
+                      Flexible(child: _buildField("Name", controller.motherName,function: ()=> controller.validateFamilyInfoFields())),
+                      Flexible(child: _buildField("CNIC", controller.motherCnic,function: ()=> controller.validateFamilyInfoFields())),
+                    ],
+                  ),
                   Container(
                     width: double.infinity,
-                    height: 150,
+                    height: 170,
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(8),
                         //color: const Color(0xffffead1),
                         color: Color(0xfffffcf6)
                       //border: Border.all(color:Colors.grey,width: 1)
                     ),
-                    child: Icon(Icons.upload_file_outlined,size: 50,color: Constants().green,),
+                    child: uploadSection('mother_cnic', gController.user.value.itsId.toString(), '81'),
                   ),
                 ],
               )),
@@ -333,8 +366,8 @@ class _FormScreenState extends State<FormScreenM> {
                   borderRadius: BorderRadius.circular(8),
                   //color: const Color(0xffffead1),
                   color: Color(0xffecdacc)
-                  //border: Border.all(color:Colors.grey,width: 1)
-                  ),
+                //border: Border.all(color:Colors.grey,width: 1)
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 spacing: 15,
@@ -346,14 +379,146 @@ class _FormScreenState extends State<FormScreenM> {
                         fontSize: 16,
                         color: Colors.brown),
                   ),
-                  _buildField("Name", controller.guardianName,function: ()=> controller.validateFamilyInfoFields()),
-                  _buildField("CNIC", controller.guardianCnic,function: ()=> controller.validateFamilyInfoFields()),
-                  _buildField("Relation to Student", controller.relationToStudent,function: ()=> controller.validateFamilyInfoFields()),
+                  Row(
+                    spacing: 8,
+                    children: [
+                      Flexible(child: _buildField("Name", controller.guardianName,function: ()=> controller.validateFamilyInfoFields())),
+                      Flexible(child: _buildField("CNIC", controller.guardianCnic,function: ()=> controller.validateFamilyInfoFields())),
+                      Flexible(child: _buildField("Relation to Student", controller.relationToStudent,function: ()=> controller.validateFamilyInfoFields())),
+                    ],
+                  ),
                 ],
               )),
         ],
       ),
     );
+  }
+
+  Widget mainOccupation() {
+    return Container(
+      //padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
+      margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 12),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        color: const Color(0xffffead1),
+      ),
+      child: Column(
+        spacing: 15,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            spacing: 8,
+            children: [
+              Flexible(child: _buildField("Occupation", controller.occupation,function: ()=>controller.validateMainOccupationFields())),
+              Flexible(child: _buildField("Work Address", controller.wordAddress,function: ()=>controller.validateMainOccupationFields())),
+              Flexible(child: _buildField("Work Phone Number", controller.workPhone,function: ()=>controller.validateMainOccupationFields())),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget uploadSection(String docType, String ITS, String reqId, {int numItems = 1}) {
+    // Define specific names for multiple items if docType is "cNIC"
+    List<String> docTypesList;
+    if (docType == 'cNIC' && numItems == 2) {
+      docTypesList = ['cNIC_front', 'cNIC_back'];
+    } else {
+      docTypesList = List.generate(numItems, (index) => "${docType}_$index");
+    }
+
+    return Column(
+      children: docTypesList.map((specificDocType) {
+        return Container(
+          margin: EdgeInsets.symmetric(vertical: 8), // Adds spacing between sections
+          width: double.infinity,
+          height: 150,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            color: Color(0xfffffcf6),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              GetX<GlobalStateController>(
+                builder: (controller) {
+                  var document = controller.documents[specificDocType];
+                  if (document != null) {
+                    return ListTile(
+                      leading: Icon(
+                        Icons.insert_drive_file,
+                        size: 40,
+                        color: Constants().green,
+                      ),
+                      title: Text(
+                        basename(document.file!.path),
+                      ),
+                      trailing: IconButton(
+                        icon: Icon(Icons.remove_circle, color: Colors.red),
+                        onPressed: () {
+                          Api.removeDocument(specificDocType);
+                        },
+                      ),
+                    );
+                  } else {
+                    return Column(
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            Icons.upload_file_outlined,
+                            size: 50,
+                            color: Constants().green,
+                          ),
+                          onPressed: () async {
+                            await _pickFile(specificDocType);
+                            await Api.uploadDocument(specificDocType, ITS, reqId);
+                            //validateDocuments(specificDocType);
+                          },
+                        ),
+                        Text("Click here to upload ${specificDocType.replaceAll('_', ' ').toUpperCase()}"),
+                        Text(
+                          "Supported Format: PDF",
+                          style: TextStyle(color: Colors.grey),
+                        ),
+                      ],
+                    );
+                  }
+                },
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Future<void> _pickFile(String docType) async {
+    // Check if a file is already picked for the docType, if yes, return
+    if (gController.documents[docType] != null) {
+      return;
+    }
+
+    // Use FilePicker to pick a single file
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      allowMultiple: false, // Allow only one file
+      type: FileType
+          .any, // You can specify specific types (e.g., FileType.custom) if needed
+    );
+
+    if (result != null) {
+      // Get the file path of the selected file
+      File selectedFile = File(result.files.single.path!);
+
+      // Update the documents map with the picked file
+      setState(() {
+        gController.documents[docType] = Document(
+            file: selectedFile,
+            filePath: null); // Store the file object dynamically
+      });
+    } else {
+      print("No file selected for $docType");
+    }
   }
 
 

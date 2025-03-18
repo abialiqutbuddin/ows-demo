@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
-import 'package:ows/controller/request_form_controller.dart';
+import 'package:ows/controller/state_management/state_manager.dart';
 import 'package:ows/model/member_model.dart';
 import 'package:ows/constants/constants.dart';
 import 'package:get/get.dart';
-import 'package:ows/table.dart';
 import 'package:ows/web_ui/profile_preview_screen.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../api/api.dart';
+import '../constants/custom_dialog.dart';
 import '../controller/profile_pdf_controller.dart';
-import '../model/family_model.dart';
-
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+
+import '../model/family_model.dart';
+import 'forms/main_form.dart';
 
 class ProfilePDFScreenW extends StatefulWidget {
   final UserProfile member;
@@ -24,9 +27,8 @@ class ProfilePDFScreenW extends StatefulWidget {
 }
 
 class ProfilePDFScreenWState extends State<ProfilePDFScreenW> {
-
   final PDFScreenController controller = Get.find<PDFScreenController>();
-
+  final GlobalStateController gController = Get.find<GlobalStateController>();
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +37,6 @@ class ProfilePDFScreenWState extends State<ProfilePDFScreenW> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       showLoadingDialog(context);
@@ -85,7 +86,7 @@ class ProfilePDFScreenWState extends State<ProfilePDFScreenW> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: Color(0xffffead1),
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(
@@ -120,7 +121,7 @@ class ProfilePDFScreenWState extends State<ProfilePDFScreenW> {
               // ✅ Optional Cancel Button
               ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blueAccent,
+                  backgroundColor: Constants().green,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
@@ -132,7 +133,7 @@ class ProfilePDFScreenWState extends State<ProfilePDFScreenW> {
                   style: TextStyle(color: Colors.white, fontSize: 14),
                 ),
                 onPressed: () {
-                    Get.back();
+                  Get.back();
                 },
               ),
             ],
@@ -141,6 +142,11 @@ class ProfilePDFScreenWState extends State<ProfilePDFScreenW> {
       ),
       barrierDismissible: true, // Prevent closing until PDF loads
     );
+    ever(controller.pdfData, (value) {
+      if (value != null && Get.isDialogOpen == true) {
+        Get.back();
+      }
+    });
   }
 
   Widget headerSection(BuildContext context) {
@@ -187,7 +193,41 @@ class ProfilePDFScreenWState extends State<ProfilePDFScreenW> {
             //       )),
             // ),
             SizedBox(
-              width: 120,
+              height: 35,
+              child: ElevatedButton(
+                style: ButtonStyle(
+                  backgroundColor: WidgetStateProperty.resolveWith<Color>(
+                        (Set<WidgetState> states) {
+                      if (states.contains(WidgetState.hovered)) {
+                        return Colors.transparent; // No hover effect
+                      }
+                      return Colors.transparent; // Default color
+                    },
+                  ),
+                  overlayColor: WidgetStateProperty.all(
+                      Colors.transparent), // No ripple effect
+                  shape: WidgetStateProperty.all(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                      side: BorderSide(
+                        color: const Color(0xFF008759),
+                        width: 2, // Green border
+                      ),
+                    ),
+                  ),
+                  elevation: WidgetStateProperty.all(0), // Flat button
+                ),
+                onPressed: () async {
+                  Get.to(()=>IndexStackScreen());
+                },
+                child: Text(
+                  "Application Form",
+                  style: TextStyle(
+                      color: Colors.black, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+            SizedBox(
               height: 35,
               child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
@@ -196,11 +236,62 @@ class ProfilePDFScreenWState extends State<ProfilePDFScreenW> {
                       borderRadius: BorderRadius.circular(5),
                     ),
                   ),
-                  onPressed: () {
-                    Get.to(() => RequestForm(member: widget.member));
+                  onPressed: () async {
+                    var data = await Api.fetchProxiedData(
+                        "https://paktalim.com/admin/ws_app/GetFamilyCompletionStatus/${gController.user.value.itsId}?access_key=622ae1838756026b9500e50e778f131ac180bf70&username=40459629");
+                    //data['profile_complete'] = "false";
+                    //data['family_complete'] = "false";
+                    if (data["profile_complete"] == "true" &&
+                        data["family_complete"] == "true") {
+                      Get.toNamed('/request-form');
+                    } else {
+                      String message = "";
+                      if (data["profile_complete"] != "true") {
+                        message = "Kindly complete your Pak Talim profile.";
+                        showCustomDialog(
+                          title: "Incomplete Data",
+                          message: message,
+                          confirmText: "Update Profile",
+                          cancelText: "Cancel",
+                          onCancel: () {
+                            Get.back();
+                          },
+                          onConfirm: () {
+                            Family family = Family();
+                            Get.to(() => ProfilePreview(
+                                member: gController.user.value,
+                                family: family));
+                          },
+                        );
+                      } else {
+                        message =
+                            "Kindly complete your family’s Paktalim profile. Contact your mohallah UT committee for further guidance.";
+                        showCustomDialog(
+                          title: "Incomplete Data",
+                          message: message,
+                          confirmText: "Go to Paktalim",
+                          cancelText: "Cancel",
+                          onCancel: () {
+                            Get.back();
+                          },
+                          onConfirm: () async {
+                            final url =
+                                'https://paktalim.com/admin/profile/create';
+                            if (await canLaunchUrl(Uri.parse(url))) {
+                              await launchUrl(
+                                Uri.parse(url),
+                                mode: LaunchMode.externalApplication,
+                              );
+                            } else {
+                              throw 'Could not launch $url';
+                            }
+                          },
+                        );
+                      }
+                    }
                   },
                   child: Text(
-                    "Request",
+                    "Request Form",
                     style: TextStyle(color: Colors.white),
                   )),
             ),

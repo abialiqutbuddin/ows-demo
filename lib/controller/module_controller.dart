@@ -13,6 +13,7 @@ import '../model/module_model.dart';
 import 'package:flutter/material.dart';
 
 import '../web_ui/module_screen.dart';
+import '../web_ui/profile_preview_screen.dart';
 
 class ModuleController extends GetxController {
   var modules = <ModuleModel>[].obs;
@@ -34,22 +35,22 @@ class ModuleController extends GetxController {
         var permissions = globalController.moduleFeaturesMap;
 
         for (var moduleId in permissions.keys) {
-          print(moduleId);
           if (!allModules.containsKey(moduleId)) {
-            print("Ignoring unknown module ID: $moduleId");
             continue;
           }
           ModuleModel matchedModule = allModules[moduleId]!;
           List<int> allowedFeatureIds = permissions[moduleId] ?? [];
 
-          moduleMap[moduleId] =
-              matchedModule.copyWith(featureIds: allowedFeatureIds);
+          moduleMap[moduleId] = matchedModule.copyWith(featureIds: allowedFeatureIds);
         }
+        moduleMap[2] = allModules[2]!;
       }
 
       modules.value = moduleMap.values.toList();
     } catch (e) {
-      Get.snackbar("Error", "Failed to fetch modules: $e");
+      if (Get.overlayContext != null) {
+        Get.snackbar("Error", "Failed to fetch modules: $e");
+      }
     }
   }
 
@@ -72,7 +73,17 @@ class ModuleController extends GetxController {
         icon: "📊",
         featureIds: [],
         onModuleOpen: (featureIds, its, mohalla) async {
-          navigateToModule(2, featureIds, its: its, mohalla: mohalla);
+          navigateToModule(2, featureIds, its: its, mohalla: mohalla,role: globalController.userRole.value);
+        },
+      ),
+      3: ModuleModel(
+        id: 2,
+        moduleName: "update_profile",
+        moduleTitle: "Update Profile",
+        icon: "📊",
+        featureIds: [],
+        onModuleOpen: (featureIds, its, mohalla) async {
+          navigateToModule(3, featureIds, its: its, mohalla: mohalla,role: globalController.userRole.value);
         },
       ),
       // 3: ModuleModel(
@@ -89,7 +100,7 @@ class ModuleController extends GetxController {
   }
 
   Future<void> navigateToModule(int moduleId, List<int> featureIds,
-      {String? its, String? mohalla}) async {
+      {required String its, String? mohalla,String? role}) async {
     switch (moduleId) {
       case 1:
         if (its != null) {
@@ -118,10 +129,14 @@ class ModuleController extends GetxController {
         break;
       case 2:
         Get.to(() =>
-            ReqFormTable(mohalla: globalController.userMohalla.value,featureIds: featureIds, org: globalController.userUmoor.value,));
+            ReqFormTable(mohalla: globalController.userMohalla.value,featureIds: featureIds, org: globalController.userUmoor.value, ITS: its.toString(), role: role.toString(),));
         break;
       case 3:
-        print("Opening Admin Panel Module with Features: $featureIds");
+        Family family = Family();
+        Get.to(() => ProfilePreview(
+            member: globalController.user.value,
+            family: family));
+        //print("Opening Admin Panel Module with Features: $featureIds");
         break;
       default:
         Get.snackbar("Error", "Module not found");

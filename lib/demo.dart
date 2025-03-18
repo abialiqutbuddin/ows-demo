@@ -1,115 +1,81 @@
-import 'dart:convert';
-import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 
-class ApiScreen extends StatefulWidget {
-  @override
-  _ApiScreenState createState() => _ApiScreenState();
-}
+import 'controller/state_management/state_manager.dart';
 
-class _ApiScreenState extends State<ApiScreen> {
-  final TextEditingController _endpointController = TextEditingController();
-  String _method = 'GET'; // Default to GET
-  String _responseData = "";
-  bool _isLoading = false;
-
-  Future<void> _fetchData() async {
-    if (_endpointController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter an API endpoint')),
-      );
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _responseData = "";
-    });
-
-    String baseUrl = "http://localhost:3002"; // Replace with actual base URL
-    String fullUrl = "$baseUrl/${_endpointController.text}";
-
+class ProfileService {
+  static const String proxyUrl = "https://mode.imadiinnovations.com:3002/get-url"; // Updated URL
+  static final GlobalStateController permissionsController = Get.find<GlobalStateController>();
+  /// Updates user profile by sending data to the Node.js proxy
+  static Future<Map<String, dynamic>> updateProfile({
+    required String accessKey,
+    required String username,
+    required String mId,
+    String? pId, // Optional
+    required String jId,
+    required String itsId,
+    required String cId,
+    required String cityId,
+    required String imani,
+    required String iId,
+    required String scholarshipTaken,
+    required String qardan,
+    required String scholar,
+    required String classId,
+    required String sId,
+    String? yearCountDir, // Optional
+    required String edate,
+    required String duration,
+    required String sdate,
+  }) async {
     try {
-      http.Response response;
+      // Construct the target API URL
+      final Map<String, String> params = {
+        "access_key": accessKey,
+        "username": username,
+        "m_id": mId,
+        if (pId != null) "p_id": pId,
+        "j_id": jId,
+        "its_id": itsId,
+        "c_id": cId,
+        "city_id": cityId,
+        "imani": imani,
+        "i_id": iId,
+        "scholarship_taken": scholarshipTaken,
+        "qardan": qardan,
+        "scholar": scholar,
+        "class_id": classId,
+        "s_id": sId,
+        if (yearCountDir != null) "year_count_dir": yearCountDir,
+        "edate": edate,
+        "duration": duration,
+        "sdate": sdate,
+      };
 
-      if (_method == 'GET') {
-        response = await http.get(Uri.parse(fullUrl));
-      } else {
-        response = await http.post(Uri.parse(fullUrl), body: jsonEncode({"sample": "data"}), headers: {"Content-Type": "application/json"});
-      }
+      // Encode parameters as a query string
+      String queryString = Uri(queryParameters: params).query;
+      String targetUrl = "https://paktalim.com/admin/ws_app/UpdateProfile?$queryString";
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        setState(() {
-          _responseData = const JsonEncoder.withIndent('  ').convert(jsonDecode(response.body));
-        });
+      // Send a POST request to the proxy with the target URL in the body
+      final response = await http.post(
+        Uri.parse(proxyUrl),
+        headers: {
+          "Authorization": "Bearer ${permissionsController.token.value}",
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode({"url": targetUrl}),
+      );
+
+      if (response.statusCode == 200) {
+        print(jsonDecode(response.body));
+        return jsonDecode(response.body); // Parse JSON response
       } else {
-        setState(() {
-          _responseData = "Error: ${response.statusCode}\n${response.body}";
-        });
+        throw Exception("Failed to update profile: ${response.body}");
       }
-    } catch (e) {
-      setState(() {
-        _responseData = "Error: $e";
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
+    } catch (error) {
+      print("Error updating profile: $error");
+      return {"error": error.toString()};
     }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SelectionArea(
-      child: Scaffold(
-        appBar: AppBar(title: Text('API Tester')),
-        body: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                controller: _endpointController,
-                decoration: InputDecoration(labelText: 'Enter API Endpoint (e.g., posts/1)'),
-              ),
-              SizedBox(height: 10),
-              Row(
-                children: [
-                  Text("Method: "),
-                  DropdownButton<String>(
-                    value: _method,
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _method = newValue!;
-                      });
-                    },
-                    items: <String>['GET', 'POST'].map<DropdownMenuItem<String>>((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
-                  ),
-                  Spacer(),
-                  ElevatedButton(
-                    onPressed: _isLoading ? null : _fetchData,
-                    child: _isLoading ? CircularProgressIndicator(color: Colors.white) : Text('Fetch Data'),
-                  ),
-                ],
-              ),
-              SizedBox(height: 20),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Text(
-                    _responseData.isEmpty ? "Response will appear here" : _responseData,
-                    style: TextStyle(fontSize: 14, fontFamily: 'monospace'),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }

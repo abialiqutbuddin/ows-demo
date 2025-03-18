@@ -19,21 +19,17 @@ class FamilyScreenW extends StatefulWidget {
 class FamilyScreenWState extends State<FamilyScreenW> {
   int? _selectedIndex; // Track the selected family member
   bool _isLoading = false;
-  late final GlobalStateController stateController;
+  GlobalStateController stateController = Get.find<GlobalStateController>();
 
   @override
   void initState() {
     super.initState();
-    stateController = Get.find<GlobalStateController>();
 
-    /// **Wait for data before accessing familyMembers**
     if (stateController.familyMembers.isEmpty) {
       stateController.loadFromStorage();
     }
 
-    /// **Avoid accessing before ensuring data is loaded**
     if (stateController.familyMembers.isNotEmpty) {
-      print(stateController.familyMembers.first.fullName);
     } else {
       print("No family members loaded yet.");
     }
@@ -46,9 +42,8 @@ class FamilyScreenWState extends State<FamilyScreenW> {
     try {
       final userProfile = await Api.fetchUserProfile(itsId);
       if (userProfile != null) {
-        Get.to(() => ProfilePDFScreen(
-          member: userProfile,
-        ));
+        stateController.user.value = userProfile;
+        Get.to(() => ProfilePDFScreen(member: userProfile,));
       } else {
         Get.snackbar("Error", "Profile not found for ITS ID: $itsId");
       }

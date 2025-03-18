@@ -50,6 +50,9 @@ dependencies:
   super_tooltip: ^2.0.9
   font_awesome_flutter: ^10.8.0
   material_table_view: ^5.1.0
+  mime: ^2.0.0
+  image_picker: ^1.1.2
+  file_picker: ^9.0.2
 
 dev_dependencies:
   flutter_test:

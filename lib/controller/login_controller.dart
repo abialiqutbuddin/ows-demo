@@ -52,6 +52,18 @@ class LoginController extends StatelessWidget {
         stateController.userIts.value = itsId;
         stateController.userUmoor.value = umoor;
 
+        try {
+          final userProfile = await Api.fetchUserProfile(itsId);
+          if (userProfile != null) {
+            stateController.user.value = userProfile;
+            //Get.to(() => ProfilePDFScreen(member: userProfile,));
+          } else {
+            Get.snackbar("Error", "Profile not found for ITS ID: $itsId");
+          }
+        } catch (e) {
+          Get.snackbar("Error", "Failed to fetch user profile: $e");
+        }
+
         GetStorage().write("token", token);
 
         await fetchAndNavigate(itsId, role);

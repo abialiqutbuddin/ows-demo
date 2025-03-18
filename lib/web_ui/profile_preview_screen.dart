@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:ows/model/member_model.dart';
 import 'package:ows/constants/constants.dart';
 import 'package:ows/constants/expandable_container.dart';
+import 'package:ows/web_ui/update_paktalim.dart';
 import 'package:timelines_plus/timelines_plus.dart';
 import 'package:get/get.dart';
 import '../api/api.dart';
+import '../controller/state_management/state_manager.dart';
 import '../model/family_model.dart';
 
 class ProfilePreview extends StatelessWidget {
@@ -15,6 +17,8 @@ class ProfilePreview extends StatelessWidget {
   late final List<Widget> futureSubEducation = [
     subEducation("Dunyawi", "Future Education Plan,", "No Data Available"),
   ];
+
+  final GlobalStateController gController = Get.find<GlobalStateController>();
 
 
 
@@ -89,41 +93,6 @@ class ProfilePreview extends StatelessWidget {
                     style: TextStyle(color: Colors.white),
                   )),
             ),
-            // SizedBox(
-            //   height: 35,
-            //   child: ElevatedButton(
-            //     style: ButtonStyle(
-            //       backgroundColor: WidgetStateProperty.resolveWith<Color>(
-            //         (Set<WidgetState> states) {
-            //           if (states.contains(WidgetState.hovered)) {
-            //             return Colors.transparent; // No hover effect
-            //           }
-            //           return Colors.transparent; // Default color
-            //         },
-            //       ),
-            //       overlayColor: WidgetStateProperty.all(
-            //           Colors.transparent), // No ripple effect
-            //       shape: WidgetStateProperty.all(
-            //         RoundedRectangleBorder(
-            //           borderRadius: BorderRadius.circular(5),
-            //           side: BorderSide(
-            //             color: const Color(0xFF008759),
-            //             width: 2, // Green border
-            //           ),
-            //         ),
-            //       ),
-            //       elevation: WidgetStateProperty.all(0), // Flat button
-            //     ),
-            //     onPressed: () async {
-            //       Constants().Logout();
-            //     },
-            //     child: Text(
-            //       "Logout",
-            //       style: TextStyle(
-            //           color: Colors.black, fontWeight: FontWeight.bold),
-            //     ),
-            //   ),
-            // ),
           ],
         )
       ],
@@ -240,48 +209,55 @@ class ProfilePreview extends StatelessWidget {
   }
 
   Widget otherItems(BuildContext context) {
-    List<String> marhalas = [
-      "Marhala 7",
-      "Marhala 6",
-      "Marhala 5",
-      "Marhala 4",
-      "Marhala 4",
-      "Marhala 4",
-      "Marhala 4"
-    ];
-    List<Widget> customContents = [
-      Text(
-        "Post Graduation",
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
-      Text(
-        "Graduation",
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
-      Text(
-        "11th to 12th",
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
-      Text(
-        "9th to 10th",
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
-      Text(
-        "5th to 8th",
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
-      Text(
-        "1st to 4th",
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
-      Text(
-        "Pre Primary",
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
+
+    List<Map<String, dynamic>> allClasses = [
+      {"id": 1, "name": "Play Group", "rank": 1, "marhala": 1},
+      {"id": 2, "name": "Nursery", "rank": 2, "marhala": 1},
+      {"id": 3, "name": "Junior Kindergarten", "rank": 3, "marhala": 1},
+      {"id": 4, "name": "Senior Kindergarten", "rank": 4, "marhala": 1},
+      {"id": 5, "name": "1st", "rank": 5, "marhala": 2},
+      {"id": 6, "name": "2nd", "rank": 6, "marhala": 2},
+      {"id": 7, "name": "3rd", "rank": 7, "marhala": 2},
+      {"id": 8, "name": "4th", "rank": 8, "marhala": 2},
+      {"id": 9, "name": "5th", "rank": 9, "marhala": 3},
+      {"id": 10, "name": "6th", "rank": 10, "marhala": 3},
+      {"id": 11, "name": "7th", "rank": 11, "marhala": 3},
+      {"id": 12, "name": "8th", "rank": 12, "marhala": 3},
+      {"id": 13, "name": "9th", "rank": 13, "marhala": 4},
+      {"id": 14, "name": "O-Level(I)", "rank": 14, "marhala": 4},
+      {"id": 15, "name": "10th", "rank": 15, "marhala": 4},
+      {"id": 16, "name": "O-Level(II)", "rank": 15, "marhala": 4},
+      {"id": 17, "name": "11th", "rank": 16, "marhala": 5},
+      {"id": 18, "name": "AS-Level", "rank": 16, "marhala": 5},
+      {"id": 19, "name": "Diploma/ Vocational Training", "rank": 17, "marhala": 5},
+      {"id": 20, "name": "Diploma of Associate Engineer (DAE)", "rank": 17, "marhala": 5},
+      {"id": 21, "name": "12th", "rank": 17, "marhala": 5},
+      {"id": 22, "name": "A2-Level", "rank": 17, "marhala": 5},
+      {"id": 23, "name": "Associated Degree Programs", "rank": 18, "marhala": 6},
+      {"id": 24, "name": "Bachelors Degree Programs", "rank": 18, "marhala": 6},
+      {"id": 25, "name": "Professional Programs", "rank": 18, "marhala": 6},
+      {"id": 26, "name": "Diploma/ Vocational Training", "rank": 18, "marhala": 6},
+      {"id": 27, "name": "Masters/ M. Phil.", "rank": 19, "marhala": 7},
+      {"id": 28, "name": "Ph.D", "rank": 19, "marhala": 7},
+      {"id": 29, "name": "Post Doctorate", "rank": 19, "marhala": 7},
     ];
 
-    final groupedEducation = groupEducationByMarhala(member.education ?? []);
-    final groupedFutureEducation = groupFutureEducationByMarhala(member.future ?? []);
+    List<Map<String, dynamic>> matchedEducationList = [];
+
+    //for (var education in member.education!) {
+      for (var education in gController.user.value.education!) {
+      var matchedClass = allClasses.firstWhere(
+            (cls) => cls["name"] == education.className,
+        orElse: () => {},
+      );
+
+      if (matchedClass.isNotEmpty) {
+        matchedEducationList.add(matchedClass);
+      }
+    }
+
+    final groupedEducation = groupEducationByMarhala(gController.user.value.education ?? []);
+    final groupedFutureEducation = groupFutureEducationByMarhala(gController.user.value.future ?? []);
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -322,7 +298,7 @@ class ProfilePreview extends StatelessWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                customContents[index],
+                                Text(matchedEducationList[index]['name']),
                                 Text(
                                   "Completed",
                                   style: TextStyle(
@@ -337,7 +313,7 @@ class ProfilePreview extends StatelessWidget {
                           return Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Text(
-                              marhalas[index],
+                              "Marhala ${matchedEducationList[index]['marhala']}",
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ), // Display marhala from bottom to top
                           );
@@ -346,7 +322,7 @@ class ProfilePreview extends StatelessWidget {
                             ConnectorStyle.solidLine,
                         indicatorStyleBuilder: (context, index) =>
                             IndicatorStyle.outlined,
-                        itemCount: marhalas.length,
+                        itemCount: matchedEducationList.length,
                       ),
                     ),
                   ),
@@ -371,26 +347,52 @@ class ProfilePreview extends StatelessWidget {
           ],
         ),
         Expanded(
-          child: Column(
-            children: [
-              // Future Education Section
-              if (groupedFutureEducation.values.first.isEmpty)
-                ExpandableEducation(title: "Future Education", subEducation: futureSubEducation)
-              else
-                ...groupedFutureEducation.entries.map((entry) {
+          child: Container(
+            margin: EdgeInsets.only(right: 20,left: 20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  height: 35 ,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF008759),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(5.0), // Rounded corners
+                      ),
+                    ),
+                    onPressed: () async {
+                      updatePakTalimForm().showRequestDetailsPopup(context);
+                    },
+                    child: const Text(
+                      'Add Education',
+                      style: TextStyle(
+                        color: Colors.white,
+                        // Button text color
+                        fontSize: 18.0,
+                      ),
+                    ),
+                  ),
+                ),
+                // Future Education Section
+                if (groupedFutureEducation.values.first.isEmpty)
+                  ExpandableEducation(title: "Future Education", subEducation: futureSubEducation)
+                else
+                  ...groupedFutureEducation.entries.map((entry) {
+                    return ExpandableEducation(
+                      title: "Future Education",
+                      subEducation: entry.value.map((future) => futureEducationDetails(future)).toList(),
+                    );
+                  }),
+                // Grouped Education Section
+                ...groupedEducation.entries.map((entry) {
                   return ExpandableEducation(
-                    title: "Future Education",
-                    subEducation: entry.value.map((future) => futureEducationDetails(future)).toList(),
+                    title: "Marhala ${entry.key}",
+                    subEducation: entry.value.map((edu) => educationDetails(edu, edu.imaniOtherSchool ?? 0)).toList(),
                   );
                 }),
-              // Grouped Education Section
-              ...groupedEducation.entries.map((entry) {
-                return ExpandableEducation(
-                  title: "Marhala ${entry.key}",
-                  subEducation: entry.value.map((edu) => educationDetails(edu, edu.imaniOtherSchool ?? 0)).toList(),
-                );
-              }),
-            ],
+              ],
+            ),
           ),
         )
 

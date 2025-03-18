@@ -14,15 +14,17 @@ class ModuleSelectionScreenW extends StatefulWidget {
 }
 
 class ModuleSelectionScreenState extends State<ModuleSelectionScreenW> {
-  final ModuleController controller = Get.find<ModuleController>();
-  final GlobalStateController statecontroller = Get.find<GlobalStateController>();
+  ModuleController controller = Get.find<ModuleController>();
+  GlobalStateController statecontroller = Get.find<GlobalStateController>();
   late final String its;
 
   @override
   void initState() {
     super.initState();
     its = widget.its;
-    controller.fetchModules(its);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      controller.fetchModules(its);
+    });
   }
 
   @override

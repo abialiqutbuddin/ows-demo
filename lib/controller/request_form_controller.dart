@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:ows/controller/state_management/state_manager.dart';
 import '../api/api.dart';
 import '../mobile_ui/request_form_screen.dart';
 import '../model/institutes_model.dart';
@@ -11,30 +13,44 @@ import '../web_ui/request_form.dart';
 
 class RequestFormController extends GetxController {
 
-  RxString selectedEducationType = "".obs; // Ongoing / Future
-  Rxn<int> selectedMarhala = Rxn<int>(); // 1 to 7
-  RxString selectedCategory = "".obs; // Dunyawi / Deeni
-  RxString selectedDeeniType = "".obs; // Madrasa / Hifz
-  RxString purpose = "".obs; // Madrasa / Hifz
-  RxString grade = "".obs; // Madrasa / Hifz
+  RxString selectedEducationType = "".obs;
+  Rxn<int> selectedMarhala = Rxn<int>();
+  RxString selectedCategory = "".obs;
+  RxString selectedDeeniType = "".obs;
+  RxString purpose = "".obs;
+  RxString grade = "".obs;
+
+  RxBool isSubmitEnabled = false.obs;
+
+  RxString organization = ''.obs;
+
+  RxBool isMarhalaSelected = false.obs;
+  RxBool isDunyawiSelected = false.obs;
+  RxBool isStandardBetween1_3 = false.obs;
+  RxBool isStandardBetween4_5 = false.obs;
+  RxBool isStandardBetween6_7 = false.obs;
+  RxBool isDeeniiSelected = false.obs;
+  RxBool isMadrasaSelected = false.obs;
+  RxBool isHifzSelected = false.obs;
+
+  // RxBool isStandardSelected = false.obs;
+  // RxBool isCitySelected = false.obs;
+  // RxBool isInstituteSelected = false.obs;
+  // RxBool isYearSelected = false.obs;
+  // RxBool isFundsSelected = false.obs;
+  // RxBool isDescriptionSelected = false.obs;
+
 
   // Convert to Rxn<int> for dropdown selections
-  Rxn<int> standardIndex = Rxn<int>(null); // Standard dropdown (Marhala 2-3)
-  Rxn<int> fieldOfStudyIndex =
-  Rxn<int>(null); // Field of Study dropdown (Marhala 4-7)
+  Rxn<int> standardIndex = Rxn<int>(null);
+  Rxn<int> fieldOfStudyIndex = Rxn<int>(null);
   Rxn<int> courseIndexPoint = Rxn<int>(null);
-  Rxn<int> degreeProgramIndex =
-  Rxn<int>(null); // Degree Program dropdown (Marhala 6-7)
-  Rxn<int> marhala4Index =
-  Rxn<int>(null); // Degree Program dropdown (Marhala 6-7)
-  Rxn<int> marhala5Index =
-  Rxn<int>(null); // Degree Program dropdown (Marhala 6-7)
-  Rxn<int> madrasaIndex =
-  Rxn<int>(null); // Degree Program dropdown (Marhala 6-7)
-  Rxn<int> hifzProgramIndex =
-  Rxn<int>(null); // Degree Program dropdown (Marhala 6-7)
-  Rxn<int> darajaIndex =
-  Rxn<int>(null); // Degree Program dropdown (Marhala 6-7)
+  Rxn<int> degreeProgramIndex = Rxn<int>(null);
+  Rxn<int> marhala4Index = Rxn<int>(null);
+  Rxn<int> marhala5Index = Rxn<int>(null);
+  Rxn<int> madrasaIndex = Rxn<int>(null);
+  Rxn<int> hifzProgramIndex = Rxn<int>(null);
+  Rxn<int> darajaIndex = Rxn<int>(null);
 
   RxList<Map<String, dynamic>> degreePrograms = [
     {"id": 1, "name": "Associated Degree Programs"},
@@ -109,7 +125,7 @@ class RequestFormController extends GetxController {
   RxString standard = "".obs;
   RxString fieldOfStudy = "".obs;
   RxString className = "".obs;
- RxString subject = "".obs;
+  RxString subject = "".obs;
   //RxString degreeProgram = "".obs;
   RxString course = "".obs;
   RxString madrasaName = "".obs;
@@ -123,7 +139,7 @@ class RequestFormController extends GetxController {
     hifzProgress.value = "";
     hifzProgramName.value = "";
     grade.value = "";
-    purpose.value = "";
+    //purpose.value = "";
     fieldOfStudyIndex.value = null;
     courseIndexPoint.value = null;
     degreeProgramIndex.value = null;
@@ -132,7 +148,28 @@ class RequestFormController extends GetxController {
     marhala5Index.value = null;
     darajaIndex.value = null;
     hifzProgramIndex.value = null;
+    filteredDarajat.clear();
     madrasaIndex.value = null;
+    studyOptions.clear();
+    filteredStudies.clear();
+    courseOptions.clear();
+    selectedInstitute.value=null;
+    selectedCity.value='Select City';
+    selectedInstituteName.value='';
+    year.value='';
+    selectedCityId.value=null;
+    standardIndex.value = null;
+    selectedCategory.value = '';
+    fieldOfStudyIndex.value = null;
+    courseIndexPoint.value = null;
+    degreeProgramIndex.value = null;
+    marhala4Index.value = null;
+    marhala5Index.value = null;
+    darajaIndex.value = null;
+    hifzProgramIndex.value = null;
+    madrasaIndex.value = null;
+    funds.value='';
+    description.value='';
   }
 
   RxList<Map<String, dynamic>> studyOptions = <Map<String, dynamic>>[].obs;
@@ -150,7 +187,6 @@ class RequestFormController extends GetxController {
   final double defSpacing = 8;
 
   RxInt reqId = 0.obs;
-  final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
   String? appliedByName;
   String? appliedbyIts;
   final String reqNum = "Request #: ows-req-000";
@@ -182,19 +218,7 @@ class RequestFormController extends GetxController {
   ];
 
 
-  void resetSelections({bool resetCategoryOnly = false}) {
-    standardIndex.value = null;
-    selectedCategory.value = '';
-    if (resetCategoryOnly) {
-      fieldOfStudyIndex.value = null;
-      courseIndexPoint.value = null;
-      degreeProgramIndex.value = null;
-      marhala4Index.value = null;
-      marhala5Index.value = null;
-      darajaIndex.value = null;
-      hifzProgramIndex.value = null;
-      madrasaIndex.value = null;
-    }
+  void resetSelections() {
   }
 
 
@@ -313,33 +337,179 @@ class RequestFormController extends GetxController {
   RxString classDegree = ''.obs;
   RxString institution = ''.obs;
   RxString study = ''.obs;
-  RxString year = ''.obs;
+  RxString year = '2025'.obs;
   RxString email = ''.obs;
   RxString phone = ''.obs;
   RxString whatsapp = ''.obs;
   RxString funds = ''.obs;
   RxString description = ''.obs;
 
+  // Function to Validate Form Based on Selections
+  void validateForm() {
+    List<String> requiredFields = ["purpose","marhala"];
+    List<String> missingFields = []; // To store missing required fields
+
+    if (marhala4Index.value != null) {
+      classDegree.value = marhala4Class.firstWhere((e) =>
+      e["id"] == marhala4Index.value)["name"];
+    } else if (marhala5Index.value != null) {
+      classDegree.value = marhala5Class.firstWhere((e) =>
+      e["id"] == marhala5Index.value)["name"];
+    } else if (degreeProgramIndex.value != null) {
+      classDegree.value = degreePrograms.firstWhere((e) =>
+      e["id"] == degreeProgramIndex.value)["name"];
+    }
+
+    if (fieldOfStudyIndex.value != null) {
+      fieldOfStudy.value = studyOptions.firstWhere((e) =>
+      e["id"] == fieldOfStudyIndex.value)["name"];
+
+    }
+
+    if (courseIndexPoint.value != null) {
+      subject.value = courseOptions.firstWhere((e) =>
+      e["id"] == courseIndexPoint.value)["name"];
+    }
+
+    // 🔹 **Dynamically determine subjectCourse**
+    // if (courseIndexPoint.value != null) {
+    //   subjectCourse = courseOptions.firstWhere((e) =>
+    //   e["id"] == courseIndexPoint.value)["name"];
+    // }
+
+    print(subject);
+    print(fieldOfStudy);
+    print(classDegree);
+    print("1 $isDeeniSelected");
+    print(isDeeniiSelected);
+
+    if (isMarhalaSelected.value && isDunyawiSelected.value) {
+      if (isStandardBetween1_3.value) {
+        requiredFields = ["purpose","marhala","standard", "city", "institute", "year", "funds", "description"];
+      } else if (isStandardBetween4_5.value) {
+        requiredFields = ["classDegree","purpose","marhala","fieldOfStudy", "subject", "city", "institute", "year", "funds", "description"];
+      } else if (isStandardBetween6_7.value) {
+        requiredFields = ["purpose","marhala","classDegree", "fieldOfStudy", "subject", "city", "institute", "year", "funds", "description"];
+      }
+    } else if (isMarhalaSelected.value && isDeeniiSelected.value) {
+      if (isMadrasaSelected.value) {
+        requiredFields = ["purpose","marhala","madrasaName", "darajaName", "year", "funds", "description"];
+      } else if (isHifzSelected.value) {
+        requiredFields = ["purpose","marhala","hifzProgramName", "year", "funds", "description"];
+      }
+    }
+
+    // Check required fields and store missing ones
+    for (var field in requiredFields) {
+      if (getFieldValue(field).isEmpty) {
+        missingFields.add(field);
+      }
+    }
+
+    // Debugging Output
+    print("🔹 Required Fields: $requiredFields");
+    print("✅ Filled Fields: ${requiredFields.where((field) => getFieldValue(field).isNotEmpty).toList()}");
+    print("❌ Missing Fields: $missingFields");
+
+    isSubmitEnabled.value = missingFields.isEmpty;
+  }
+
+  RxString degreeProgram = ''.obs;
+
+  // Get Field Value Dynamically
+  String getFieldValue(String fieldName) {
+    switch (fieldName) {
+      case "classDegree":
+        return classDegree.value;
+      case "marhala":
+        return (selectedMarhala.value != null && selectedMarhala.value! > 0)
+            ? selectedMarhala.value.toString()
+            : '';
+        case "purpose":
+        return purpose.value;
+      case "standard":
+        return grade.value;
+      case "city":
+        return selectedCity.value;
+      case "institute":
+        return selectedInstituteName.value.toString();
+      case "year":
+        return year.value;
+      case "funds":
+        return funds.value;
+      case "description":
+        return description.value;
+      case "fieldOfStudy":
+        return fieldOfStudy.value;
+      case "className":
+        return classDegree.value;
+      case "subject":
+        return subject.value;
+      case "degreeProgram":
+        return degreeProgram.value;
+      case "course":
+        return course.value;
+      case "madrasaName":
+        return madrasaName.value;
+      case "darajaName":
+        return darajaName.value;
+      case "hifzProgramName":
+        return hifzProgramName.value;
+      default:
+        return "";
+    }
+  }
+
+  // Function to Reset Other Options When Selecting a New One in a Group
+  // void selectOption(RxBool selectedOption, List<RxBool> groupOptions) {
+  //   for (var option in groupOptions) {
+  //     if (option != selectedOption) {
+  //       option.value = false;
+  //     }
+  //   }
+  //   selectedOption.value = true;
+  //   validateForm(); // Revalidate after selection
+  // }
+
   @override
   Future<void> onInit() async {
     super.onInit();
+    //final GlobalStateController stateController = Get.put(GlobalStateController());
+    //print(stateController.user.value);
+    //stateController.user.value = GetStorage().read("saved_user");
+
+    everAll([
+      isMarhalaSelected,
+      isDunyawiSelected,
+      isStandardBetween1_3,
+      isStandardBetween4_5,
+      isStandardBetween6_7,
+      isDeeniiSelected,
+      isMadrasaSelected,
+      isHifzSelected,
+      standard,
+      selectedCity,
+      institution,
+      year,
+      funds,
+      description,
+      fieldOfStudy,
+      classDegree,
+      className,
+      subject,
+      degreeProgram,
+      course,
+      madrasaName,
+      darajaName,
+      hifzProgramName,
+      purpose,
+      grade
+    ], (_) => validateForm());
+
 
     loadData();
     loadInstitute();
 
-    // Trigger validation when dropdowns change
-    //ever(selectedCity, (_) => validateForm());
-    ever(selectedSubject, (_) => validateForm());
-    ever(selectedCity, (_) => validateForm());
-    ever(selectedInstitute, (_) => validateForm());
-    ever(classDegree, (_) => validateForm());
-    ever(study, (_) => validateForm());
-    ever(year, (_) => validateForm());
-    ever(email, (_) => validateForm());
-    ever(phone, (_) => validateForm());
-    ever(whatsapp, (_) => validateForm());
-    ever(funds, (_) => validateForm());
-    ever(description, (_) => validateForm());
   }
 
   Future<void> loadInstitute() async {
@@ -357,25 +527,25 @@ class RequestFormController extends GetxController {
     ];
   }
 
-  void validateForm() {
-    bool isValid =
-        //selectedInstitute.value != null &&
-        selectedCity.value != 'Select City' &&
-        selectedMarhala.value != null &&
-        selectedStudy.value != null &&
-        selectedField.value != null &&
-        year.value.isNotEmpty &&
-        _validateYear(year.value) == null && // ✅ Validate year
-        email.value.isNotEmpty &&
-        _validateEmail(email.value) == null && // ✅ Validate email
-        phone.value.isNotEmpty &&
-        _validatePhoneNumber(phone.value) == null && // ✅ Validate phone
-        whatsapp.value.isNotEmpty &&
-        _validatePhoneNumber(whatsapp.value) == null && // ✅ Validate WhatsApp
-        funds.value.isNotEmpty &&
-        _validateFunds(funds.value) == null && // ✅ Validate funds
-        description.value.isNotEmpty;
-  }
+  // void validateForm() {
+  //   bool isValid =
+  //       //selectedInstitute.value != null &&
+  //       selectedCity.value != 'Select City' &&
+  //       selectedMarhala.value != null &&
+  //       selectedStudy.value != null &&
+  //       selectedField.value != null &&
+  //       year.value.isNotEmpty &&
+  //       _validateYear(year.value) == null && // ✅ Validate year
+  //       email.value.isNotEmpty &&
+  //       _validateEmail(email.value) == null && // ✅ Validate email
+  //       phone.value.isNotEmpty &&
+  //       _validatePhoneNumber(phone.value) == null && // ✅ Validate phone
+  //       whatsapp.value.isNotEmpty &&
+  //       _validatePhoneNumber(whatsapp.value) == null && // ✅ Validate WhatsApp
+  //       funds.value.isNotEmpty &&
+  //       _validateFunds(funds.value) == null && // ✅ Validate funds
+  //       description.value.isNotEmpty;
+  // }
 
   // Define validation logic here
   String? validateField(String label, String? value) {
@@ -580,10 +750,8 @@ class RequestFormController extends GetxController {
 }
 
 class RequestForm extends StatefulWidget {
-  final UserProfile member;
 
   const RequestForm({
-    required this.member,
     super.key,
   });
 
@@ -593,15 +761,16 @@ class RequestForm extends StatefulWidget {
 
 class RequestFormState extends State<RequestForm> {
   final RequestFormController controller = Get.find<RequestFormController>();
+  final GlobalStateController stateController = Get.find<GlobalStateController>();
 
   @override
   void initState() {
-    fetchDefaultValues(widget.member);
+    fetchDefaultValues(stateController.user.value);
     super.initState();
   }
 
   void fetchDefaultValues(UserProfile member) {
-    controller.email.value = member.email ?? ''; // ✅ Use RxString instead of emailController.text
+    controller.email.value = member.email ?? '';
     controller.phone.value = member.mobileNo ?? '';
     controller.whatsapp.value = member.whatsappNo ?? '';
 
@@ -637,7 +806,7 @@ class RequestFormState extends State<RequestForm> {
     const double mobileBreakpoint = 600;
 
     return screenWidth <= mobileBreakpoint
-        ? RequestFormM(member: widget.member)
-        : RequestFormW(member: widget.member);
+        ? RequestFormM()
+        : RequestFormW();
   }
 }

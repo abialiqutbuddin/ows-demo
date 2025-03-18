@@ -2,26 +2,73 @@ import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'package:mime/mime.dart';
 import 'package:ows/controller/state_management/state_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../mobile_ui/forms/documents_upload.dart';
+import '../model/document.dart';
+import '../model/funding_record_model.dart';
 import '../model/family_data2.dart';
 import '../model/family_model.dart';
 import '../model/member_model.dart';
 import '../model/permission_model.dart';
 import '../model/request_form_model.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:http_parser/http_parser.dart';
+
+import '../model/submit_application_form.dart';
 
 class Api {
   static const String baseUrl =
       //"http://36.50.12.171:3002";
-        // "http://localhost:3002";
-     "https://mode.imadiinnovations.com:3002";
+      // "http://172.16.109.94:3002";
+      //  "https://mode.imadiinnovations.com:3002";
+      "https://dev.imadiinnovations.com:3003";
+  // "http://localhost:3003";
 
-  static final GlobalStateController permissionsController = Get.find<GlobalStateController>();
+  static final GlobalStateController permissionsController =
+      Get.find<GlobalStateController>();
 
   static Future<List<dynamic>> loadData() async {
     final String response = await rootBundle.loadString('assets/data.json');
     return json.decode(response);
+  }
+
+  static Future<String> fetchVersion() async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/api-version'));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        return data['version'] ?? "Unknown Version";
+      } else {
+        throw Exception("Failed to fetch version");
+      }
+    } catch (e) {
+      print("Error fetching version: $e");
+      return "Unknown Version";
+    }
+  }
+
+  static Future<List<FundingRecords>> fetchRecords(String its) async {
+    try {
+      final response = await http.post(
+        Uri.parse("$baseUrl/fetch-records"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"its": its}),
+      );
+
+      if (response.statusCode == 200) {
+        return FundingRecords.fromJsonList(response.body);
+      } else if (response.statusCode == 404) {
+        return [];
+      } else {
+        throw Exception("Failed to fetch records");
+      }
+    } catch (e) {
+      print("Error: $e");
+      return [];
+    }
   }
 
   static Future<List<FamilyMember>?> fetchFamilyData2(String itsId) async {
@@ -35,14 +82,22 @@ class Api {
 
     try {
       final response = await http.post(url, headers: headers, body: body);
-      print(response.body);
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
 
         if (jsonResponse['family_members'] != null) {
-          return (jsonResponse['family_members'] as List)
-              .map((member) => FamilyMember.fromJson(member))
-              .toList();
+          List<FamilyMember> familyList =
+              (jsonResponse['family_members'] as List)
+                  .map((member) => FamilyMember.fromJson(member))
+                  .toList();
+
+          FamilyMember? matchingMember = familyList.firstWhereOrNull(
+              (member) => member.itsNumber.toString() == itsId);
+
+          permissionsController.appliedByITS.value = itsId;
+          permissionsController.appliedByName.value = matchingMember!.fullName;
+
+          return familyList;
         } else {
           print("⚠️ No family members found.");
           return [];
@@ -64,14 +119,13 @@ class Api {
     try {
       final response = await http.post(uri,
           headers: {
-            'Authorization':
-                'Bearer ${permissionsController.token.value}', // Add authentication if needed
+            'Authorization': 'Bearer ${permissionsController.token.value}',
             'Content-Type': 'application/json',
           },
-          body: json.encode({'url': encodedUrl}));
+          body: json.encode({'url': targetUrl}));
 
       if (response.statusCode == 200) {
-        return UserProfile.fromJson(jsonDecode(response.body));
+        return jsonDecode(response.body);
         //return Family.fromJson(jsonDecode(response.body));
       } else {
         throw Exception('Failed to fetch data: ${response.body}');
@@ -89,8 +143,8 @@ class Api {
         url,
         headers: {
           "Content-Type": "application/json",
-          'Authorization':
-              'Bearer ${permissionsController.token.value}', // Add authentication if needed
+          'Authorization': 'Bearer ${permissionsController.token.value}',
+          // Add authentication if needed
         },
         body: jsonEncode(requestData),
       );
@@ -126,7 +180,6 @@ class Api {
 
         // ✅ Check for valid user profile data
         if (jsonResponse['error'] == null) {
-          print(jsonResponse);
           return UserProfile.fromJson(jsonResponse);
         } else {
           print("Error: ${jsonResponse['error']}");
@@ -190,14 +243,11 @@ class Api {
         }),
       );
 
-      print(response.body);
-
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = json.decode(response.body);
 
         // ✅ Check for errors in the response
         if (jsonResponse['error'] == null) {
-          print(jsonResponse);
           return Family.fromJson(jsonResponse);
         } else {
           print("Error: ${jsonResponse['error']}");
@@ -224,7 +274,6 @@ class Api {
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = jsonDecode(response.body);
         if (data['success'] == true) {
-          print(List<Map<String, dynamic>>.from(data['data']));
           return List<Map<String, dynamic>>.from(data['data']);
         } else {
           throw Exception("Failed to fetch data: ${data['message']}");
@@ -273,8 +322,8 @@ class Api {
         Uri.parse(url),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization':
-              'Bearer ${permissionsController.token.value}', // ✅ Include Authorization header
+          'Authorization': 'Bearer ${permissionsController.token.value}',
+          // ✅ Include Authorization header
         },
         body: json.encode({
           'its': its, // ✅ Pass ITS ID in the request body
@@ -357,7 +406,6 @@ class Api {
 
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      print(data);
       await GetStorage().write("token", data["token"]); // Store token
       permissionsController.token.value = GetStorage().read("token");
       List<dynamic> permissionsData = data['user']['permissions'];
@@ -401,11 +449,12 @@ class Api {
 
   // ✅ Fetch Requests by Mohalla
   static Future<List<RequestFormModel>> fetchRequestsByMohalla(
-      String mohalla,String org) async {
+      String mohalla, String org, String its, String role) async {
     final response = await http.post(
       Uri.parse("$baseUrl/users-by-mohalla"),
       headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"mohalla": mohalla,"org":org}),
+      body: jsonEncode(
+          {"mohalla": mohalla, "org": org, "userRole": role, "ITS": its}),
     );
 
     if (response.statusCode == 200) {
@@ -433,5 +482,305 @@ class Api {
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove("auth_token");
+  }
+
+  //get goods
+  static Future<List<Map<String, dynamic>>> fetchGoods() async {
+    final response = await http.get(Uri.parse("$baseUrl/fetch-goods"));
+    if (response.statusCode == 200) {
+      print(List<Map<String, dynamic>>.from(json.decode(response.body)));
+      return List<Map<String, dynamic>>.from(json.decode(response.body));
+    } else {
+      throw Exception("Failed to load goods");
+    }
+  }
+
+  static Future<void> uploadDocument(
+      String docType, String ITS, String reqId) async {
+    final String studentId = ITS;
+    final String reqid = reqId;
+    final uri = Uri.parse('http://172.16.109.94:3002/upload');
+    var request = http.MultipartRequest('POST', uri)
+      ..fields['studentId'] = studentId;
+
+    // Get the specific document (File object) for the given docType
+    final document = permissionsController.documents[docType];
+    if (document?.file != null) {
+      try {
+        // Read the file bytes
+        var fileBytes = await document!.file!.readAsBytes();
+        var fileName = '${studentId}_$docType';
+        var mimeType =
+            lookupMimeType(document.file!.path) ?? 'application/octet-stream';
+
+        // Add the file to the request using the correct field name
+        request.files.add(http.MultipartFile.fromBytes(
+          docType, // Use the document type as the field name dynamically
+          fileBytes,
+          filename: fileName,
+          contentType: MediaType.parse(mimeType),
+        ));
+
+        try {
+          // Send the request
+          var response = await request.send();
+
+          if (response.statusCode == 200) {
+            final responseData = await http.Response.fromStream(response);
+
+            // Decode the JSON response
+            Map<String, dynamic> responseJson = json.decode(responseData.body);
+
+            // Access the full file path returned by the backend
+            String uploadedFilePath = responseJson['file']['filePath'];
+
+            // Store the file path in the documents map for the current docType
+            permissionsController.documents[docType] = Document(
+              file: permissionsController.documents[docType]?.file,
+              // Keep the file object as is
+              filePath:
+                  uploadedFilePath, // Store the file path returned by the backend
+            );
+
+            print("File uploaded successfully for $docType!");
+          } else {
+            print("Failed to upload file: ${response.statusCode}");
+          }
+        } catch (e) {
+          print("Error during upload: $e");
+        }
+      } catch (e) {
+        print("Error reading file for $docType: $e");
+      }
+    } else {
+      print("No file selected for $docType");
+    }
+  }
+
+  static Future<void> removeDocument(String docType) async {
+    final document = permissionsController.documents[docType];
+    if (document == null || document.filePath == null) {
+      return; // No file to remove
+    }
+
+    final studentId = '30445124';
+
+    // Build the URI with query parameters for file deletion
+    final uri =
+        Uri.parse('http://172.16.109.94:3002/delete').replace(queryParameters: {
+      'studentId': studentId,
+      'docType': docType,
+      'filePath': document.filePath!, // Send the full file path for deletion
+    });
+
+    final response = await http.delete(uri);
+
+    if (response.statusCode == 200) {
+      permissionsController.documents[docType] =
+          null; // Remove the file object locally
+      // Optionally, show a success message or handle deletion
+      print("File removed successfully for $docType.");
+    } else {
+      print("Error removing file: ${response.body}");
+    }
+  }
+
+  static Future<Map<String, dynamic>> updateProfile({
+    required String accessKey,
+    required String username,
+    required String mId,
+    String? pId, // Optional
+    required String jId,
+    required String itsId,
+    required String cId,
+    required String cityId,
+    required String imani,
+    required String iId,
+    required String scholarshipTaken,
+    required String qardan,
+    required String scholar,
+    required String classId,
+    required String sId,
+    String? yearCountDir, // Optional
+    required String edate,
+    required String duration,
+    required String sdate,
+  }) async {
+    try {
+      // Construct request body as JSON
+      final Map<String, dynamic> requestBody = {
+        "access_key": accessKey,
+        "username": username,
+        "m_id": mId,
+        if (pId != null) "p_id": pId,
+        "j_id": jId,
+        "its_id": itsId,
+        "c_id": cId,
+        "city_id": cityId,
+        "imani": imani,
+        "i_id": iId,
+        "scholarship_taken": scholarshipTaken,
+        "qardan": qardan,
+        "scholar": scholar,
+        "class_id": classId,
+        "s_id": sId,
+        if (yearCountDir != null) "year_count_dir": yearCountDir,
+        "edate": edate,
+        "duration": duration,
+        "sdate": sdate,
+      };
+
+      // Send a POST request to the Node.js server
+      final response = await http.post(
+        Uri.parse('$baseUrl/update-paktalim-profile'),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: jsonEncode(requestBody),
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception("Failed to update profile: ${response.body}");
+      }
+    } catch (error) {
+      print("Error updating profile: $error");
+      return {"error": error.toString()};
+    }
+  }
+
+  static Future<dynamic> postProxiedData({
+    required int pId,
+    required int mId,
+    required int jId,
+    required int itsId,
+    required int cId,
+    required int cityId,
+    required String imani,
+    required int iId,
+    required List<String> subId,
+    required int scholarshipTaken,
+    required String qardan,
+    required String scholar,
+    required String className,
+    required String sId,
+    required String edate,
+    required String duration,
+    required String sdate,
+  }) async {
+    //final encodedUrl = Uri.encodeComponent(targetUrl); // Proper encoding
+    final Uri uri = Uri.parse('$baseUrl/post-url-v2');
+
+    try {
+      final response = await http.post(uri,
+          headers: {
+            'Authorization': 'Bearer ${permissionsController.token.value}',
+            'Content-Type': 'application/json',
+          },
+          body: json.encode({
+            'url':
+                'https://paktalim.com/admin/ws_app/UpdateProfile?access_key=bbb1d493d3c4969f55045326d6e2f4a662b85374&username=40459629',
+            'data': {
+              "its_id": itsId,
+              "p_id": pId,
+              "m_id": mId,
+              "j_id": jId,
+              "c_id": cId,
+              "city_id": cityId,
+              "imani": imani,
+              "i_id": iId,
+              "sub_id": subId,
+              "scholarship_taken": scholarshipTaken,
+              "class_id": className,
+              "s_id": sId,
+              "edate": edate,
+              "sdate": sdate,
+              "duration": duration
+            }
+          }));
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception('Failed to fetch data: ${response.body}');
+      }
+    } catch (e) {
+      throw Exception('Error: $e');
+    }
+  }
+
+  static Future<void> submitForm(SubmissionFormModel model) async {
+    final url = '$baseUrl/submit-draft-form';
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(model.toJson()),
+      );
+
+      if (response.statusCode == 200) {
+        // Successful submission.
+        print('Form submitted successfully!');
+        final responseData = jsonDecode(response.body);
+        print('Inserted ID: ${responseData['id']}');
+      } else {
+        print('Error submitting form: ${response.body}');
+      }
+    } catch (error) {
+      print('Error: $error');
+    }
+  }
+
+  Future<void> fetchApplicationData(String its, String reqId) async {
+    final String url = '$baseUrl/get-draft-application?its=$its&reqId=$reqId';
+
+    try {
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        print("Application Data: $data");
+      } else {
+        print("Error: ${jsonDecode(response.body)['error']}");
+      }
+    } catch (e) {
+      print("Network Error: $e");
+    }
+  }
+
+  static Future<void> updateGuardian({
+    required String its, // Guardian ITS
+    required String name,
+    required String contact,
+    required String relation,
+    required String studentIts, // Optional student ITS
+  }) async {
+    final String apiUrl = "$baseUrl/add-guardian";
+
+    final Map<String, dynamic> requestBody = {
+      "name": name,
+      "ITS": its,
+      "contact": contact,
+      "relation": relation,
+      "student_ITS": studentIts,
+    };
+
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode(requestBody),
+      );
+
+      if (response.statusCode == 200) {
+        print("Guardian updated successfully: ${response.body}");
+      } else {
+        print("Failed to update guardian: ${response.body}");
+      }
+    } catch (error) {
+      print("Error updating guardian: $error");
+    }
   }
 }

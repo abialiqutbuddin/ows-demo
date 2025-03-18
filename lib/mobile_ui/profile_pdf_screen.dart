@@ -21,9 +21,7 @@ class ProfilePDFScreenM extends StatefulWidget {
 }
 
 class ProfilePDFScreenMState extends State<ProfilePDFScreenM> {
-  //final bool _isLoading = false;
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final PDFScreenController controller = Get.find<PDFScreenController>();
+  PDFScreenController controller = Get.find<PDFScreenController>();
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +29,6 @@ class ProfilePDFScreenMState extends State<ProfilePDFScreenM> {
     final double screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      key: _scaffoldKey,
       appBar: AppBar(
           backgroundColor: Color(0xfffffcf6),
           surfaceTintColor: Colors.transparent,
@@ -88,7 +85,7 @@ class ProfilePDFScreenMState extends State<ProfilePDFScreenM> {
                       if (value == 'logout') {
                         Get.back();
                       } else if (value == 'request') {
-                        Get.to(() => RequestForm(member: widget.member));
+                        Get.to(() => RequestForm());
                       }
                     },
                     buttonStyleData: const ButtonStyleData(

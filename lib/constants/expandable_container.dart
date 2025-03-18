@@ -38,7 +38,7 @@ class ExpandableEducationState extends State<ExpandableEducation>
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(15),
-      margin: EdgeInsets.only(left: 20, right: 20, top: 10),
+      margin: EdgeInsets.only(top: 10),
       decoration: BoxDecoration(
         color: Color(0xffffead1),
         borderRadius: BorderRadius.all(Radius.circular(5)),

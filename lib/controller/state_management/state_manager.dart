@@ -3,6 +3,8 @@ import 'package:get_storage/get_storage.dart';
 import 'package:ows/model/family_data2.dart';
 import 'package:ows/model/member_model.dart';
 
+import '../../mobile_ui/forms/documents_upload.dart';
+import '../../model/document.dart';
 import '../../model/family_model.dart';
 import '../../model/permission_model.dart';
 
@@ -14,9 +16,14 @@ class GlobalStateController extends GetxController {
   var userIts = ''.obs;
   var userMohalla = ''.obs;
   var userUmoor = ''.obs;
+  var appliedByITS = ''.obs;
+  var appliedByName = ''.obs;
   var familyMembers = <FamilyMember>[].obs;
   final box = GetStorage();
   var token = ''.obs;
+  var version = ''.obs;
+
+  final RxMap<String, Document?> documents = <String, Document?>{}.obs;
 
   @override
   void onInit() {

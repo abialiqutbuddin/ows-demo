@@ -4,13 +4,16 @@ import 'package:ows/constants/table_ui_web.dart';
 import '../api/api.dart';
 import '../controller/admin/view_req_forms.dart';
 import '../model/request_form_model.dart';
+import 'more_student_info.dart';
 
 class ReqFormTable extends StatefulWidget {
   final String mohalla;
   final String org;
+  final String ITS;
+  final String role;
   final List<int> featureIds;
 
-  const ReqFormTable({super.key, required this.mohalla,required this.org, required this.featureIds});
+  const ReqFormTable({super.key, required this.mohalla,required this.org, required this.featureIds, required this.ITS, required this.role});
 
   @override
   _ReqFormTableState createState() => _ReqFormTableState();
@@ -23,7 +26,7 @@ class _ReqFormTableState extends State<ReqFormTable> {
 
 
   final Map<String, String> columnNames = {
-    "sNo": "S.#",  // ✅ This will be generated dynamically
+    "sNo": "S.#",
     "organization": "Organization",
     "currentStatus": "Status",
     "ITS": "ITS No",
@@ -56,8 +59,9 @@ class _ReqFormTableState extends State<ReqFormTable> {
   Future<void> fetchFilteredRequests() async {
     setState(() => _isLoading = true);
     try {
-      await reqFormController.fetchRequests(widget.mohalla,widget.org);
-      _calculateColumnWidths();
+      //await Api.getToken('30445124');
+      await reqFormController.fetchRequests(widget.mohalla,widget.org,widget.ITS,widget.role);
+     // _calculateColumnWidths();
     } catch (e) {
       Get.snackbar("Error", "Failed to load data: $e");
     } finally {
@@ -65,38 +69,52 @@ class _ReqFormTableState extends State<ReqFormTable> {
     }
   }
 
-  void _calculateColumnWidths() {
-    columnWidths.clear();
-    for (String field in columnNames.keys) {
-      double maxWidth = field.length * 10.0;
-      for (var req in reqFormController.reqForms) {
-        String value = req.toJson()[field]?.toString() ?? "";
-        double calculatedWidth = value.length * 8.0;
-        if (calculatedWidth > maxWidth) maxWidth = calculatedWidth;
-      }
-      columnWidths[field] = maxWidth + 20;
-    }
-    setState(() {});
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Requests - ${widget.mohalla}"), backgroundColor: Colors.teal),
+      backgroundColor: Colors.white,
+      appBar: AppBar(title: Text("Requests Dashboard"),
+        backgroundColor: Color(0xffdbbb99,),
+        automaticallyImplyLeading: true,),
       body: _isLoading
           ? Center(child: CircularProgressIndicator())
           : ReqFormTableUI(
         requests: reqFormController.reqForms,
-        columnNames: columnNames,
-        columnWidths: columnWidths,
         scrollController: _scrollController,
         allowEditStatus: widget.featureIds.contains(7),
         onStatusChanged: (req, newStatus) {
-          if(widget.featureIds.contains(7)){
-          _showStatusChangeDialog(req,widget.featureIds);
+          if (widget.featureIds.contains(7)) {
+            _showStatusChangeDialog(req, widget.featureIds);
           }
         },
-      ),
+        onViewDetails: (req) {
+          _showRequestDetailsPopup(context,req,widget.featureIds.contains(7));
+        },
+      )
+    );
+  }
+
+  void _showRequestDetailsPopup(BuildContext context,RequestFormModel req,bool allowEdit) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12), // Adds rounded corners
+          ),
+          insetPadding: const EdgeInsets.all(20), // Controls padding around the popup
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.95, // 95% of screen width
+            height: MediaQuery.of(context).size.height * 0.95, // 95% of screen height
+            padding: const EdgeInsets.all(16), // Inner padding inside the dialog
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: Colors.white,
+            ),
+            child: MoreStudentInfo(req: req,allowEdit: allowEdit,),
+          ),
+        );
+      },
     );
   }
 
@@ -138,7 +156,7 @@ class _ReqFormTableState extends State<ReqFormTable> {
               DropdownButton<String>(
                 value: selectedStatus,
                 isExpanded: true,
-                icon: const Icon(Icons.arrow_drop_down, color: Colors.teal),
+                icon: const Icon(Icons.arrow_drop_down, color: Colors.brown),
                 style: const TextStyle(color: Colors.black, fontSize: 16),
                 items: statusOptions
                     .map<DropdownMenuItem<String>>(
