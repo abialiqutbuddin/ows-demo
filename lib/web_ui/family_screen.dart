@@ -43,7 +43,7 @@ class FamilyScreenWState extends State<FamilyScreenW> {
       final userProfile = await Api.fetchUserProfile(itsId);
       if (userProfile != null) {
         stateController.user.value = userProfile;
-        Get.to(() => ProfilePDFScreen(member: userProfile,));
+        Get.to(() => ProfilePDFScreen());
       } else {
         Get.snackbar("Error", "Profile not found for ITS ID: $itsId");
       }

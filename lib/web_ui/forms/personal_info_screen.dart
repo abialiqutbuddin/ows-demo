@@ -30,8 +30,10 @@ class _FormScreenState extends State<FormScreenW> {
   final RxBool isStudentExpanded = false.obs;
   final RxBool isFamilyExpanded = false.obs;
   final RxBool isOccupationExpanded = false.obs;
+  final RxBool isKhidmatHrExpanded = false.obs;
   final bool isFCNIC = false;
   final bool isMCNIC = false;
+  final RxInt selectedRadio = 0.obs; // Default: No radio selected
 
   @override
   Widget build(BuildContext context) {
@@ -45,12 +47,15 @@ class _FormScreenState extends State<FormScreenW> {
       backgroundColor: Color(0xfffffcf6),
       body: ListView(
         children: [
-          _buildCollapsibleSection(
-              "Personal Information", isPersonalExpanded, personalInfo,complete: controller.isPersonalInfoComplete),
-          _buildCollapsibleSection(
-              "Student Info", isStudentExpanded, studentInfo,complete: controller.isStudentInfoComplete),
+          // _buildCollapsibleSection(
+          //     "Personal Information", isPersonalExpanded, personalInfo,complete: controller.isPersonalInfoComplete),
+          //
+          // _buildCollapsibleSection(
+          //     "Student Info", isStudentExpanded, studentInfo,complete: controller.isStudentInfoComplete),
+          //
           _buildCollapsibleSection("Family Info", isFamilyExpanded, familyInfo,complete: controller.isFamilyInfoComplete),
-          _buildCollapsibleSection("Main Occupation", isOccupationExpanded, mainOccupation,complete: controller.isMainOccupationComplete),
+          _buildCollapsibleSection("Main Occupation", isOccupationExpanded, _mainOccupation2,complete: controller.isMainOccupationComplete),
+          _buildCollapsibleSection("Khidmat / HR", isKhidmatHrExpanded, khidmatHr,complete: controller.isKhidmatHrComplete),
           Obx(() => Padding(
             padding: EdgeInsets.all(16.0),
             child: ElevatedButton(
@@ -79,7 +84,10 @@ class _FormScreenState extends State<FormScreenW> {
             padding: EdgeInsets.all(16.0),
             child: ElevatedButton(
               onPressed: () {
-                Get.to(FinancialFormScreen());
+                setState(() {
+                  controller.selectedIndex.value = 1;
+                });
+                //Get.to(FinancialFormScreen());
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.brown,
@@ -110,6 +118,8 @@ class _FormScreenState extends State<FormScreenW> {
       ),
     );
   }
+
+
 
   /// **Function to build collapsible sections with animation**
   Widget _buildCollapsibleSection(String title, RxBool isExpanded, Widget Function() content,{RxBool? complete}) {
@@ -394,7 +404,7 @@ class _FormScreenState extends State<FormScreenW> {
     );
   }
 
-  Widget mainOccupation() {
+  Widget khidmatHr() {
     return Container(
       //padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
       margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 12),
@@ -407,17 +417,276 @@ class _FormScreenState extends State<FormScreenW> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            spacing: 8,
             children: [
-              Flexible(child: _buildField("Occupation", controller.occupation,function: ()=>controller.validateMainOccupationFields())),
-              Flexible(child: _buildField("Work Address", controller.wordAddress,function: ()=>controller.validateMainOccupationFields())),
-              Flexible(child: _buildField("Work Phone Number", controller.workPhone,function: ()=>controller.validateMainOccupationFields())),
+              Flexible(
+                child: Row(
+                  children: [
+                    Obx(() => Radio(
+                      value: 1,
+                      groupValue: selectedRadio.value,
+                      onChanged: (value) {
+                        controller.tkm.value = '';
+                        controller.shabab.value = '';
+                        controller.umoor.value = '';
+                        controller.dawat.value = '';
+                        selectedRadio.value = value as int;
+                      },
+                    )),
+                    Expanded(
+                      child: Obx(() => _buildField(
+                        "Burhani Guards",
+                        function: ()=> controller.validateKhidmatHr(),
+                        controller.bgi,
+                        isEnabled: selectedRadio.value == 1,
+
+                      )),
+                    ),
+                  ],
+                ),
+              ),
+              Flexible(
+                child: Row(
+                  children: [
+                    Obx(() => Radio(
+                      value: 2,
+                      groupValue: selectedRadio.value,
+                      onChanged: (value) {
+                        selectedRadio.value = value as int;
+                        controller.shabab.value = '';
+                        controller.umoor.value = '';
+                        controller.dawat.value = '';
+                        controller.bgi.value = '';
+
+                      },
+                    )),
+                    Expanded(
+                      child: Obx(() => _buildField(
+                        "Tolobatul Kulliyat",
+                        function: ()=> controller.validateKhidmatHr(),
+                        controller.tkm,
+                        isEnabled: selectedRadio.value ==
+                            2, // Enable when radio is checked
+                      )),
+                    ),
+                  ],
+                ),
+              ),
+              Flexible(
+                child: Row(
+                  children: [
+                    Obx(() => Radio(
+                      value: 3,
+                      groupValue: selectedRadio.value,
+                      onChanged: (value) {
+                        selectedRadio.value = value as int;
+                        controller.tkm.value = '';
+                        controller.shabab.value = '';
+                        controller.dawat.value = '';
+                        controller.bgi.value = '';
+                      },
+                    )),
+                    Expanded(
+                      child: Obx(() => _buildField(
+                        "12 Umoor",
+                        function: ()=> controller.validateKhidmatHr(),
+                        controller.umoor,
+                        isEnabled: selectedRadio.value ==
+                            3, // Enable when radio is checked
+                      )),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
+          Row(
+            children: [
+              Flexible(
+                child: Row(
+                  children: [
+                    Obx(() => Radio(
+                      value: 4,
+                      groupValue: selectedRadio.value,
+                      onChanged: (value) {
+                        selectedRadio.value = value as int;
+                        controller.tkm.value = '';
+                        controller.umoor.value = '';
+                        controller.dawat.value = '';
+                        controller.bgi.value = '';
+                      },
+                    )),
+                    Expanded(
+                      child: Obx(() => _buildField(
+                        "Shabab",
+                        function: ()=> controller.validateKhidmatHr(),
+                        controller.shabab,
+                        isEnabled: selectedRadio.value ==
+                            4, // Enable when radio is checked
+                      )),
+                    ),
+                  ],
+                ),
+              ),
+              Flexible(
+                child: Row(
+                  children: [
+                    Obx(() => Radio(
+                      value: 5,
+                      groupValue: selectedRadio.value,
+                      onChanged: (value) {
+                        selectedRadio.value = value as int;
+                        controller.tkm.value = '';
+                        controller.shabab.value = '';
+                        controller.umoor.value = '';
+                        controller.bgi.value = '';
+                      },
+                    )),
+                    Expanded(
+                      child: Obx(() => _buildField(
+                        "Dawat Offices",
+                        function: ()=> controller.validateKhidmatHr(),
+                        controller.dawat,
+                        isEnabled: selectedRadio.value ==
+                            5, // Enable when radio is checked
+                      )),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          )
         ],
       ),
     );
   }
+
+  Widget _mainOccupation2() {
+    return Column(
+      spacing: 10,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          "Occupations",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.brown),
+        ),
+        Row(
+          children: [
+            Obx(() => Radio(
+              value: 1,
+              toggleable: true,
+              groupValue: controller.occupationInt.value,
+              onChanged: (value) {
+                if (value == null) {
+                  controller.occupationInt.value = 0;
+                } else {
+                  controller.occupationInt.value = value;
+                  controller.validateOccupationsList();
+                }
+              },
+            )),
+            Text("Student",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),)
+          ],
+        ),
+        if(controller.occupationInt.value==0)
+          Obx(() => Column(
+            spacing: 15,
+            children: List.generate(controller.occupations.length, (index) {
+              RxString occupation = controller.occupations[index]["occupation"];
+              RxString wordAddress = controller.occupations[index]["workAddress"];
+              RxString workPhone = controller.occupations[index]["workPhone"];
+
+              return Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      spacing: 8,
+                      children: [
+                        Row(
+                          spacing:15,
+                          children: [
+                            Flexible(
+                              child: _buildField(
+                                  "Occupation",
+                                  occupation,
+                                  function: ()=> controller.validateOccupationsList()
+                              ),
+                            ),
+                            Flexible(
+                              child: _buildField(
+                                  "Work Address",
+                                  wordAddress,
+                                  function: ()=> controller.validateOccupationsList()
+                              ),
+                            ),
+                            Flexible(
+                              child: _buildField(
+                                  "Work Phone",
+                                  workPhone,
+                                  function: ()=> controller.validateOccupationsList()
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.delete, color: Colors.red),
+                    onPressed: () {
+                      controller.occupations.removeAt(index);
+                      controller.validateOccupationsList();
+                    },
+                  ),
+                ],
+              );
+            }),
+          )),
+        if(controller.occupationInt.value==0)
+          TextButton.icon(
+            onPressed: () {
+              bool allValid = controller.occupations.every((entry) =>
+              entry["occupation"].value.isNotEmpty &&
+              entry["workAddress"].value.isNotEmpty &&
+                  entry["workPhone"].value.isNotEmpty);
+
+              if (!allValid) {
+                return;
+              }
+              controller.occupations.add({"occupation": "".obs, "workAddress": "".obs,"workPhone":"".obs});
+              controller.validateOccupationsList();
+            },
+            icon: Icon(Icons.add,color: Colors.green,size: 20,),
+            label: Text("Add Occupation",style: TextStyle(color: Colors.green,fontSize: 15,fontWeight: FontWeight.bold),),
+          ),
+        SizedBox(height: 10,)
+      ],
+    );
+  }
+
+  // Widget mainOccupation() {
+  //   return Container(
+  //     //padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 20),
+  //     margin: const EdgeInsets.symmetric(horizontal: 5, vertical: 12),
+  //     decoration: BoxDecoration(
+  //       borderRadius: BorderRadius.circular(8),
+  //       color: const Color(0xffffead1),
+  //     ),
+  //     child: Column(
+  //       spacing: 15,
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Row(
+  //           spacing: 8,
+  //           children: [
+  //             Flexible(child: _buildField("Occupation", controller.occupation,function: ()=>controller.validateMainOccupationFields())),
+  //             Flexible(child: _buildField("Work Address", controller.wordAddress,function: ()=>controller.validateMainOccupationFields())),
+  //             Flexible(child: _buildField("Work Phone Number", controller.workPhone,function: ()=>controller.validateMainOccupationFields())),
+  //           ],
+  //         ),
+  //       ],
+  //     ),
+  //   );
+  // }
 
   Widget uploadSection(String docType, String ITS, String reqId, {int numItems = 1}) {
     // Define specific names for multiple items if docType is "cNIC"
@@ -522,7 +791,7 @@ class _FormScreenState extends State<FormScreenW> {
   }
 
 
-  Widget _buildField(String label, RxString rxValue, {double? height, Function()? function}) {
+  Widget _buildField(String label, RxString rxValue, {double? height, bool? isEnabled, Function()? function}) {
     bool isDescription = height != null;
     SuperTooltipController tooltipController = SuperTooltipController();
 
@@ -537,6 +806,7 @@ class _FormScreenState extends State<FormScreenW> {
           SizedBox(
             height: height ?? 50,
             child: TextFormField(
+              enabled: isEnabled ?? true,
               textInputAction: TextInputAction.done,
               cursorColor: Colors.brown,
               controller: TextEditingController(text: rxValue.value)
@@ -599,12 +869,16 @@ class _FormScreenState extends State<FormScreenW> {
                   borderRadius: BorderRadius.all(Radius.circular(8)),
                   borderSide: BorderSide(width: 1, color: Colors.brown),
                 ),
+                disabledBorder: const OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                  borderSide: BorderSide(width: 1, color: Colors.grey), // Grey border when disabled
+                ),
                 focusedBorder: const OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(8)),
                   borderSide: BorderSide(width: 1, color: Colors.brown),
                 ),
                 filled: true,
-                fillColor: const Color(0xfffffcf6),
+                fillColor: (isEnabled ?? true) ? const Color(0xfffffcf6) : Colors.grey[300],
                 contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               ),
             ),

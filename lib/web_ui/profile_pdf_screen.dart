@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
+import 'package:ows/constants/app_routes.dart';
 import 'package:ows/controller/state_management/state_manager.dart';
 import 'package:ows/model/member_model.dart';
 import 'package:ows/constants/constants.dart';
@@ -239,11 +240,12 @@ class ProfilePDFScreenWState extends State<ProfilePDFScreenW> {
                   onPressed: () async {
                     var data = await Api.fetchProxiedData(
                         "https://paktalim.com/admin/ws_app/GetFamilyCompletionStatus/${gController.user.value.itsId}?access_key=622ae1838756026b9500e50e778f131ac180bf70&username=40459629");
-                    //data['profile_complete'] = "false";
+                    print(data);
+                    //data['profile_complete'] = "true";
                     //data['family_complete'] = "false";
                     if (data["profile_complete"] == "true" &&
                         data["family_complete"] == "true") {
-                      Get.toNamed('/request-form');
+                      Get.toNamed(AppRoutes.request_form);
                     } else {
                       String message = "";
                       if (data["profile_complete"] != "true") {
@@ -258,9 +260,10 @@ class ProfilePDFScreenWState extends State<ProfilePDFScreenW> {
                           },
                           onConfirm: () {
                             Family family = Family();
-                            Get.to(() => ProfilePreview(
-                                member: gController.user.value,
-                                family: family));
+                            Get.toNamed(AppRoutes.profile_preview);
+                            // Get.to(() => ProfilePreview(
+                            //     member: gController.user.value,
+                            //     family: family));
                           },
                         );
                       } else {

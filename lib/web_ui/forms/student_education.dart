@@ -45,16 +45,16 @@ class _StudentEducationState extends State<StudentEducationW> {
       setState(() {
         goodsList = goods;
         selectedGoods = goodsList
-            .map((good) => {'good_id': good['good_id'], 'selected': 'none', 'comment': ''})
+            .map((good) =>
+                {'good_id': good['good_id'], 'selected': 'none', 'comment': ''})
             .toList();
       });
-
     } catch (e) {
       print("Error fetching goods: $e");
     }
   }
 
-  Widget travellingSection(){
+  Widget travellingSection() {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 15),
@@ -62,8 +62,8 @@ class _StudentEducationState extends State<StudentEducationW> {
           borderRadius: BorderRadius.circular(8),
           //color: const Color(0xffffead1),
           color: Color(0xffecdacc)
-        //border: Border.all(color:Colors.grey,width: 1)
-      ),
+          //border: Border.all(color:Colors.grey,width: 1)
+          ),
       child: Column(
         spacing: 15,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,79 +71,88 @@ class _StudentEducationState extends State<StudentEducationW> {
           Text(
             "Places",
             style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: Colors.brown),
+                fontWeight: FontWeight.bold, fontSize: 16, color: Colors.brown),
           ),
           Row(
             children: [
               Obx(() => Radio(
-                value: 1,
-                toggleable: true,
-                groupValue: controller.travelledInt.value,
-                onChanged: (value) {
-                  if (value == null) {
-                    controller.travelledInt.value = 0;
-                  } else {
-                    controller.travelledInt.value = value;
-                    controller.validateTravellingsFields();
-                  }},
-              )),
-              Text("Not Travelled",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),)
+                    value: 1,
+                    toggleable: true,
+                    groupValue: controller.travelledInt.value,
+                    onChanged: (value) {
+                      if (value == null) {
+                        controller.travelledInt.value = 0;
+                      } else {
+                        controller.travelledInt.value = value;
+                        controller.validateTravellingsFields();
+                      }
+                    },
+                  )),
+              Text(
+                "Not Travelled",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              )
             ],
           ),
-          if(controller.travelledInt.value!=1)
+          if (controller.travelledInt.value != 1)
             Obx(() => Column(
-              children: List.generate(
-                  controller.travelling.length, (index) {
-                RxString place = controller.travelling[index]["place"];
-                RxString year = controller.travelling[index]["year"];
-                RxString purpose = controller.travelling[index]["purpose"];
+                  children:
+                      List.generate(controller.travelling.length, (index) {
+                    RxString place = controller.travelling[index]["place"];
+                    RxString year = controller.travelling[index]["year"];
+                    RxString purpose = controller.travelling[index]["purpose"];
 
-                return Row(
-                  spacing: 8,
-                  children: [
-                    Text(
-                      "${index + 1}.",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Expanded(
-                      child: Row(
-                        spacing: 5,
-                        children: [
-                          Flexible(
-                              flex: 4,
-                              child: _buildField("Place", place,
-                                  isEnabled: true,function: ()=>controller.validateTravellingsFields())),
-                          Flexible(
-                              flex: 2,
-                              child: _buildField("Year", year,
-                                  isEnabled: true,function: ()=>controller.validateTravellingsFields())),
-                          Flexible(flex:4,child: _buildField("Purpose", purpose, isEnabled: true,function: ()=>controller.validateTravellingsFields())),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.delete, color: Colors.red),
-                      onPressed: () {
-                        controller.travelling
-                            .removeAt(index);
-                        controller.validateTravellingsFields();
-                      },
-                    ),
-                    //Divider(thickness: 1, color: Colors.brown),
-                  ],
-                );
-              }),
-            )),
-          if(controller.travelledInt.value!=1)
+                    return Row(
+                      spacing: 8,
+                      children: [
+                        Text(
+                          "${index + 1}.",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Expanded(
+                          child: Row(
+                            spacing: 5,
+                            children: [
+                              Flexible(
+                                  flex: 4,
+                                  child: _buildField("Place", place,
+                                      isEnabled: true,
+                                      function: () => controller
+                                          .validateTravellingsFields())),
+                              Flexible(
+                                  flex: 2,
+                                  child: _buildField("Year", year,
+                                      isEnabled: true,
+                                      function: () => controller
+                                          .validateTravellingsFields())),
+                              Flexible(
+                                  flex: 4,
+                                  child: _buildField("Purpose", purpose,
+                                      isEnabled: true,
+                                      function: () => controller
+                                          .validateTravellingsFields())),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            controller.travelling.removeAt(index);
+                            controller.validateTravellingsFields();
+                          },
+                        ),
+                        //Divider(thickness: 1, color: Colors.brown),
+                      ],
+                    );
+                  }),
+                )),
+          if (controller.travelledInt.value != 1)
             TextButton.icon(
               onPressed: () {
-                bool allValid = controller.travelling.every(
-                        (entry) =>
+                bool allValid = controller.travelling.every((entry) =>
                     entry["place"].value.isNotEmpty &&
-                        entry["year"].value.isNotEmpty &&
-                        entry["purpose"].value.isNotEmpty);
+                    entry["year"].value.isNotEmpty &&
+                    entry["purpose"].value.isNotEmpty);
                 if (!allValid) {
                   return;
                 }
@@ -172,7 +181,7 @@ class _StudentEducationState extends State<StudentEducationW> {
     );
   }
 
-  Widget dependentsSection(){
+  Widget dependentsSection() {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 15),
@@ -180,8 +189,8 @@ class _StudentEducationState extends State<StudentEducationW> {
           borderRadius: BorderRadius.circular(8),
           //color: const Color(0xffffead1),
           color: Color(0xffecdacc)
-        //border: Border.all(color:Colors.grey,width: 1)
-      ),
+          //border: Border.all(color:Colors.grey,width: 1)
+          ),
       child: Column(
         spacing: 15,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -189,80 +198,87 @@ class _StudentEducationState extends State<StudentEducationW> {
           Text(
             "Dependents",
             style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: Colors.brown),
+                fontWeight: FontWeight.bold, fontSize: 16, color: Colors.brown),
           ),
           Row(
             children: [
               Obx(() => Radio(
-                value: 1,
-                toggleable: true,
-                groupValue: controller.dependentsInt.value,
-                onChanged: (value) {
-                  if (value == null) {
-                    controller.dependentsInt.value = 0;
-                  } else {
-                    controller.dependentsInt.value = value;
-                    controller.validateDependentsFields();
-                  }
-                },
-              )),
-              Text("No Dependents",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),)
+                    value: 1,
+                    toggleable: true,
+                    groupValue: controller.dependentsInt.value,
+                    onChanged: (value) {
+                      if (value == null) {
+                        controller.dependentsInt.value = 0;
+                      } else {
+                        controller.dependentsInt.value = value;
+                        controller.validateDependentsFields();
+                      }
+                    },
+                  )),
+              Text(
+                "No Dependents",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              )
             ],
           ),
-          if (controller.dependentsInt.value!=1)
+          if (controller.dependentsInt.value != 1)
             Obx(() => Column(
-              children: List.generate(
-                  controller.dependents.length, (index) {
-                RxString place = controller.dependents[index]["name"];
-                RxString year = controller.dependents[index]["relation"];
-                RxString purpose = controller.dependents[index]["age"];
+                  children:
+                      List.generate(controller.dependents.length, (index) {
+                    RxString place = controller.dependents[index]["name"];
+                    RxString year = controller.dependents[index]["relation"];
+                    RxString purpose = controller.dependents[index]["age"];
 
-                return Row(
-                  spacing: 8,
-                  children: [
-                    Text(
-                      "${index + 1}.",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Expanded(
-                      child: Row(
-                        spacing: 8,
-                        children: [
-                          Flexible(
-                            child: _buildField("Name", place,
-                                isEnabled: true,function: ()=> controller.validateDependentsFields()),
+                    return Row(
+                      spacing: 8,
+                      children: [
+                        Text(
+                          "${index + 1}.",
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Expanded(
+                          child: Row(
+                            spacing: 8,
+                            children: [
+                              Flexible(
+                                child: _buildField("Name", place,
+                                    isEnabled: true,
+                                    function: () =>
+                                        controller.validateDependentsFields()),
+                              ),
+                              Flexible(
+                                child: _buildField("Relation", year,
+                                    isEnabled: true,
+                                    function: () =>
+                                        controller.validateDependentsFields()),
+                              ),
+                              Flexible(
+                                  child: _buildField("Age", purpose,
+                                      isEnabled: true,
+                                      function: () => controller
+                                          .validateDependentsFields())),
+                            ],
                           ),
-                          Flexible(
-                            child: _buildField("Relation", year,
-                                isEnabled: true,function: ()=> controller.validateDependentsFields()),
-                          ),
-                          Flexible(child: _buildField("Age", purpose, isEnabled: true,function: ()=> controller.validateDependentsFields())),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.delete, color: Colors.red),
-                      onPressed: () {
-                        controller.dependents
-                            .removeAt(index);
-                        controller.validateDependentsFields();
-                      },
-                    ),
-                    //Divider(thickness: 1, color: Colors.brown),
-                  ],
-                );
-              }),
-            )),
-          if (controller.dependentsInt.value!=1)
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            controller.dependents.removeAt(index);
+                            controller.validateDependentsFields();
+                          },
+                        ),
+                        //Divider(thickness: 1, color: Colors.brown),
+                      ],
+                    );
+                  }),
+                )),
+          if (controller.dependentsInt.value != 1)
             TextButton.icon(
               onPressed: () {
-                bool allValid = controller.dependents.every(
-                        (entry) =>
+                bool allValid = controller.dependents.every((entry) =>
                     entry["name"].value.isNotEmpty &&
-                        entry["relation"].value.isNotEmpty &&
-                        entry["age"].value.isNotEmpty);
+                    entry["relation"].value.isNotEmpty &&
+                    entry["age"].value.isNotEmpty);
                 if (!allValid) {
                   return;
                 }
@@ -291,7 +307,7 @@ class _StudentEducationState extends State<StudentEducationW> {
     );
   }
 
-  Widget liabilitiesSection(){
+  Widget liabilitiesSection() {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 15),
@@ -299,8 +315,8 @@ class _StudentEducationState extends State<StudentEducationW> {
           borderRadius: BorderRadius.circular(8),
           //color: const Color(0xffffead1),
           color: Color(0xffecdacc)
-        //border: Border.all(color:Colors.grey,width: 1)
-      ),
+          //border: Border.all(color:Colors.grey,width: 1)
+          ),
       child: Column(
         spacing: 15,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -308,98 +324,127 @@ class _StudentEducationState extends State<StudentEducationW> {
           Text(
             "Liabilities",
             style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: Colors.brown),
+                fontWeight: FontWeight.bold, fontSize: 16, color: Colors.brown),
           ),
           Row(
             children: [
               Obx(() => Radio(
-                value: 1,
-                toggleable: true,
-                groupValue: controller.liabilitiesInt.value,
-                onChanged: (value) {
-                  if (value == null) {
-                    controller.liabilitiesInt.value = 0;
-                  } else {
-                    controller.liabilitiesInt.value = value;
-                    controller.validateLiabilitiesFields();
-                  }
-                },
-              )),
-              Text("No Liabilities",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),)
+                    value: 1,
+                    toggleable: true,
+                    groupValue: controller.liabilitiesInt.value,
+                    onChanged: (value) {
+                      if (value == null) {
+                        controller.liabilitiesInt.value = 0;
+                      } else {
+                        controller.liabilitiesInt.value = value;
+                        controller.validateLiabilitiesFields();
+                      }
+                    },
+                  )),
+              Text(
+                "No Liabilities",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              )
             ],
           ),
-          if(controller.liabilitiesInt.value!=1)
+          if (controller.liabilitiesInt.value != 1)
             Obx(() => Column(
-              children: List.generate(
-                  controller.liabilities.length, (index) {
-                RxString type = controller.liabilities[index]["type"];
-                RxString its = controller.liabilities[index]["its"];
-                RxString purpose = controller.liabilities[index]["purpose"];
-                RxString amount = controller.liabilities[index]["amount"];
-                RxString balance = controller.liabilities[index]["balance"];
-                RxString status = controller.liabilities[index]["status"];
-                RxString reason = controller.liabilities[index]["reason"];
+                  children:
+                      List.generate(controller.liabilities.length, (index) {
+                    RxString type = controller.liabilities[index]["type"];
+                    RxString its = controller.liabilities[index]["its"];
+                    RxString purpose = controller.liabilities[index]["purpose"];
+                    RxString amount = controller.liabilities[index]["amount"];
+                    RxString balance = controller.liabilities[index]["balance"];
+                    RxString status = controller.liabilities[index]["status"];
+                    RxString reason = controller.liabilities[index]["reason"];
 
-                return Row(
-                  spacing: 8,
-                  children: [
-                    Text(
-                      "${index + 1}.",
-                      style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18),
-                    ),
+                    return Row(
+                      spacing: 8,
+                      children: [
+                        Text(
+                          "${index + 1}.",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18),
+                        ),
 
-                    Expanded(
-                      child: Column(
-                        spacing: 8,
-                        children: [
-                          Row(
-                            spacing:8,
+                        Expanded(
+                          child: Column(
+                            spacing: 8,
                             children: [
-                              Flexible(child: _buildField("QH Type / From", type, isEnabled: true,function: ()=> controller.validateLiabilitiesFields())),
-                              Flexible(child: _buildField("ITS (Mother / Father)", its, isEnabled: true,function: ()=> controller.validateLiabilitiesFields())),
-                              Flexible(child: _buildField("Purpose", purpose, isEnabled: true,function: ()=> controller.validateLiabilitiesFields())),
-                              Flexible(child: _buildField("Amount", amount, isEnabled: true,function: ()=> controller.validateLiabilitiesFields())),
-                      
+                              Row(
+                                spacing: 8,
+                                children: [
+                                  Flexible(
+                                      child: _buildField("QH Type / From", type,
+                                          isEnabled: true,
+                                          function: () => controller
+                                              .validateLiabilitiesFields())),
+                                  Flexible(
+                                      child: _buildField(
+                                          "ITS (Mother / Father)", its,
+                                          isEnabled: true,
+                                          function: () => controller
+                                              .validateLiabilitiesFields())),
+                                  Flexible(
+                                      child: _buildField("Purpose", purpose,
+                                          isEnabled: true,
+                                          function: () => controller
+                                              .validateLiabilitiesFields())),
+                                  Flexible(
+                                      child: _buildField("Amount", amount,
+                                          isEnabled: true,
+                                          function: () => controller
+                                              .validateLiabilitiesFields())),
+                                ],
+                              ),
+                              Row(
+                                spacing: 8,
+                                children: [
+                                  Flexible(
+                                      child: _buildField("Balance", balance,
+                                          isEnabled: true,
+                                          function: () => controller
+                                              .validateLiabilitiesFields())),
+                                  Flexible(
+                                      child: _buildField("Status", status,
+                                          isEnabled: true,
+                                          function: () => controller
+                                              .validateLiabilitiesFields())),
+                                  Flexible(
+                                      child: _buildField(
+                                          "Reason if delay in Payment", reason,
+                                          isEnabled: true,
+                                          function: () => controller
+                                              .validateLiabilitiesFields())),
+                                ],
+                              ),
                             ],
                           ),
-                          Row(
-                            spacing:8,
-                            children: [
-                              Flexible(child: _buildField("Balance", balance, isEnabled: true,function: ()=> controller.validateLiabilitiesFields())),
-                              Flexible(child: _buildField("Status", status, isEnabled: true,function: ()=> controller.validateLiabilitiesFields())),
-                              Flexible(child: _buildField("Reason if delay in Payment", reason, isEnabled: true,function: ()=> controller.validateLiabilitiesFields())),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
+                        ),
 
-                    IconButton(
-                      icon: Icon(Icons.delete, color: Colors.red),
-                      onPressed: () {
-                        controller.liabilities
-                            .removeAt(index);
-                        controller.validateLiabilitiesFields();
-                      },
-                    ),
-                    //Divider(thickness: 1, color: Colors.brown),
-                  ],
-                );
-              }),
-            )),
-          if(controller.liabilitiesInt.value!=1)
+                        IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            controller.liabilities.removeAt(index);
+                            controller.validateLiabilitiesFields();
+                          },
+                        ),
+                        //Divider(thickness: 1, color: Colors.brown),
+                      ],
+                    );
+                  }),
+                )),
+          if (controller.liabilitiesInt.value != 1)
             TextButton.icon(
               onPressed: () {
-                bool allValid = controller.liabilities.every(
-                        (entry) =>
+                bool allValid = controller.liabilities.every((entry) =>
                     entry["type"].value.isNotEmpty &&
-                        entry["its"].value.isNotEmpty &&
-                        entry["purpose"].value.isNotEmpty &&
-                        entry["amount"].value.isNotEmpty &&
-                        entry["balance"].value.isNotEmpty &&
-                        entry["status"].value.isNotEmpty);
+                    entry["its"].value.isNotEmpty &&
+                    entry["purpose"].value.isNotEmpty &&
+                    entry["amount"].value.isNotEmpty &&
+                    entry["balance"].value.isNotEmpty &&
+                    entry["status"].value.isNotEmpty);
                 if (!allValid) {
                   return;
                 }
@@ -432,7 +477,7 @@ class _StudentEducationState extends State<StudentEducationW> {
     );
   }
 
-  Widget enayatSection(){
+  Widget enayatSection() {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 15),
@@ -440,8 +485,8 @@ class _StudentEducationState extends State<StudentEducationW> {
           borderRadius: BorderRadius.circular(8),
           //color: const Color(0xffffead1),
           color: Color(0xffecdacc)
-        //border: Border.all(color:Colors.grey,width: 1)
-      ),
+          //border: Border.all(color:Colors.grey,width: 1)
+          ),
       child: Column(
         spacing: 15,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -449,77 +494,92 @@ class _StudentEducationState extends State<StudentEducationW> {
           Text(
             "Enayat",
             style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: Colors.brown),
+                fontWeight: FontWeight.bold, fontSize: 16, color: Colors.brown),
           ),
           Row(
             children: [
               Obx(() => Radio(
-                value: 1,
-                toggleable: true,
-                groupValue: controller.enayatInt.value,
-                onChanged: (value) {
-                  if (value == null) {
-                    controller.enayatInt.value = 0;
-                  } else {
-                    controller.enayatInt.value = value;
-                    controller.validateEnayatFromFields();
-                  }
-                },
-              )),
-              Text("No Previous Enayat",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),)
+                    value: 1,
+                    toggleable: true,
+                    groupValue: controller.enayatInt.value,
+                    onChanged: (value) {
+                      if (value == null) {
+                        controller.enayatInt.value = 0;
+                      } else {
+                        controller.enayatInt.value = value;
+                        controller.validateEnayatFromFields();
+                      }
+                    },
+                  )),
+              Text(
+                "No Previous Enayat",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              )
             ],
           ),
-          if(controller.enayatInt.value!=1)
+          if (controller.enayatInt.value != 1)
             Obx(() => Column(
-              children: List.generate(
-                  controller.enayat.length, (index) {
-                RxString its = controller.enayat[index]["its"];
-                RxString purpose = controller.enayat[index]["purpose"];
-                RxString amount = controller.enayat[index]["amount"];
-                RxString date = controller.enayat[index]["date"];
+                  children: List.generate(controller.enayat.length, (index) {
+                    RxString its = controller.enayat[index]["its"];
+                    RxString purpose = controller.enayat[index]["purpose"];
+                    RxString amount = controller.enayat[index]["amount"];
+                    RxString date = controller.enayat[index]["date"];
 
-                return Row(
-                  spacing: 8,
-                  children: [
-                    Text(
-                      "${index + 1}.",
-                      style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18),
-                    ),
-                    Expanded(
-                      child: Row(
-                        spacing: 8,
-                        children: [
-                          Flexible(child: _buildField("ITS", its, isEnabled: true,function: ()=>controller.validateEnayatFromFields())),
-                          Flexible(child: _buildField("Purpose", purpose, isEnabled: true,function: ()=>controller.validateEnayatFromFields())),
-                          Flexible(child: _buildField("Amount", amount, isEnabled: true,function: ()=>controller.validateEnayatFromFields())),
-                          Flexible(child: _buildField("Date", date, isEnabled: true,function: ()=>controller.validateEnayatFromFields())),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.delete, color: Colors.red),
-                      onPressed: () {
-                        controller.enayat
-                            .removeAt(index);
-                        controller.validateEnayatFromFields();
-                      },
-                    ),
-                    //Divider(thickness: 1, color: Colors.brown),
-                  ],
-                );
-              }),
-            )),
-          if(controller.enayatInt.value!=1)
+                    return Row(
+                      spacing: 8,
+                      children: [
+                        Text(
+                          "${index + 1}.",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18),
+                        ),
+                        Expanded(
+                          child: Row(
+                            spacing: 8,
+                            children: [
+                              Flexible(
+                                  child: _buildField("ITS", its,
+                                      isEnabled: true,
+                                      function: () => controller
+                                          .validateEnayatFromFields())),
+                              Flexible(
+                                  child: _buildField("Purpose", purpose,
+                                      isEnabled: true,
+                                      function: () => controller
+                                          .validateEnayatFromFields())),
+                              Flexible(
+                                  child: _buildField("Amount", amount,
+                                      isEnabled: true,
+                                      function: () => controller
+                                          .validateEnayatFromFields())),
+                              Flexible(
+                                  child: _buildField("Date", date,
+                                      isEnabled: true,
+                                      function: () => controller
+                                          .validateEnayatFromFields())),
+                            ],
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            controller.enayat.removeAt(index);
+                            controller.validateEnayatFromFields();
+                          },
+                        ),
+                        //Divider(thickness: 1, color: Colors.brown),
+                      ],
+                    );
+                  }),
+                )),
+          if (controller.enayatInt.value != 1)
             TextButton.icon(
               onPressed: () {
-                bool allValid = controller.enayat.every(
-                        (entry) =>
+                bool allValid = controller.enayat.every((entry) =>
                     entry["its"].value.isNotEmpty &&
-                        entry["purpose"].value.isNotEmpty &&
-                        entry["amount"].value.isNotEmpty &&
-                        entry["date"].value.isNotEmpty);
+                    entry["purpose"].value.isNotEmpty &&
+                    entry["amount"].value.isNotEmpty &&
+                    entry["date"].value.isNotEmpty);
                 if (!allValid) {
                   return;
                 }
@@ -549,38 +609,46 @@ class _StudentEducationState extends State<StudentEducationW> {
     );
   }
 
-  Widget qhAppliedSection(){
+  Widget qhAppliedSection() {
     return Column(
       spacing: 8,
       children: [
         Row(
           children: [
             Obx(() => Radio(
-              value: 1,
-              toggleable: true,
-              groupValue: controller.qhappliedInt.value,
-              onChanged: (value) {
-                if (value == null) {
-                  controller.qhappliedInt.value = 0;
-                } else {
-                  controller.qhappliedInt.value = value;
-                  controller.validateQHAppliedFields();
-                }
-              },
-            )),
-            Text("No Previously QH Taken",style: TextStyle(fontSize: 18,fontWeight: FontWeight.bold),)
+                  value: 1,
+                  toggleable: true,
+                  groupValue: controller.qhappliedInt.value,
+                  onChanged: (value) {
+                    if (value == null) {
+                      controller.qhappliedInt.value = 0;
+                    } else {
+                      controller.qhappliedInt.value = value;
+                      controller.validateQHAppliedFields();
+                    }
+                  },
+                )),
+            Text(
+              "No Previously QH Taken",
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            )
           ],
         ),
-        if(controller.qhappliedInt.value!=1)
+        if (controller.qhappliedInt.value != 1)
           Row(
             spacing: 8,
             children: [
-              Flexible(child: _buildField("QH Applied", controller.appliedAmount, isEnabled: true,function: ()=> controller.validateQHAppliedFields())),
-              Flexible(child: _buildField("Amanat", controller.amanat, isEnabled: true,function: ()=> controller.validateQHAppliedFields())),
-
+              Flexible(
+                  child: _buildField("QH Applied", controller.appliedAmount,
+                      isEnabled: true,
+                      function: () => controller.validateQHAppliedFields())),
+              Flexible(
+                  child: _buildField("Amanat", controller.amanat,
+                      isEnabled: true,
+                      function: () => controller.validateQHAppliedFields())),
             ],
           ),
-        if(controller.qhappliedInt.value!=1)
+        if (controller.qhappliedInt.value != 1)
           Container(
             width: double.infinity,
             padding: EdgeInsets.symmetric(horizontal: 8, vertical: 15),
@@ -588,8 +656,8 @@ class _StudentEducationState extends State<StudentEducationW> {
                 borderRadius: BorderRadius.circular(8),
                 //color: const Color(0xffffead1),
                 color: Color(0xffecdacc)
-              //border: Border.all(color:Colors.grey,width: 1)
-            ),
+                //border: Border.all(color:Colors.grey,width: 1)
+                ),
             child: Column(
               spacing: 15,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -602,50 +670,62 @@ class _StudentEducationState extends State<StudentEducationW> {
                       color: Colors.brown),
                 ),
                 Obx(() => Column(
-                  children: List.generate(
-                      controller.guarantor.length, (index) {
-                    RxString name = controller.guarantor[index]["name"];
-                    RxString its = controller.guarantor[index]["its"];
-                    RxString mobile = controller.guarantor[index]["mobile"];
+                      children:
+                          List.generate(controller.guarantor.length, (index) {
+                        RxString name = controller.guarantor[index]["name"];
+                        RxString its = controller.guarantor[index]["its"];
+                        RxString mobile = controller.guarantor[index]["mobile"];
 
-                    return Row(
-                      spacing: 8,
-                      children: [
-                        Text(
-                          "${index + 1}.",
-                          style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18),
-                        ),
-                        Expanded(
-                          child: Row(
-                            spacing: 8,
-                            children: [
-                              Flexible(child: _buildField("Name", name, isEnabled: true,function: ()=> controller.validateQHAppliedFields())),
-                              Flexible(child: _buildField("ITS", its, isEnabled: true,function: ()=> controller.validateQHAppliedFields())),
-                              Flexible(child: _buildField("Mobile Number", mobile, isEnabled: true,function: ()=> controller.validateQHAppliedFields())),
-                            ],
-                          ),
-                        ),
+                        return Row(
+                          spacing: 8,
+                          children: [
+                            Text(
+                              "${index + 1}.",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 18),
+                            ),
+                            Expanded(
+                              child: Row(
+                                spacing: 8,
+                                children: [
+                                  Flexible(
+                                      child: _buildField("Name", name,
+                                          isEnabled: true,
+                                          function: () => controller
+                                              .validateQHAppliedFields())),
+                                  Flexible(
+                                      child: _buildField("ITS", its,
+                                          isEnabled: true,
+                                          function: () => controller
+                                              .validateQHAppliedFields())),
+                                  Flexible(
+                                      child: _buildField(
+                                          "Mobile Number", mobile,
+                                          isEnabled: true,
+                                          function: () => controller
+                                              .validateQHAppliedFields())),
+                                ],
+                              ),
+                            ),
 
-                        IconButton(
-                          icon: Icon(Icons.delete, color: Colors.red),
-                          onPressed: () {
-                            controller.guarantor
-                                .removeAt(index);
-                            controller.validateQHAppliedFields();
-                          },
-                        ),
-                        //Divider(thickness: 1, color: Colors.brown),
-                      ],
-                    );
-                  }),
-                )),
+                            IconButton(
+                              icon: Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                controller.guarantor.removeAt(index);
+                                controller.validateQHAppliedFields();
+                              },
+                            ),
+                            //Divider(thickness: 1, color: Colors.brown),
+                          ],
+                        );
+                      }),
+                    )),
                 TextButton.icon(
                   onPressed: () {
-                    bool allValid = controller.guarantor.every(
-                            (entry) =>
+                    bool allValid = controller.guarantor.every((entry) =>
                         entry["name"].value.isNotEmpty &&
-                            entry["its"].value.isNotEmpty &&
-                            entry["mobile"].value.isNotEmpty);
+                        entry["its"].value.isNotEmpty &&
+                        entry["mobile"].value.isNotEmpty);
                     if (!allValid) {
                       return;
                     }
@@ -676,8 +756,7 @@ class _StudentEducationState extends State<StudentEducationW> {
     );
   }
 
-  Widget paymentsSection(){
-
+  Widget paymentsSection() {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 15),
@@ -685,8 +764,8 @@ class _StudentEducationState extends State<StudentEducationW> {
           borderRadius: BorderRadius.circular(8),
           //color: const Color(0xffffead1),
           color: Color(0xffecdacc)
-        //border: Border.all(color:Colors.grey,width: 1)
-      ),
+          //border: Border.all(color:Colors.grey,width: 1)
+          ),
       child: Column(
         spacing: 15,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -694,52 +773,56 @@ class _StudentEducationState extends State<StudentEducationW> {
           Text(
             "Payments",
             style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: Colors.brown),
+                fontWeight: FontWeight.bold, fontSize: 16, color: Colors.brown),
           ),
           Obx(() => Column(
-            children: List.generate(
-                controller.payments.length, (index) {
-              RxString amount = controller.payments[index]["amount"];
-              RxString date = controller.payments[index]["date"];
+                children: List.generate(controller.payments.length, (index) {
+                  RxString amount = controller.payments[index]["amount"];
+                  RxString date = controller.payments[index]["date"];
 
-              return Row(
-                spacing: 8,
-                children: [
-                  Text(
-                    "Semester ${index + 1} Class",
-                    style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18),
-                  ),
-                  Expanded(
-                    child: Row(
-spacing:8,
-                      children: [
-                        Flexible(child: _buildField("Amount", amount, isEnabled: true,function: ()=> controller.validatePaymentsFields())),
-                        Flexible(child: _buildField("Date", date, isEnabled: true,function: ()=> controller.validatePaymentsFields())),
-                      ],
-                    ),
-                  ),
+                  return Row(
+                    spacing: 8,
+                    children: [
+                      Text(
+                        "Semester ${index + 1} Class",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 18),
+                      ),
+                      Expanded(
+                        child: Row(
+                          spacing: 8,
+                          children: [
+                            Flexible(
+                                child: _buildField("Amount", amount,
+                                    isEnabled: true,
+                                    function: () =>
+                                        controller.validatePaymentsFields())),
+                            Flexible(
+                                child: _buildField("Date", date,
+                                    isEnabled: true,
+                                    function: () =>
+                                        controller.validatePaymentsFields())),
+                          ],
+                        ),
+                      ),
 
-                  IconButton(
-                    icon: Icon(Icons.delete, color: Colors.red),
-                    onPressed: () {
-                      controller.payments
-                          .removeAt(index);
-                      controller.validatePaymentsFields();
-                    },
-                  ),
-                  //Divider(thickness: 1, color: Colors.brown),
-                ],
-              );
-            }),
-          )),
+                      IconButton(
+                        icon: Icon(Icons.delete, color: Colors.red),
+                        onPressed: () {
+                          controller.payments.removeAt(index);
+                          controller.validatePaymentsFields();
+                        },
+                      ),
+                      //Divider(thickness: 1, color: Colors.brown),
+                    ],
+                  );
+                }),
+              )),
           TextButton.icon(
             onPressed: () {
-              bool allValid = controller.payments.every(
-                      (entry) =>
+              bool allValid = controller.payments.every((entry) =>
                   entry["amount"].value.isNotEmpty &&
-                      entry["date"].value.isNotEmpty);
+                  entry["date"].value.isNotEmpty);
               if (!allValid) {
                 return;
               }
@@ -767,8 +850,7 @@ spacing:8,
     );
   }
 
-  Widget repaymentsSection(){
-
+  Widget repaymentsSection() {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(horizontal: 8, vertical: 15),
@@ -776,8 +858,8 @@ spacing:8,
           borderRadius: BorderRadius.circular(8),
           //color: const Color(0xffffead1),
           color: Color(0xffecdacc)
-        //border: Border.all(color:Colors.grey,width: 1)
-      ),
+          //border: Border.all(color:Colors.grey,width: 1)
+          ),
       child: Column(
         spacing: 15,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -785,58 +867,70 @@ spacing:8,
           Text(
             "Repayments",
             style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: Colors.brown),
+                fontWeight: FontWeight.bold, fontSize: 16, color: Colors.brown),
           ),
           Obx(() => Column(
-            children: List.generate(
-                controller.repayments.length, (index) {
-              RxString amount = controller.repayments[index]["amount"];
-              RxString date = controller.repayments[index]["date"];
-              RxString total = controller.repayments[index]["total"];
-              RxString balance = controller.repayments[index]["balance"];
+                children: List.generate(controller.repayments.length, (index) {
+                  RxString amount = controller.repayments[index]["amount"];
+                  RxString date = controller.repayments[index]["date"];
+                  RxString total = controller.repayments[index]["total"];
+                  RxString balance = controller.repayments[index]["balance"];
 
-              return Row(
-                spacing: 8,
-                children: [
-                  Text(
-                    "${index + 1}.",
-                    style: TextStyle(fontWeight: FontWeight.bold,fontSize: 18),
-                  ),
-                  Expanded(
-                    child: Row(
-                      spacing: 8,
-                      children: [
-                        Flexible(child: _buildField("Amount", amount, isEnabled: true,function: ()=> controller.validateRePaymentsFields())),
-                        Flexible(child: _buildField("Date", date, isEnabled: true,function: ()=> controller.validateRePaymentsFields())),
-                        Flexible(child: _buildField("Total", total, isEnabled: true,function: ()=> controller.validateRePaymentsFields())),
-                        Flexible(child: _buildField("Balance", balance, isEnabled: true,function: ()=> controller.validateRePaymentsFields())),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.delete, color: Colors.red),
-                    onPressed: () {
-                      controller.repayments
-                          .removeAt(index);
-                      controller.validateRePaymentsFields();
-                    },
-                  ),
+                  return Row(
+                    spacing: 8,
+                    children: [
+                      Text(
+                        "${index + 1}.",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 18),
+                      ),
+                      Expanded(
+                        child: Row(
+                          spacing: 8,
+                          children: [
+                            Flexible(
+                                child: _buildField("Amount", amount,
+                                    isEnabled: true,
+                                    function: () =>
+                                        controller.validateRePaymentsFields())),
+                            Flexible(
+                                child: _buildField("Date", date,
+                                    isEnabled: true,
+                                    function: () =>
+                                        controller.validateRePaymentsFields())),
+                            Flexible(
+                                child: _buildField("Total", total,
+                                    isEnabled: true,
+                                    function: () =>
+                                        controller.validateRePaymentsFields())),
+                            Flexible(
+                                child: _buildField("Balance", balance,
+                                    isEnabled: true,
+                                    function: () =>
+                                        controller.validateRePaymentsFields())),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.delete, color: Colors.red),
+                        onPressed: () {
+                          controller.repayments.removeAt(index);
+                          controller.validateRePaymentsFields();
+                        },
+                      ),
 
-                  //Divider(thickness: 1, color: Colors.brown),
-                ],
-              );
-            }),
-          )),
+                      //Divider(thickness: 1, color: Colors.brown),
+                    ],
+                  );
+                }),
+              )),
           TextButton.icon(
             onPressed: () {
-              bool allValid = controller.repayments.every(
-                      (entry) =>
+              bool allValid = controller.repayments.every((entry) =>
                   entry["amount"].value.isNotEmpty &&
-                      entry["date"].value.isNotEmpty &&
-                      entry["total"].value.isNotEmpty &&
-                      entry["balance"].value.isNotEmpty);
+                  entry["date"].value.isNotEmpty &&
+                  entry["total"].value.isNotEmpty &&
+                  entry["balance"].value.isNotEmpty);
               if (!allValid) {
                 return;
               }
@@ -866,13 +960,13 @@ spacing:8,
     );
   }
 
-
   Map<int, TextEditingController> commentControllers = {};
   bool allSelected = false;
 
   void toggleSelection(int goodId, String selection) {
     setState(() {
-      final index = selectedGoods.indexWhere((item) => item['good_id'] == goodId);
+      final index =
+          selectedGoods.indexWhere((item) => item['good_id'] == goodId);
       if (index != -1) {
         selectedGoods[index]['selected'] = selection;
       }
@@ -889,14 +983,15 @@ spacing:8,
 
   // Check if all items are either "yes" or "no"
   void checkIfAllSelected() {
-    bool allAnswered = selectedGoods.every((item) => item['selected'] == 'yes' || item['selected'] == 'no');
+    bool allAnswered = selectedGoods
+        .every((item) => item['selected'] == 'yes' || item['selected'] == 'no');
     setState(() {
       allSelected = allAnswered;
     });
-    if(allSelected==true){
-      controller.isSOLComplete.value=true;
-    }else{
-      controller.isSOLComplete.value=false;
+    if (allSelected == true) {
+      controller.isSOLComplete.value = true;
+    } else {
+      controller.isSOLComplete.value = false;
     }
   }
 
@@ -918,30 +1013,40 @@ spacing:8,
         itemCount: goodsList.length,
         itemBuilder: (context, index) {
           final good = goodsList[index];
-          final selectedIndex = selectedGoods.indexWhere((item) => item['good_id'] == good['good_id']);
-          final selectedValue = selectedIndex != -1 ? selectedGoods[selectedIndex]['selected'] : 'no';
-          final comment = selectedIndex != -1 ? selectedGoods[selectedIndex]['comment'] : '';
+          final selectedIndex = selectedGoods
+              .indexWhere((item) => item['good_id'] == good['good_id']);
+          final selectedValue = selectedIndex != -1
+              ? selectedGoods[selectedIndex]['selected']
+              : 'no';
+          final comment = selectedIndex != -1
+              ? selectedGoods[selectedIndex]['comment']
+              : '';
 
           final controller = commentControllers.putIfAbsent(
             good['good_id'],
-                () => TextEditingController(text: comment),
+            () => TextEditingController(text: comment),
           );
 
           return Container(
             margin: EdgeInsets.all(10),
             padding: EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Colors.white,
-              border: Border.all(
-                color: Colors.transparent,
-              ),
-              borderRadius: BorderRadius.circular(8)
-            ),
+                color: Colors.white,
+                border: Border.all(
+                  color: Colors.transparent,
+                ),
+                borderRadius: BorderRadius.circular(8)),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SizedBox(width:200,child: Text(good['description'], style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,))),
+                SizedBox(
+                    width: 200,
+                    child: Text(good['description'],
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ))),
                 // Radio Buttons for "Yes" and "No"
                 Flexible(
                   child: StatefulBuilder(
@@ -952,7 +1057,8 @@ spacing:8,
                             value: "yes",
                             groupValue: selectedValue,
                             onChanged: (value) {
-                              setLocalState(() {}); // Only updates this part, reducing UI lag
+                              setLocalState(
+                                  () {}); // Only updates this part, reducing UI lag
                               toggleSelection(good['good_id'], value!);
                             },
                           ),
@@ -1014,49 +1120,70 @@ spacing:8,
       body: ListView(
         children: [
           //_buildCollapsibleSection("Student Education", isstudentEduExpanded, studentEducation),
-          _buildCollapsibleSection("Standard of living", isStandardofLivingExpanded, goods,complete: controller.isSOLComplete),
-          _buildCollapsibleSection("Travelling (Last 5 Years)", isTravellingExpanded, travellingSection,complete: controller.isTravellingComplete),
-          _buildCollapsibleSection("Dependents", isDependentsExpanded, dependentsSection,complete: controller.isDependentsComplete),
-          _buildCollapsibleSection("Liabilities", isLiabilitiesExpanded, liabilitiesSection,complete: controller.isLiabilitesComplete),
-          _buildCollapsibleSection("Enayat From", isEnayatExpanded, enayatSection,complete: controller.isEnayatComplete),
-          _buildCollapsibleSection("QH Applied", isAppliedSectionExpanded,qhAppliedSection,complete: controller.isQHAppliedComplete),
-          _buildCollapsibleSection("Payments", isPaymentsSectionExpanded,paymentsSection,complete: controller.isPaymentsComplete),
-          _buildCollapsibleSection("Repayments", isRepaymentsSectionExpanded,repaymentsSection,complete: controller.isRepaymentsComplete),
+          if (controller.organization.value == 'aiut')
+            _buildCollapsibleSection(
+                "Standard of living", isStandardofLivingExpanded, goods,
+                complete: controller.isSOLComplete),
+          _buildCollapsibleSection("Travelling (Last 5 Years)",
+              isTravellingExpanded, travellingSection,
+              complete: controller.isTravellingComplete),
+          _buildCollapsibleSection(
+              "Dependents", isDependentsExpanded, dependentsSection,
+              complete: controller.isDependentsComplete),
+          if (controller.organization.value == 'stmsf') ...[
+            _buildCollapsibleSection(
+                "Liabilities", isLiabilitiesExpanded, liabilitiesSection,
+                complete: controller.isLiabilitesComplete),
+            _buildCollapsibleSection(
+                "Previously Taken", isAppliedSectionExpanded, qhAppliedSection,
+                complete: controller.isQHAppliedComplete),
+          ],
+          if (controller.organization.value == 'stsmf' ||
+              controller.organization.value == 'aiut')
+            _buildCollapsibleSection(
+                "Enayat From", isEnayatExpanded, enayatSection,
+                complete: controller.isEnayatComplete),
+          // _buildCollapsibleSection(
+          //     "Payments", isPaymentsSectionExpanded, paymentsSection,
+          //     complete: controller.isPaymentsComplete),
+          // _buildCollapsibleSection(
+          //     "Repayments", isRepaymentsSectionExpanded, repaymentsSection,
+          //     complete: controller.isRepaymentsComplete),
           Obx(() => Padding(
-            padding: EdgeInsets.all(16.0),
-            child: ElevatedButton(
-              onPressed: controller.isButtonEnabled.value
-                  ? () {
-                // Handle next action here
-              }
-                  : null, // Disabled if form is invalid
-              style: ElevatedButton.styleFrom(
-                backgroundColor: controller.isButtonEnabled.value
-                    ? Colors.brown
-                    : Colors.grey,
-                padding: EdgeInsets.symmetric(vertical: 14),
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8)),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "Next",
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
+                padding: EdgeInsets.all(16.0),
+                child: ElevatedButton(
+                  onPressed: controller.isButtonEnabled.value
+                      ? () {
+                          // Handle next action here
+                        }
+                      : null, // Disabled if form is invalid
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: controller.isButtonEnabled.value
+                        ? Colors.brown
+                        : Colors.grey,
+                    padding: EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
                   ),
-                  Icon(
-                    Icons.navigate_next_rounded,
-                    color: Colors.white,
-                    size: 24,
-                  )
-                ],
-              ),
-            ),
-          )),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        "Next",
+                        style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white),
+                      ),
+                      Icon(
+                        Icons.navigate_next_rounded,
+                        color: Colors.white,
+                        size: 24,
+                      )
+                    ],
+                  ),
+                ),
+              )),
         ],
       ),
     );
@@ -1064,88 +1191,88 @@ spacing:8,
 
   /// **Function to build collapsible sections with animation**
   Widget _buildCollapsibleSection(
-      String title, RxBool isExpanded, Widget Function() content,{RxBool? complete}) {
+      String title, RxBool isExpanded, Widget Function() content,
+      {RxBool? complete}) {
     return Obx(() => Stack(
-      children: [
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          margin: EdgeInsets.all(12),
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: Color(0xffffead1),
-              border: Border.all(
-                  color: complete!.value ? Colors.green : Colors.transparent,
-                  width: 2
-              )
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  isExpanded.value = !isExpanded.value;
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 10,
+          children: [
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+              margin: EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: Color(0xffffead1),
+                  border: Border.all(
+                      color:
+                          complete!.value ? Colors.green : Colors.transparent,
+                      width: 2)),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  GestureDetector(
+                    onTap: () {
+                      isExpanded.value = !isExpanded.value;
+                    },
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(title,
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                                color: Colors.brown)),
-                      ],
-                    ),
-                    Row(
-                      children: [
-                        AnimatedRotation(
-                          turns: isExpanded.value
-                              ? 0.5
-                              : 0.0, // Rotates 180° when expanded
-                          duration: Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                          child: Icon(
-                            Icons.keyboard_arrow_down,
-                            // Keep only one icon and rotate it
-                            color: Colors.brown,
-                          ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: 10,
+                          children: [
+                            Text(title,
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 20,
+                                    color: Colors.brown)),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            AnimatedRotation(
+                              turns: isExpanded.value
+                                  ? 0.5
+                                  : 0.0, // Rotates 180° when expanded
+                              duration: Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                              child: Icon(
+                                Icons.keyboard_arrow_down,
+                                // Keep only one icon and rotate it
+                                color: Colors.brown,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-              Divider(height: 20, color: Colors.white, thickness: 2),
-              AnimatedSize(
-                alignment: Alignment.topCenter,
-                duration: Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                child: isExpanded.value ? content() : SizedBox.shrink(),
-              ),
-            ],
-          ),
-        ),
-        if (complete.value)
-          Positioned(
-            top: 0,
-            right: 25,
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.green,
-                borderRadius: BorderRadius.all(Radius.circular(50)),
-              ),
-              child: Text(
-                "Completed",
-                style: TextStyle(color: Colors.white, fontSize: 12),
+                  ),
+                  Divider(height: 20, color: Colors.white, thickness: 2),
+                  AnimatedSize(
+                    alignment: Alignment.topCenter,
+                    duration: Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                    child: isExpanded.value ? content() : SizedBox.shrink(),
+                  ),
+                ],
               ),
             ),
-          ),
-      ],
-    ));
+            if (complete.value)
+              Positioned(
+                top: 0,
+                right: 25,
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.green,
+                    borderRadius: BorderRadius.all(Radius.circular(50)),
+                  ),
+                  child: Text(
+                    "Completed",
+                    style: TextStyle(color: Colors.white, fontSize: 12),
+                  ),
+                ),
+              ),
+          ],
+        ));
   }
 
   Widget studentEducation() {
@@ -1167,8 +1294,8 @@ spacing:8,
                 borderRadius: BorderRadius.circular(8),
                 //color: const Color(0xffffead1),
                 color: Color(0xffecdacc)
-              //border: Border.all(color:Colors.grey,width: 1)
-            ),
+                //border: Border.all(color:Colors.grey,width: 1)
+                ),
             child: Column(
               spacing: 15,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1198,7 +1325,7 @@ spacing:8,
                         Flexible(
                             flex: 3,
                             child:
-                            _buildField("Year", controller.personalIncome)),
+                                _buildField("Year", controller.personalIncome)),
                       ],
                     ),
                   ],
@@ -1221,7 +1348,7 @@ spacing:8,
                         Flexible(
                             flex: 3,
                             child:
-                            _buildField("Year", controller.personalIncome)),
+                                _buildField("Year", controller.personalIncome)),
                       ],
                     ),
                   ],
@@ -1244,7 +1371,7 @@ spacing:8,
                         Flexible(
                             flex: 3,
                             child:
-                            _buildField("Year", controller.personalIncome)),
+                                _buildField("Year", controller.personalIncome)),
                       ],
                     ),
                   ],
@@ -1267,7 +1394,7 @@ spacing:8,
                         Flexible(
                             flex: 3,
                             child:
-                            _buildField("Year", controller.personalIncome)),
+                                _buildField("Year", controller.personalIncome)),
                       ],
                     ),
                   ],
@@ -1283,8 +1410,8 @@ spacing:8,
                 borderRadius: BorderRadius.circular(8),
                 //color: const Color(0xffffead1),
                 color: Color(0xffecdacc)
-              //border: Border.all(color:Colors.grey,width: 1)
-            ),
+                //border: Border.all(color:Colors.grey,width: 1)
+                ),
             child: Column(
               spacing: 15,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1312,7 +1439,7 @@ spacing:8,
                         Flexible(
                             flex: 1,
                             child:
-                            _buildField("Year", controller.personalIncome)),
+                                _buildField("Year", controller.personalIncome)),
                         Flexible(
                             flex: 1,
                             child: _buildField(
@@ -1320,7 +1447,7 @@ spacing:8,
                         Flexible(
                             flex: 1,
                             child:
-                            _buildField("CGPA", controller.personalIncome)),
+                                _buildField("CGPA", controller.personalIncome)),
                       ],
                     ),
                   ],
@@ -1338,8 +1465,8 @@ spacing:8,
                 borderRadius: BorderRadius.circular(8),
                 //color: const Color(0xffffead1),
                 color: Color(0xffecdacc)
-              //border: Border.all(color:Colors.grey,width: 1)
-            ),
+                //border: Border.all(color:Colors.grey,width: 1)
+                ),
             child: Column(
               spacing: 15,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1352,66 +1479,66 @@ spacing:8,
                       color: Colors.brown),
                 ),
                 Obx(() => Column(
-                  children: List.generate(
-                      controller.otherCertificationList.length, (index) {
-                    RxString program =
-                    controller.otherCertificationList[index]["program"];
-                    RxString institute = controller
-                        .otherCertificationList[index]["institute"];
-                    RxString year =
-                    controller.otherCertificationList[index]["year"];
-                    RxString age =
-                    controller.otherCertificationList[index]["age"];
-                    RxString cgpa =
-                    controller.otherCertificationList[index]["cgpa"];
+                      children: List.generate(
+                          controller.otherCertificationList.length, (index) {
+                        RxString program =
+                            controller.otherCertificationList[index]["program"];
+                        RxString institute = controller
+                            .otherCertificationList[index]["institute"];
+                        RxString year =
+                            controller.otherCertificationList[index]["year"];
+                        RxString age =
+                            controller.otherCertificationList[index]["age"];
+                        RxString cgpa =
+                            controller.otherCertificationList[index]["cgpa"];
 
-                    return Column(
-                      //crossAxisAlignment: CrossAxisAlignment.start,
-                      spacing: 8,
-                      children: [
-                        Container(
-                            width: double.infinity,
-                            child: Text(
-                              "${index + 1}.",
-                              style: TextStyle(fontWeight: FontWeight.bold),
-                            )),
-                        _buildField("Program", program, isEnabled: true),
-                        _buildField("Institute", institute,
-                            isEnabled: true),
-                        Row(
-                          spacing: 5,
+                        return Column(
+                          //crossAxisAlignment: CrossAxisAlignment.start,
+                          spacing: 8,
                           children: [
-                            Flexible(
-                                flex: 5,
-                                child: _buildField("Year", year,
-                                    isEnabled: true)),
-                            Flexible(
-                                flex: 4,
-                                child: _buildField("Age", age,
-                                    isEnabled: true)),
-                            Flexible(
-                                flex: 4,
-                                child: _buildField("CGPA", cgpa,
-                                    isEnabled: true)),
+                            Container(
+                                width: double.infinity,
+                                child: Text(
+                                  "${index + 1}.",
+                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                )),
+                            _buildField("Program", program, isEnabled: true),
+                            _buildField("Institute", institute,
+                                isEnabled: true),
+                            Row(
+                              spacing: 5,
+                              children: [
+                                Flexible(
+                                    flex: 5,
+                                    child: _buildField("Year", year,
+                                        isEnabled: true)),
+                                Flexible(
+                                    flex: 4,
+                                    child: _buildField("Age", age,
+                                        isEnabled: true)),
+                                Flexible(
+                                    flex: 4,
+                                    child: _buildField("CGPA", cgpa,
+                                        isEnabled: true)),
+                              ],
+                            ),
+                            IconButton(
+                              icon: Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                controller.otherCertificationList
+                                    .removeAt(index);
+                              },
+                            ),
+                            //Divider(thickness: 1, color: Colors.brown),
                           ],
-                        ),
-                        IconButton(
-                          icon: Icon(Icons.delete, color: Colors.red),
-                          onPressed: () {
-                            controller.otherCertificationList
-                                .removeAt(index);
-                          },
-                        ),
-                        //Divider(thickness: 1, color: Colors.brown),
-                      ],
-                    );
-                  }),
-                )),
+                        );
+                      }),
+                    )),
                 TextButton.icon(
                   onPressed: () {
                     bool allValid = controller.otherCertificationList.every(
-                            (entry) =>
-                        entry["program"].value.isNotEmpty &&
+                        (entry) =>
+                            entry["program"].value.isNotEmpty &&
                             entry["institute"].value.isNotEmpty &&
                             entry["year"].value.isNotEmpty &&
                             entry["age"].value.isNotEmpty &&
@@ -1512,7 +1639,7 @@ spacing:8,
               cursorColor: Colors.brown,
               controller: TextEditingController(text: rxValue.value)
                 ..selection =
-                TextSelection.collapsed(offset: rxValue.value.length),
+                    TextSelection.collapsed(offset: rxValue.value.length),
               onChanged: (value) {
                 rxValue.value = value;
                 controller.validateForm();
@@ -1524,56 +1651,56 @@ spacing:8,
                 floatingLabelBehavior: FloatingLabelBehavior.always,
                 suffixIcon: isValid
                     ? Icon(
-                  Icons.check_circle_rounded,
-                  color: Colors.green,
-                )
+                        Icons.check_circle_rounded,
+                        color: Colors.green,
+                      )
                     : GestureDetector(
-                  onTap: () async {
-                    if (!isValid && !isEmpty) {
-                      await tooltipController.showTooltip();
-                    }
-                  },
-                  child: SuperTooltip(
-                    elevation: 1,
-                    showBarrier: true,
-                    barrierColor: Colors.transparent,
-                    controller: tooltipController,
-                    arrowTipDistance: 10,
-                    arrowTipRadius: 2,
-                    arrowLength: 10,
-                    borderColor: isEmpty
-                        ? Colors.amber // ⚠️ Yellow for info
-                        : Colors.red, // ❌ Red for error
-                    borderWidth: 2,
-                    backgroundColor: isEmpty
-                        ? Colors.amber.withValues(alpha: 0.9) // ⚠️ Yellow
-                        : Colors.red.withValues(alpha: 0.9), // ❌ Red
-                    boxShadows: [
-                      BoxShadow(
-                        color: Colors.black
-                            .withValues(alpha: 0.2), // Light shadow
-                        blurRadius: 6,
-                        spreadRadius: 2,
-                        offset: Offset(0, 4),
+                        onTap: () async {
+                          if (!isValid && !isEmpty) {
+                            await tooltipController.showTooltip();
+                          }
+                        },
+                        child: SuperTooltip(
+                          elevation: 1,
+                          showBarrier: true,
+                          barrierColor: Colors.transparent,
+                          controller: tooltipController,
+                          arrowTipDistance: 10,
+                          arrowTipRadius: 2,
+                          arrowLength: 10,
+                          borderColor: isEmpty
+                              ? Colors.amber // ⚠️ Yellow for info
+                              : Colors.red, // ❌ Red for error
+                          borderWidth: 2,
+                          backgroundColor: isEmpty
+                              ? Colors.amber.withValues(alpha: 0.9) // ⚠️ Yellow
+                              : Colors.red.withValues(alpha: 0.9), // ❌ Red
+                          boxShadows: [
+                            BoxShadow(
+                              color: Colors.black
+                                  .withValues(alpha: 0.2), // Light shadow
+                              blurRadius: 6,
+                              spreadRadius: 2,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                          toggleOnTap: true,
+                          content: Text(
+                            isEmpty ? "This field is required" : error ?? "",
+                            style: const TextStyle(
+                                color: Colors.black, fontSize: 12),
+                          ),
+                          child: Icon(
+                            isEmpty
+                                ? Icons.info_rounded // ⚠️ Yellow info icon
+                                : Icons.error_rounded, // ❌ Red error icon
+                            color: isEmpty ? Colors.amber : Colors.red,
+                          ),
+                        ),
                       ),
-                    ],
-                    toggleOnTap: true,
-                    content: Text(
-                      isEmpty ? "This field is required" : error ?? "",
-                      style: const TextStyle(
-                          color: Colors.black, fontSize: 12),
-                    ),
-                    child: Icon(
-                      isEmpty
-                          ? Icons.info_rounded // ⚠️ Yellow info icon
-                          : Icons.error_rounded, // ❌ Red error icon
-                      color: isEmpty ? Colors.amber : Colors.red,
-                    ),
-                  ),
-                ),
                 labelText: label,
                 labelStyle:
-                TextStyle(fontWeight: FontWeight.bold, color: Colors.brown),
+                    TextStyle(fontWeight: FontWeight.bold, color: Colors.brown),
                 enabledBorder: const OutlineInputBorder(
                   borderRadius: BorderRadius.all(Radius.circular(8)),
                   borderSide: BorderSide(width: 1, color: Colors.brown),
@@ -1592,9 +1719,9 @@ spacing:8,
                 fillColor: (isEnabled ?? true)
                     ? const Color(0xfffffcf6)
                     : Colors.grey[
-                300], // Lighter color for disabled                //contentPadding: EdgeInsets.zero
+                        300], // Lighter color for disabled                //contentPadding: EdgeInsets.zero
                 contentPadding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               ),
             ),
           ),
@@ -1617,83 +1744,83 @@ spacing:8,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Obx(() => DropdownButtonFormField2<int>(
-          value: selectedValue.value,
-          decoration: InputDecoration(
-            suffixIcon: error == null
-                ? SizedBox.shrink()
-                : GestureDetector(
-              onTap: () async {
-                await tooltipController.showTooltip();
-              },
-              child: SuperTooltip(
-                elevation: 1,
-                //showBarrier: true, // Allows tapping outside to close
-                barrierColor: Colors
-                    .transparent, // Keep it visible without dark overlay
-                showBarrier: true,
-                controller: tooltipController,
-                arrowTipDistance: 10,
-                arrowTipRadius: 2,
-                arrowLength: 10,
-                borderColor: Color(0xffE9D502),
-                borderWidth: 2,
-                backgroundColor:
-                Color(0xffE9D502).withValues(alpha: 0.9),
-                boxShadows: [
-                  BoxShadow(
-                    color: Colors.black
-                        .withValues(alpha: 0.2), // Light shadow color
-                    blurRadius: 6, // Soft blur effect
-                    spreadRadius: 2,
-                    offset: Offset(0, 4),
-                  ),
-                ],
-                toggleOnTap: true,
-                content: Text(error,
-                    style: const TextStyle(
-                        color: Colors.black, fontSize: 12)),
-                child: Icon(
-                  Icons.error,
-                  color: Color(0xffE9D502),
+              value: selectedValue.value,
+              decoration: InputDecoration(
+                suffixIcon: error == null
+                    ? SizedBox.shrink()
+                    : GestureDetector(
+                        onTap: () async {
+                          await tooltipController.showTooltip();
+                        },
+                        child: SuperTooltip(
+                          elevation: 1,
+                          //showBarrier: true, // Allows tapping outside to close
+                          barrierColor: Colors
+                              .transparent, // Keep it visible without dark overlay
+                          showBarrier: true,
+                          controller: tooltipController,
+                          arrowTipDistance: 10,
+                          arrowTipRadius: 2,
+                          arrowLength: 10,
+                          borderColor: Color(0xffE9D502),
+                          borderWidth: 2,
+                          backgroundColor:
+                              Color(0xffE9D502).withValues(alpha: 0.9),
+                          boxShadows: [
+                            BoxShadow(
+                              color: Colors.black
+                                  .withValues(alpha: 0.2), // Light shadow color
+                              blurRadius: 6, // Soft blur effect
+                              spreadRadius: 2,
+                              offset: Offset(0, 4),
+                            ),
+                          ],
+                          toggleOnTap: true,
+                          content: Text(error,
+                              style: const TextStyle(
+                                  color: Colors.black, fontSize: 12)),
+                          child: Icon(
+                            Icons.error,
+                            color: Color(0xffE9D502),
+                          ),
+                        ),
+                      ),
+                floatingLabelBehavior: FloatingLabelBehavior.always,
+                label: Text(label),
+                labelStyle:
+                    TextStyle(fontWeight: FontWeight.bold, color: Colors.brown),
+                filled: true,
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide(
+                      width: 1, color: Colors.brown), // Removes the border
                 ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                  borderSide: BorderSide(width: 1, color: Colors.brown),
+                ),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
               ),
-            ),
-            floatingLabelBehavior: FloatingLabelBehavior.always,
-            label: Text(label),
-            labelStyle:
-            TextStyle(fontWeight: FontWeight.bold, color: Colors.brown),
-            filled: true,
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
-              borderSide: BorderSide(
-                  width: 1, color: Colors.brown), // Removes the border
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.all(Radius.circular(8)),
-              borderSide: BorderSide(width: 1, color: Colors.brown),
-            ),
-            contentPadding:
-            const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          ),
-          dropdownStyleData: DropdownStyleData(
-              decoration: BoxDecoration(
-                  color: Color(0xfffffcf6),
-                  borderRadius: BorderRadius.circular(8))),
-          items: items.map((Map<String, dynamic> item) {
-            return DropdownMenuItem<int>(
-              value: item['id'],
-              child: Text(item['name']),
-            );
-          }).toList(),
-          onChanged: isEnabled
-              ? (value) {
-            selectedValue.value = value;
-            onChanged(value);
-            controller.validateForm();
-          }
-              : null, // Disable when needed
-          //disabledHint: Text("Select ${_getDisabledHint(label)}"),
-        )),
+              dropdownStyleData: DropdownStyleData(
+                  decoration: BoxDecoration(
+                      color: Color(0xfffffcf6),
+                      borderRadius: BorderRadius.circular(8))),
+              items: items.map((Map<String, dynamic> item) {
+                return DropdownMenuItem<int>(
+                  value: item['id'],
+                  child: Text(item['name']),
+                );
+              }).toList(),
+              onChanged: isEnabled
+                  ? (value) {
+                      selectedValue.value = value;
+                      onChanged(value);
+                      controller.validateForm();
+                    }
+                  : null, // Disable when needed
+              //disabledHint: Text("Select ${_getDisabledHint(label)}"),
+            )),
       ],
     );
   }

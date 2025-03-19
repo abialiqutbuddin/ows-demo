@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:ows/constants/dummy_data.dart';
 import 'package:ows/controller/state_management/state_manager.dart';
 import '../api/api.dart';
 import '../mobile_ui/request_form_screen.dart';
@@ -19,6 +20,7 @@ class RequestFormController extends GetxController {
   RxString selectedDeeniType = "".obs;
   RxString purpose = "".obs;
   RxString grade = "".obs;
+  RxString cnicNo = "".obs;
 
   RxBool isSubmitEnabled = false.obs;
 
@@ -556,6 +558,8 @@ class RequestFormController extends GetxController {
     switch (label.toLowerCase()) {
       case "year":
         return _validateYear(value);
+      case "cnic no.":
+        return _validateCNIC(value);
       case "class / degree program":
         return _validateDegree(value);
       case "institution":
@@ -679,6 +683,13 @@ class RequestFormController extends GetxController {
     return null;
   }
 
+  String? _validateCNIC(String value) {
+    if (!RegExp(r'^\d{13}$').hasMatch(value)) {
+      return "CNIC must be 13 digits";
+    }
+    return null;
+  }
+
   String? _validateFunds(String? value) {
     if (value == null || value.isEmpty) {
       return "Funds amount is required";
@@ -765,6 +776,9 @@ class RequestFormState extends State<RequestForm> {
 
   @override
   void initState() {
+
+    stateController.user.value = userProfile11;
+
     fetchDefaultValues(stateController.user.value);
     super.initState();
   }

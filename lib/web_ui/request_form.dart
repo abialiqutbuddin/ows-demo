@@ -1898,6 +1898,12 @@ class RequestFormWState extends State<RequestFormW> {
                     controller.selectedInstituteName.value = institute ?? "";
                   },
                 )),
+                Flexible(
+                    child: _buildField2(
+                      "CNIC No.",
+                      controller.cnicNo,
+                      isEnabled: true,
+                    )),
                 Flexible(child: _buildField2("Year", controller.year)),
               ],
             ),
@@ -1972,6 +1978,12 @@ class RequestFormWState extends State<RequestFormW> {
                     controller.selectedInstituteName.value = institute ?? "";
                   },
                 )),
+                Flexible(
+                    child: _buildField2(
+                      "CNIC No.",
+                      controller.cnicNo,
+                      isEnabled: true,
+                    )),
                 Flexible(child: _buildField2("Year", controller.year)),
               ],
             ),
@@ -2046,6 +2058,12 @@ class RequestFormWState extends State<RequestFormW> {
                         },
                       )),
                 ),
+                Flexible(
+                    child: _buildField2(
+                      "CNIC No.",
+                      controller.cnicNo,
+                      isEnabled: true,
+                    )),
                 Flexible(child: _buildField2("Year", controller.year)),
               ],
             ),
@@ -2290,14 +2308,12 @@ class RequestFormWState extends State<RequestFormW> {
     return Row(
       spacing: 10,
       children: [
-        // Flexible(
-        //     child: _buildDropdown2(
-        //   label: "City",
-        //   selectedValue: controller.selectedCityId,
-        //   items: controller.cities,
-        //   isEnabled: true,
-        //   onChanged: (int? cityId) => controller.selectCity(cityId),
-        // )),
+        Flexible(
+            child: _buildField2(
+              "CNIC No.",
+          controller.cnicNo,
+          isEnabled: true,
+        )),
         Flexible(
           child: CustomDropdownSearch<String>(
             label: "City",
@@ -2908,14 +2924,15 @@ class GuardianFormDialogState extends State<GuardianFormDialog> {
                       side: BorderSide.none, // Add a red border
                     ),
                   ),
-                  onPressed: () {
+                  onPressed: () async {
                     //if (_formKey1.currentState!.validate()) {
-                      Api.updateGuardian(its: itsController.text,
+                      var response = await Api.updateGuardian(its: itsController.text,
                           name: nameController.text,
                           contact: contactController.text,
                           relation: relationController.text,
                           studentIts: widget.ITS);
-                      Navigator.pop(context); // Close the dialog
+                      Navigator.pop(context);
+                      Get.snackbar("Response", response["message"]);// Close the dialog
                     //}
                   },
                   child: Text(

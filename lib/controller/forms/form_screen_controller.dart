@@ -7,6 +7,7 @@ class FormController extends GetxController {
 
   // **Form State**
   RxBool isFinancialInfoButtonEnabled = false.obs;
+  RxInt selectedIndex = 0.obs;
 
   RxBool isButtonEnabled = false.obs;
 
@@ -91,8 +92,8 @@ class FormController extends GetxController {
           isDependentsComplete.value &&
           isKhidmatComplete.value &&
           isQHAppliedComplete.value &&
-          isPaymentsComplete.value &&
-          isRepaymentsComplete.value &&
+          //isPaymentsComplete.value &&
+          //isRepaymentsComplete.value &&
           isEnayatComplete.value;
     }
 
@@ -117,6 +118,7 @@ class FormController extends GetxController {
   RxBool isPersonalInfoComplete = false.obs;
   RxBool isStudentInfoComplete = false.obs;
   RxBool isFamilyInfoComplete = false.obs;
+  RxBool isKhidmatHrComplete = false.obs;
 
   final RxBool isFinancialComplete = false.obs;
   final RxBool isPersonalAssetsComplete = false.obs;
@@ -141,6 +143,7 @@ class FormController extends GetxController {
   final RxInt qhappliedInt = 0.obs;
   final RxInt enayatInt = 0.obs;
   final RxInt businesAssetInt = 0.obs;
+  final RxInt occupationInt = 0.obs;
 
   // bool validateDocuments(String docType) {
   //   // Check if the document exists in the map and is not null
@@ -403,6 +406,34 @@ class FormController extends GetxController {
     }
   }
 
+  void validateOccupationsList() {
+    if(occupationInt.value==0) {
+      if (occupations.isEmpty) {
+        isMainOccupationComplete.value = false;
+        return;
+      }
+
+      for (var business in occupations) {
+        if (!business.containsKey("occupation") ||
+            !business.containsKey("workAddress") ||
+            business["occupation"] == null || business["workAddress"]
+            .toString()
+            .trim()
+            .isEmpty ||
+            business["occupation"] == null || business["workAddress"]
+            .toString()
+            .trim()
+            .isEmpty) {
+          isMainOccupationComplete.value = false;
+          return;
+        }
+      }
+      isMainOccupationComplete.value = true;
+    }else{
+      isMainOccupationComplete.value = true;
+    }
+  }
+
   void validateFamilyEduFields() {
     if (familyEducationList.isEmpty) {
       isFamilyEduComplete.value = false;
@@ -449,11 +480,6 @@ class FormController extends GetxController {
         familySurname.value.isNotEmpty;
   }
 
-  void validateMainOccupationFields() {
-    isMainOccupationComplete.value = occupation.value.isNotEmpty &&
-        _validateName(occupation.value, "") == null;
-  }
-
   void validateStudentInfoFields() {
     isStudentInfoComplete.value = fullName.value.isNotEmpty &&
         _validateName(fullName.value, "") == null &&
@@ -492,6 +518,15 @@ class FormController extends GetxController {
         studentIncome.isNotEmpty &&
         _validateNumber(studentIncome.value, "") == null &&
         (ownedProperty.value.isNotEmpty || rentProperty.value.isNotEmpty || goodwillProperty.value.isNotEmpty);
+  }
+
+  void validateKhidmatHr(){
+    isKhidmatHrComplete.value = (
+        bgi.value.isNotEmpty
+        || shabab.value.isNotEmpty
+        || dawat.value.isNotEmpty
+        || umoor.value.isNotEmpty
+        || tkm.value.isNotEmpty);
   }
 
   void validatePersonalAssetsFields() {
@@ -583,6 +618,13 @@ class FormController extends GetxController {
   RxString wordAddress = ''.obs;
   RxString workPhone = ''.obs;
 
+  ///KHIDMAT
+  RxString bgi = ''.obs;
+  RxString tkm = ''.obs;
+  RxString shabab = ''.obs;
+  RxString umoor = ''.obs;
+  RxString dawat = ''.obs;
+
   ///income
   RxString personalIncome = ''.obs;
   RxString otherFamilyIncome = ''.obs;
@@ -604,6 +646,7 @@ class FormController extends GetxController {
   RxList<Map<String, dynamic>> guarantor = <Map<String, dynamic>>[].obs;
   RxList<Map<String, dynamic>> payments = <Map<String, dynamic>>[].obs;
   RxList<Map<String, dynamic>> repayments = <Map<String, dynamic>>[].obs;
+  RxList<Map<String, dynamic>> occupations = <Map<String, dynamic>>[].obs;
 
 
   // **Dropdown Fields**

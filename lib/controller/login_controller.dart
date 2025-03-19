@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:ows/api/api.dart';
+import 'package:ows/constants/app_routes.dart';
 import 'package:ows/controller/module_controller.dart';
 import 'package:ows/controller/state_management/state_manager.dart';
 import 'package:get/get.dart';
@@ -80,7 +81,9 @@ class LoginController extends StatelessWidget {
   // 🔹 Fetch User Permissions & Navigate
   Future<void> fetchAndNavigate(String itsId,String role) async {
     stateController.toggleLoading(true);
-    try { Get.to(() => ModuleScreenController(its: itsId));
+    try {
+      //Get.to(() => ModuleScreenController();
+      Get.toNamed(AppRoutes.select_module);
     } catch (e) {
       Get.snackbar("Error", "Failed to fetch permissions: $e");
     } finally {

@@ -83,6 +83,7 @@ class Api {
     try {
       final response = await http.post(url, headers: headers, body: body);
       if (response.statusCode == 200) {
+
         final jsonResponse = jsonDecode(response.body);
 
         if (jsonResponse['family_members'] != null) {
@@ -750,7 +751,7 @@ class Api {
     }
   }
 
-  static Future<void> updateGuardian({
+  static Future<Map<String,dynamic>> updateGuardian({
     required String its, // Guardian ITS
     required String name,
     required String contact,
@@ -768,19 +769,20 @@ class Api {
     };
 
     try {
-      final response = await http.post(
+      final response = await http.put(
         Uri.parse(apiUrl),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode(requestBody),
       );
 
       if (response.statusCode == 200) {
-        print("Guardian updated successfully: ${response.body}");
+        return jsonDecode(response.body);
       } else {
-        print("Failed to update guardian: ${response.body}");
+        return jsonDecode(response.body);
       }
     } catch (error) {
-      print("Error updating guardian: $error");
+      //Get.snackbar('Error updating guardian', error.toString());
+      return {'message':error};
     }
   }
 }

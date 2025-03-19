@@ -42,9 +42,15 @@ class _FinancialFormState extends State<FinancialFormScreenW> {
       body: ListView(
         children: [
           _buildCollapsibleSection("Financials", isFinancialExpanded, financialInfo,complete: controller.isFinancialComplete),
-          _buildCollapsibleSection("Personal Assets", isPersonalAssetsExpanded, personalAssetsInfo,complete: controller.isPersonalAssetsComplete),
-          _buildCollapsibleSection("Business Assets", isBusinessAssetExpanded, _businessAssetSection,complete: controller.isBusinessAssetComplete),
-          //_buildCollapsibleSection("Family Education", isFamilyEduExpanded, _familyEducationSection,complete: controller.isFamilyEduComplete),
+          if(controller.organization.value=='stsmf')...[
+            _buildCollapsibleSection(
+                "Personal Assets", isPersonalAssetsExpanded, personalAssetsInfo,
+                complete: controller.isPersonalAssetsComplete),
+            _buildCollapsibleSection("Business Assets", isBusinessAssetExpanded,
+                _businessAssetSection,
+                complete: controller.isBusinessAssetComplete),
+          ],
+    //_buildCollapsibleSection("Family Education", isFamilyEduExpanded, _familyEducationSection,complete: controller.isFamilyEduComplete),
           Obx(() => Padding(
             padding: EdgeInsets.all(16.0),
             child: ElevatedButton(

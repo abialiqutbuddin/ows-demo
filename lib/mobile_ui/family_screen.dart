@@ -31,9 +31,7 @@ class FamilyScreenMState extends State<FamilyScreenM> {
     try {
       final userProfile = await Api.fetchUserProfile(itsId);
       if (userProfile != null) {
-        Get.to(() => ProfilePDFScreen(
-          member: userProfile,
-        ));
+        Get.to(() => ProfilePDFScreen());
       } else {
         Get.snackbar("Error", "Profile not found for ITS ID: $itsId");
       }

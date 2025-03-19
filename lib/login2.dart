@@ -252,7 +252,7 @@ class LoginController2State extends State<LoginController2> {
         // Store token
         GetStorage().write("token", token);
 
-        Get.to(() => ModuleScreenController(its: itsId));
+        Get.to(() => ModuleScreenController());
       } else {
         throw Exception("Invalid ITS ID");
       }

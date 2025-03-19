@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:ows/api/api.dart';
+import 'package:ows/controller/state_management/state_manager.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import '../mobile_ui/profile_pdf_screen.dart';
 import '../model/family_model.dart';
@@ -34,11 +35,9 @@ class PDFScreenController extends GetxController {
 }
 
 class ProfilePDFScreen extends StatefulWidget {
-  final UserProfile member;
 
   const ProfilePDFScreen({
     super.key,
-    required this.member,
   });
 
   @override
@@ -49,12 +48,13 @@ class ProfilePDFScreenState extends State<ProfilePDFScreen> {
   bool _isLoading = true; // Loading state
   late final Uint8List pdfData; // Pass the PDF data as Uint8List
   final PDFScreenController controller = Get.find<PDFScreenController>();
+  final GlobalStateController gController = Get.find<GlobalStateController>();
 
 
   @override
   void initState() {
     super.initState();
-    controller.fetchAndLoadPDF(widget.member.itsId.toString());
+    controller.fetchAndLoadPDF(gController.user.value.itsId.toString());
   }
 
   @override
@@ -68,12 +68,12 @@ class ProfilePDFScreenState extends State<ProfilePDFScreen> {
         backgroundColor: Color(0xffdbbb99),
         body: screenWidth <= mobileBreakpoint
               ? ProfilePDFScreenM(
-            member: widget.member,
+            member: gController.user.value,
             //pdfData: pdfData,
           )
               :
           ProfilePDFScreenW(
-            member: widget.member,
+            member: gController.user.value,
           ),
       );
   }

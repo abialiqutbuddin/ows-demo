@@ -15,7 +15,6 @@ class IndexStackScreen extends StatefulWidget {
 }
 
 class _IndexStackScreenState extends State<IndexStackScreen> {
-  int selectedIndex = 0;
 
   final FormController controller = Get.find<FormController>();
   final GlobalStateController gController = Get.find<GlobalStateController>();
@@ -30,14 +29,16 @@ class _IndexStackScreenState extends State<IndexStackScreen> {
   }
 
   void loadDefaultValues(){
-    controller.dateOfBirth.value = gController.user.value.dob!;
-    controller.fullName.value = gController.user.value.fullName!;
-    controller.mobileNo.value = gController.user.value.mobileNo!;
-    controller.whatsappNo.value = gController.user.value.whatsappNo!;
-    controller.email.value = gController.user.value.email!;
-    controller.residentialAddress.value = gController.user.value.address!;
-    controller.fatherName.value = gController.user.value.fatherName!;
-    controller.motherName.value = gController.user.value.motherName !;
+    // controller.fatherName.value = gController.user.value.fatherName ?? '';
+    // controller.motherName.value = gController.user.value.motherName ?? '';
+    controller.dateOfBirth.value = gController.user.value.dob ?? '';
+    controller.fullName.value = gController.user.value.fullName ?? '';
+    controller.mobileNo.value = gController.user.value.mobileNo ?? '';
+    controller.whatsappNo.value = gController.user.value.whatsappNo ?? '';
+    controller.email.value = gController.user.value.email ?? '';
+    controller.residentialAddress.value = gController.user.value.address ?? '';
+    controller.fatherName.value = gController.user.value.fatherName ?? '';
+    controller.motherName.value = gController.user.value.motherName  ?? '';
   }
 
   @override
@@ -63,7 +64,7 @@ class _IndexStackScreenState extends State<IndexStackScreen> {
     return Scaffold(
       backgroundColor: Color(0xfffffcf6),
       appBar: AppBar(
-        title: Text(getPageTitle(selectedIndex)), // Display the title dynamically
+        title: Text(getPageTitle(controller.selectedIndex.value)), // Display the title dynamically
       ),
       body: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -82,40 +83,42 @@ class _IndexStackScreenState extends State<IndexStackScreen> {
               shrinkWrap: true,
               itemCount: pages.length,
               itemBuilder: (context, index) {
-                return ListTile(
-                  leading: pages[index].values.first['icon'], // Display icon
-                  title: Text(getPageTitle(index),style: TextStyle(fontWeight: FontWeight.bold),), // Show correct title in sidebar
-                  selected: index == selectedIndex,
-                  onTap: () {
-                    setState(() {
-                      selectedIndex = index;
-                    });
-                  },
+                return Obx( ()=>
+                  ListTile(
+                    leading: pages[index].values.first['icon'], // Display icon
+                    title: Text(getPageTitle(index),style: TextStyle(fontWeight: FontWeight.bold),), // Show correct title in sidebar
+                    selected: index == controller.selectedIndex.value,
+                    onTap: () {
+                        controller.selectedIndex.value = index;
+                    },
+                  ),
                 );
               },
             ),
           ),
           // Right Column: Animated page transition
           Expanded(
-            child: Container(
-              color: Colors.white,
-              child: AnimatedSwitcher(
-                duration: Duration(milliseconds: 500),
-                transitionBuilder: (child, animation) {
-                  final slideAnimation = Tween<Offset>(
-                    begin: Offset(1.0, 0.0),
-                    end: Offset(0.0, 0.0),
-                  ).animate(animation);
-                  return SlideTransition(
-                    position: slideAnimation,
-                    child: FadeTransition(
-                      opacity: animation,
-                      child: child,
-                    ),
-                  );
-                },
-                // Use a unique key for the widget to trigger animation
-                child: pages[selectedIndex].values.first['page'],
+            child: Obx( () =>
+              Container(
+                color: Colors.white,
+                child: AnimatedSwitcher(
+                  duration: Duration(milliseconds: 500),
+                  transitionBuilder: (child, animation) {
+                    final slideAnimation = Tween<Offset>(
+                      begin: Offset(1.0, 0.0),
+                      end: Offset(0.0, 0.0),
+                    ).animate(animation);
+                    return SlideTransition(
+                      position: slideAnimation,
+                      child: FadeTransition(
+                        opacity: animation,
+                        child: child,
+                      ),
+                    );
+                  },
+                  // Use a unique key for the widget to trigger animation
+                  child: pages[controller.selectedIndex.value].values.first['page'],
+                ),
               ),
             ),
           ),

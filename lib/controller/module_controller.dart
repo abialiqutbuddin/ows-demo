@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:get/get.dart';
+import 'package:ows/constants/app_routes.dart';
 import 'package:ows/controller/family_screen_controller.dart';
 import 'package:ows/controller/state_management/state_manager.dart';
 import 'package:ows/mobile_ui/module_screen.dart';
@@ -103,30 +104,19 @@ class ModuleController extends GetxController {
       {required String its, String? mohalla,String? role}) async {
     switch (moduleId) {
       case 1:
-        if (its != null) {
-          isLoading.value = true;
+        isLoading.value = true;
+        List<FamilyMember>? familyMembers = await Api.fetchFamilyData2(its);
+        isLoading.value = false;
 
-          // Fetch the family data
-          List<FamilyMember>? familyMembers = await Api.fetchFamilyData2(its);
+        if (familyMembers != null && familyMembers.isNotEmpty) {
 
-          isLoading.value = false;
-
-          if (familyMembers != null && familyMembers.isNotEmpty) {
-            // Navigate to FamilyScreenController with the list of family members
-            // String familyJson = Uri.encodeComponent(jsonEncode(familyMembers));
-            //
-            // // Navigate using Get.toNamed with query parameters
-            // Get.toNamed('/family-selection', arguments: familyMembers);
-
-            globalController.setUser(its, familyMembers);
-            Get.toNamed('/family-selection');
-
-            //Get.to(() => FamilyScreenController(familyMembers: familyMembers));
-          } else {
-            Get.snackbar("Error", "No family members found.");
-          }
+          globalController.setUser(its, familyMembers);
+          globalController.familyMembers.value = familyMembers;
+          Get.toNamed(AppRoutes.family_screen);
+        } else {
+          Get.snackbar("Error", "No family members found.");
         }
-        break;
+              break;
       case 2:
         Get.to(() =>
             ReqFormTable(mohalla: globalController.userMohalla.value,featureIds: featureIds, org: globalController.userUmoor.value, ITS: its.toString(), role: role.toString(),));
@@ -145,8 +135,9 @@ class ModuleController extends GetxController {
 }
 
 class ModuleScreenController extends StatelessWidget {
-  const ModuleScreenController({super.key, required this.its});
-  final String its;
+   ModuleScreenController({super.key});
+
+  final GlobalStateController globalController = Get.find<GlobalStateController>();
 
   @override
   Widget build(BuildContext context) {
@@ -156,7 +147,7 @@ class ModuleScreenController extends StatelessWidget {
     const double mobileBreakpoint = 600;
 
     return screenWidth <= mobileBreakpoint
-        ? ModuleSelectionScreenM(its: its)
-        : ModuleSelectionScreenW(its: its);
+        ? ModuleSelectionScreenM(its: globalController.userIts.value)
+        : ModuleSelectionScreenW(its: globalController.userIts.value);
   }
 }
