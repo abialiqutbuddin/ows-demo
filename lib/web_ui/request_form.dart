@@ -1170,6 +1170,7 @@ class RequestFormWState extends State<RequestFormW> {
                     applyDate: DateTime.now().toString(),
                     grade: controller.grade.value,
                     purpose: controller.purpose.value,
+                    cnic: controller.cnicNo.value,
                     classification: "",
                     organization: org,
                     currentStatus: "",
@@ -1212,6 +1213,7 @@ class RequestFormWState extends State<RequestFormW> {
                     currentStatus: "",
                     createdBy: "",
                     updatedBy: "",
+                    cnic: controller.cnicNo.value,
                   );
                 }
                 int returnCode = await Api.addRequestForm(requestData);

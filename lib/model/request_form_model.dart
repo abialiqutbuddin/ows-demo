@@ -26,6 +26,7 @@ class RequestFormModel {
   String updatedBy;
   String applyDate;
   String mohalla;
+  String cnic;
   String? address;
   String? dob;
 
@@ -56,6 +57,7 @@ class RequestFormModel {
     required this.updatedBy,
     required this.applyDate,
     required this.mohalla,
+    required this.cnic,
     this.address,
     this.dob,
   });
@@ -89,6 +91,7 @@ class RequestFormModel {
     String? mohalla,
     String? address,
     String? dob,
+    String? cnic,
   }) {
     return RequestFormModel(
       reqId: reqId ?? this.reqId,
@@ -118,6 +121,7 @@ class RequestFormModel {
       applyDate: applyDate ?? this.applyDate,
       mohalla: mohalla ?? this.mohalla,
       address: address ?? this.address,
+      cnic: cnic ?? this.cnic,
       dob: dob ?? this.dob,
     );
   }
@@ -150,6 +154,7 @@ class RequestFormModel {
       mohalla: json['mohalla'] ?? '',
       address: json['address'],
       dob: json['dob'],
+      cnic: json['cnic'] ?? '',
       studentFirstName: json['studentFirstName'] ?? '',
       studentFullName: json['studentFullName'] ?? '',
     );
@@ -184,6 +189,7 @@ class RequestFormModel {
       'applyDate': applyDate,
       'mohalla': mohalla,
       'address': address,
+      'cnic': cnic,
       'dob': dob,
     };
   }
@@ -219,6 +225,7 @@ RequestFormModel(
   mohalla: $mohalla
   address: $address
   dob: $dob
+  cnic: $cnic
 )
     ''';
   }

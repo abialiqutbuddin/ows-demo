@@ -35,8 +35,8 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'OWS',
-      //initialRoute: AppRoutes.login,
-      initialRoute: AppRoutes.app_form,
+      initialRoute: AppRoutes.login,
+     // initialRoute: AppRoutes.app_form,
       //initialRoute: AppRoutes.request_form,
      // home:LoginController(),
        // home: LoginController2(),
