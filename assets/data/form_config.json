@@ -1,0 +1,433 @@
+[
+  {
+    "title": "Personal Info",
+    "sections": [
+      {
+        "title": "Khidmat (HR)",
+        "key": "khidmatInfo",
+        "subSections": [
+          {
+            "title": "Khidmat Details",
+            "fields": [
+              {
+                "label": "Are you currently a part of any of the following khidmat avenues?",
+                "key": "currentKhidmat",
+                "type": "dropdown",
+                "itemsKey": "khidmatOptions"
+              },
+              {
+                "label": "Are you intending to be a part of any of the following khidmat avenues?",
+                "key": "intentKhidmat",
+                "type": "dropdown",
+                "itemsKey": "khidmatOptions"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Deeni Info",
+        "key": "deeniInfo",
+        "subSections": [
+          {
+            "title": "Deeni Info",
+            "fields": [
+              {
+                "type": "radio",
+                "label":
+                "Have you studied Kalemat-ul-shahadah and 7 Daim ul Islam in school/madrasa?",
+                "key": "studied_kalemat_daim",
+                "options": ["Yes", "No"]
+              },
+              {
+                "type": "radio",
+                "label":
+                "Have you memorized names of Dai-al-Zaman TUS / Mazoon Saheb / Mukasir Saheb?",
+                "key": "memorized_names",
+                "options": ["Yes", "No"]
+              },
+              {
+                "type": "radio",
+                "label":
+                "Does he/she offer in Sila Fitra / Vajebaat? (Only HOF)",
+                "key": "offers_sila_vajebaat",
+                "options": ["Yes", "No"]
+              },
+              {
+                "type": "radio",
+                "label":
+                "When have you latest attended misaq majlis to Dai-al-Zamaan TUS?",
+                "key": "attended_misaq_majlis",
+                "options": ["Yes", "No"]
+              },
+              {
+                "type": "radio",
+                "label":
+                "Have you come to contact with any moharramaat – (prohibited activities) - Alcoholic substances/drugs/cigarette/Riba/ in your life?",
+                "key": "contact_moharramaat",
+                "options": ["Yes", "No"]
+              },
+              {
+                "type": "dropdown",
+                "label": "Shaadi?",
+                "key": "shaadi_status",
+                "itemsKey": "shaadiOptions",
+                "showTextFieldIf": 0,
+                "textFieldKey": "spouse_name",
+                "textFieldLabel": "Spouse Name"
+              },
+              {
+                "type": "dropdown",
+                "label":
+                "Does he/she attend all 9 days of Ashara Mubarakah punctually?",
+                "key": "ashara_attendance",
+                "itemsKey": "asharaAttendanceOptions"
+              },
+              {
+                "type": "radio",
+                "label": "Has he/she done ziyarat of Raudat Tahera?",
+                "key": "ziyarat_raudat_tahera",
+                "options": ["Yes", "No"]
+              },
+              {
+                "type": "dropdown",
+                "label": "Does he/she pray Namaz daily?",
+                "key": "namaz_daily",
+                "itemsKey": "namazDailyOptions"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Family Info",
+        "key": "familyInfo",
+        "subSections": [
+          {
+            "title": "Father Info",
+            "fields": [
+              {
+                "type": "text",
+                "label": "Name",
+                "key": "father_name",
+                "validator": "name"
+              },
+              {
+                "type": "text",
+                "label": "CNIC",
+                "key": "father_cnic",
+                "validator": "cnic"
+              }
+            ]
+          },
+          {
+            "title": "Mother Info",
+            "fields": [
+              {
+                "type": "text",
+                "label": "Name",
+                "key": "mother_name",
+                "validator": "name"
+              },
+              {
+                "type": "text",
+                "label": "CNIC",
+                "key": "mother_cnic",
+                "validator": "cnic"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Housing Info",
+        "key": "housingInfo",
+        "subSections": [
+          {
+            "title": "House Details",
+            "fields": [
+              {
+                "type": "multiselect",
+                "label": "Assets Owned",
+                "key": "assets",
+                "itemsKey": "assetsOptions"
+              },
+              {
+                "type": "dropdown",
+                "label": "House Title",
+                "key": "house_title",
+                "itemsKey": "houseTitleOptions"
+              },
+              {
+                "type": "dropdown",
+                "label": "Area of House",
+                "key": "area",
+                "itemsKey": "houseAreaOptions"
+              },
+              {
+                "type": "dropdown",
+                "label": "Neighborhood",
+                "key": "neighborhood",
+                "itemsKey": "neighborhoodOptions"
+              },
+              {
+                "type": "dropdown",
+                "label": "Drinking Water Source",
+                "key": "drinking_water",
+                "itemsKey": "drinkingWaterOptions"
+              },
+              {
+                "type": "dropdown",
+                "label": "Sanitation / Bathroom Type",
+                "key": "sanitation_bathroom",
+                "itemsKey": "sanitationBathroomOptions"
+              },
+              {
+                "type": "radio",
+                "label": "Question 1",
+                "key": "question_1",
+                "options": ["Yes", "No"],
+                "showTextFieldIf": "No"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "FMB Info",
+        "key": "fmbInfo",
+        "subSections": [
+          {
+            "title": "FMB Details",
+            "fields": [
+              {
+                "type": "dropdown",
+                "label": "Are you taking FMB Thali? (HOF)",
+                "key": "taking_fmb",
+                "itemsKey": "fmbThaliOptions"
+              },
+              {
+                "type": "dropdown",
+                "label": "Does the quantity suffice for the whole family?",
+                "key": "fmb_quantity_sufficient",
+                "itemsKey": "fmbQuantityOptions"
+              }
+            ]
+          },
+          {
+            "title": "BMI",
+            "fields": [
+              {"type": "text", "label": "Height (in cm)", "key": "height"},
+              {"type": "text", "label": "Weight (in kg)", "key": "weight"}
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Medical Info",
+        "key": "medicalInfo",
+        "subSections": [
+          {
+            "title": "Medical Info",
+            "fields": [
+              {
+                "type": "radio",
+                "label":
+                "Is there anyone who is physically or mentally challenged in the house? (HOF)",
+                "key": "physically_mentally_challenged",
+                "options": ["Yes", "No"]
+              },
+              {
+                "type": "radio",
+                "label": "Has any child died in the past 5 years?",
+                "key": "child_death_past_5yrs",
+                "options": ["Yes", "No"],
+                "showDropdownIf": "Yes",
+                "dropdownLabel": "Cause of Death",
+                "dropdownKey": "child_death_cause",
+                "itemsKey": "causeOptions"
+              },
+              {
+                "type": "radio",
+                "label":
+                "Are all children in the household taking/taken the required vaccinations? (HOF)",
+                "key": "vaccination_status",
+                "options": ["Yes", "No"]
+              },
+              {
+                "type": "radio",
+                "label": "Any Chronic (long term, incurable) illness? (e.g.)",
+                "key": "chronic_illness",
+                "options": ["Yes", "No"]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Financials",
+        "key": "financialInfo",
+        "subSections": [
+          {
+            "title": "Sources of Income",
+            "fields": [
+              {
+                "label": "Income Type",
+                "key": "incomeType",
+                "type": "dropdown",
+                "itemsKey": "incomeTypeOptions"
+              },
+              {
+                "label": "Family Member Name",
+                "key": "familyMemberName",
+                "type": "text",
+                "validator": "name"
+              },
+              {
+                "label": "Student Part Time",
+                "key": "studentPartTimeIncome",
+                "type": "text",
+                "validator": "number"
+              },
+              {
+                "type": "radio",
+                "label": "Is any member of the household unemployed but capable of working?",
+                "key": "family_member_working",
+                "options": ["Yes", "No"],
+                "showTextFieldIf": "Yes",
+                "textFieldKey": "workingDetails",
+                "textFieldLabel": "Give Details"
+              },
+              {
+                "type": "radio",
+                "label": "Does any family member have a disability or chronic illness affecting earning capacity?",
+                "key": "family_member_disability",
+                "options": ["Yes", "No"],
+                "showTextFieldIf": "Yes",
+                "textFieldKey": "disabilityDetails",
+                "textFieldLabel": "Give Details"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Monthly Expenses",
+        "key": "expensesInfo",
+        "type": "totaling",
+        "subSections": [
+          {
+            "title": "Expenses Breakdown",
+            "fields": [
+              {
+                "label": "Wajebaat / Khumus",
+                "key": "wajebaatExpenses",
+                "type": "text",
+                "validator": "number"
+              },
+              {
+                "label": "FMB Thaali / Niyaaz",
+                "key": "niyazExpenses",
+                "type": "text",
+                "validator": "number"
+              },
+              {
+                "label": "Jamaat Expenses / Sabeel",
+                "key": "sabeelExpenses",
+                "type": "text",
+                "validator": "number"
+              },
+              {
+                "label": "Ziyarat",
+                "key": "zyaratExpenses",
+                "type": "text",
+                "validator": "number"
+              },
+              {
+                "label": "Ashara Mubarakah",
+                "key": "asharaExpenses",
+                "type": "text",
+                "validator": "number"
+              },
+              {
+                "label": "Qardan Hasana",
+                "key": "qardanHasana",
+                "type": "text",
+                "validator": "number"
+              },
+              {
+                "label": "Others",
+                "key": "otherExpenses",
+                "type": "text",
+                "validator": "number"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "title": "Main Occupation",
+        "key": "occupationInfo",
+        "type": "repeatable",
+        "radioLabel": "Student",
+        "fields": [
+          {"label": "Occupation", "key": "occupation"},
+          {"label": "Work Address", "key": "workAddress"},
+          {"label": "Work Phone", "key": "workPhone"}
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Personal Info",
+    "sections": [
+      {
+        "title": "Family Info",
+        "key": "familyInfo",
+        "type": "totaling",
+        "subSections": [
+          {
+            "title": "Income Details",
+            "fields": [
+              {
+                "label": "Personal Income",
+                "key": "personalIncome",
+                "type": "text",
+                "validator": "number"
+              },
+              {
+                "label": "Other Family Income",
+                "key": "otherFamilyIncome",
+                "type": "text",
+                "validator": "number"
+              },
+              {
+                "label": "Student Income (Part Time)",
+                "key": "studentIncomePartTime",
+                "type": "text",
+                "validator": "number"
+              }
+            ]
+          },
+          {
+            "title": "Residential Property",
+            "fields": [
+              {
+                "type": "dropdown",
+                "label": "Property Type",
+                "key": "propertyType",
+                "itemsKey": "propertyOptions"
+              },
+              {
+                "label": "Amount",
+                "key": "propertyAmount",
+                "type": "text",
+                "validator": "number"
+              }
+            ]
+          }
+        ]
+      }
+        ]
+      }
+]

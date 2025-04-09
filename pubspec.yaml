@@ -82,6 +82,7 @@ flutter:
     - assets/its.png
     - assets/profile.pdf
     - assets/data.json
+    - assets/data/form_config.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -8,6 +8,7 @@ import 'package:ows/controller/state_management/state_manager.dart';
 import 'package:ows/controller/update_paktalim_controller.dart';
 import 'package:super_tooltip/super_tooltip.dart';
 import '../api/api.dart';
+import '../constants/constants.dart';
 import '../constants/dropdown_search.dart';
 import '../model/update_paktalim_model.dart';
 
@@ -250,7 +251,7 @@ class updatePakTalimForm {
           Row(
             spacing: 8,
             children: [
-              Flexible(child: _buildField2("Qardan:", controller.qardan)),
+              Flexible(child: Constants().buildField("Qardan:", controller.qardan, controller)),
               Flexible(child: _buildField2("Scholarship", controller.scholar)),
             ],
           ),
@@ -263,32 +264,10 @@ class updatePakTalimForm {
           ),
           ElevatedButton(
             onPressed: () async {
-              UpdateProfileRequest profileData = await controller.getProfileData();
-              Map<String,dynamic> response = await Api.postProxiedData(
-                  pId: int.parse(profileData.pId),
-                  mId: int.parse(profileData.mId),
-                  jId: int.parse(profileData.jId),
-                  itsId: int.parse(profileData.itsId),
-                  cId: int.parse(profileData.cId),
-                  cityId: int.parse(profileData.cityId),
-                  imani: profileData.imani,
-                  iId: int.parse(profileData.iId),
-                  subId: profileData.subId ?? [],
-                  scholarshipTaken: int.parse(profileData.scholarshipTaken),
-                  qardan: profileData.qardan.toString(),
-                  scholar: profileData.scholar.toString(),
-                  className: profileData.classId,
-                  sId: profileData.sId,
-                  edate: profileData.edate,
-                  duration: profileData.duration,
-                  sdate: profileData.sdate);
-              if(response.containsKey('success')) {
-                Get.back();
-                Get.snackbar("result",response['success'],backgroundColor: Colors.brown);
-              }else{
-                Get.snackbar("result",response.toString(),backgroundColor: Colors.redAccent);
-              }
-              printProfileData(profileData);
+              controller.submitForm();
+              // UpdateProfileRequest profileData = await controller.getProfileData();
+              //
+              // printProfileData(profileData);
             },
             child: Text("Update"),
           ),

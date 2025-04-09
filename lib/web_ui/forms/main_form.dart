@@ -50,11 +50,14 @@ class _IndexStackScreenState extends State<IndexStackScreen> {
       {'Personal Information': {
         'page':FormScreenW(),
         'icon': Obx(() => controller.checkPersonalInfo() ? Icon( Icons.check_circle_rounded, color: Colors.green,) : Icon(Icons.error_rounded))}},
-      {'Financial Information': {'page':FinancialFormScreenW(),
+      {'Financial Information': {
+        'page':FinancialFormScreenW(),
         'icon': Obx(() => controller.checkFinancialInfo() ? Icon( Icons.check_circle_rounded, color: Colors.green,) : Icon(Icons.error_rounded))}},
-      {'Financial Information Extended': {'page':StudentEducationW(),
+      {'Financial Information Extended': {
+        'page':StudentEducationW(),
         'icon':Obx(() => controller.checkFinancialExtended() ? Icon( Icons.check_circle_rounded, color: Colors.green,) : Icon(Icons.error_rounded))}},
-      {'Documents Upload':{'page': DocumentsFormScreenW(),
+      {'Documents Upload':{
+        'page': DocumentsFormScreenW(),
         'icon':Obx(() => controller.isDependentsComplete.value ? Icon( Icons.check_circle_rounded, color: Colors.green,) : Icon(Icons.error_rounded))}},
     ];
   }

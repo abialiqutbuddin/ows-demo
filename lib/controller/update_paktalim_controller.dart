@@ -1,7 +1,9 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:ows/controller/state_management/state_manager.dart';
+import '../api/api.dart';
 import '../model/institutes_model.dart';
 import '../model/update_paktalim_model.dart';
 import 'package:intl/intl.dart';
@@ -39,6 +41,35 @@ class UpdatePaktalimController extends GetxController {
       countryCityData.assignAll(jsonData.cast<Map<String, dynamic>>()); // Assign parsed data
     } catch (e) {
       print("Error loading JSON: $e");
+    }
+  }
+
+  Future<void> submitForm() async {
+    UpdateProfileRequest profileData = await getProfileData();
+    //printProfileData(profileData);
+    Map<String,dynamic> response = await Api.postProxiedData(
+        pId: int.parse(profileData.pId),
+        mId: int.parse(profileData.mId),
+        jId: int.parse(profileData.jId),
+        itsId: int.parse(profileData.itsId),
+        cId: int.parse(profileData.cId),
+        cityId: int.parse(profileData.cityId),
+        imani: profileData.imani,
+        iId: int.parse(profileData.iId),
+        subId: profileData.subId ?? [],
+        scholarshipTaken: int.parse(profileData.scholarshipTaken),
+        qardan: profileData.qardan.toString(),
+        scholar: profileData.scholar.toString(),
+        className: profileData.classId,
+        sId: profileData.sId,
+        edate: profileData.edate,
+        duration: profileData.duration,
+        sdate: profileData.sdate);
+    if(response.containsKey('success')) {
+      Get.back();
+      Get.snackbar("result",response['success'],backgroundColor: Colors.brown);
+    }else{
+      Get.snackbar("result",response.toString(),backgroundColor: Colors.redAccent);
     }
   }
 

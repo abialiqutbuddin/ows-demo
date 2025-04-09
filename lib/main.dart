@@ -10,6 +10,7 @@ import 'controller/forms/form_screen_controller.dart';
 import 'controller/profile_pdf_controller.dart';
 import 'controller/request_form_controller.dart';
 import 'controller/state_management/state_manager.dart';
+import 'demo.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,8 +36,9 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'OWS',
-      initialRoute: AppRoutes.login,
-     // initialRoute: AppRoutes.app_form,
+      //initialRoute: AppRoutes.login,
+     home: DynamicFormBuilder(),
+     //initialRoute: AppRoutes.app_form,
       //initialRoute: AppRoutes.request_form,
      // home:LoginController(),
        // home: LoginController2(),

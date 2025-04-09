@@ -22,6 +22,7 @@ class GlobalStateController extends GetxController {
   final box = GetStorage();
   var token = ''.obs;
   var version = ''.obs;
+  RxBool updateProfile = false.obs;
 
   final RxMap<String, Document?> documents = <String, Document?>{}.obs;
 

@@ -20,7 +20,8 @@ class ModuleController extends GetxController {
   var modules = <ModuleModel>[].obs;
   RxBool isLoading = false.obs;
 
-  final GlobalStateController globalController = Get.find<GlobalStateController>();
+  final GlobalStateController globalController =
+      Get.find<GlobalStateController>();
 
   void toggleLoading(bool value) {
     isLoading.value = value;
@@ -42,7 +43,8 @@ class ModuleController extends GetxController {
           ModuleModel matchedModule = allModules[moduleId]!;
           List<int> allowedFeatureIds = permissions[moduleId] ?? [];
 
-          moduleMap[moduleId] = matchedModule.copyWith(featureIds: allowedFeatureIds);
+          moduleMap[moduleId] =
+              matchedModule.copyWith(featureIds: allowedFeatureIds);
         }
         moduleMap[2] = allModules[2]!;
       }
@@ -74,7 +76,10 @@ class ModuleController extends GetxController {
         icon: "📊",
         featureIds: [],
         onModuleOpen: (featureIds, its, mohalla) async {
-          navigateToModule(2, featureIds, its: its, mohalla: mohalla,role: globalController.userRole.value);
+          navigateToModule(2, featureIds,
+              its: its,
+              mohalla: mohalla,
+              role: globalController.userRole.value);
         },
       ),
       3: ModuleModel(
@@ -84,7 +89,10 @@ class ModuleController extends GetxController {
         icon: "📊",
         featureIds: [],
         onModuleOpen: (featureIds, its, mohalla) async {
-          navigateToModule(3, featureIds, its: its, mohalla: mohalla,role: globalController.userRole.value);
+          navigateToModule(3, featureIds,
+              its: its,
+              mohalla: mohalla,
+              role: globalController.userRole.value);
         },
       ),
       // 3: ModuleModel(
@@ -101,7 +109,7 @@ class ModuleController extends GetxController {
   }
 
   Future<void> navigateToModule(int moduleId, List<int> featureIds,
-      {required String its, String? mohalla,String? role}) async {
+      {required String its, String? mohalla, String? role}) async {
     switch (moduleId) {
       case 1:
         isLoading.value = true;
@@ -109,24 +117,36 @@ class ModuleController extends GetxController {
         isLoading.value = false;
 
         if (familyMembers != null && familyMembers.isNotEmpty) {
-
+          globalController.updateProfile.value = false;
           globalController.setUser(its, familyMembers);
           globalController.familyMembers.value = familyMembers;
           Get.toNamed(AppRoutes.family_screen);
         } else {
           Get.snackbar("Error", "No family members found.");
         }
-              break;
+        break;
       case 2:
-        Get.to(() =>
-            ReqFormTable(mohalla: globalController.userMohalla.value,featureIds: featureIds, org: globalController.userUmoor.value, ITS: its.toString(), role: role.toString(),));
+        Get.to(() => ReqFormTable(
+              mohalla: globalController.userMohalla.value,
+              featureIds: featureIds,
+              org: globalController.userUmoor.value,
+              ITS: its.toString(),
+              role: role.toString(),
+            ));
         break;
       case 3:
-        Family family = Family();
-        Get.to(() => ProfilePreview(
-            member: globalController.user.value,
-            family: family));
-        //print("Opening Admin Panel Module with Features: $featureIds");
+        isLoading.value = true;
+        List<FamilyMember>? familyMembers = await Api.fetchFamilyData2(its);
+        isLoading.value = false;
+
+        if (familyMembers != null && familyMembers.isNotEmpty) {
+          globalController.updateProfile.value = true;
+          globalController.setUser(its, familyMembers);
+          globalController.familyMembers.value = familyMembers;
+          Get.toNamed(AppRoutes.family_screen);
+        } else {
+          Get.snackbar("Error", "No family members found.");
+        }
         break;
       default:
         Get.snackbar("Error", "Module not found");
@@ -135,9 +155,10 @@ class ModuleController extends GetxController {
 }
 
 class ModuleScreenController extends StatelessWidget {
-   ModuleScreenController({super.key});
+  ModuleScreenController({super.key});
 
-  final GlobalStateController globalController = Get.find<GlobalStateController>();
+  final GlobalStateController globalController =
+      Get.find<GlobalStateController>();
 
   @override
   Widget build(BuildContext context) {

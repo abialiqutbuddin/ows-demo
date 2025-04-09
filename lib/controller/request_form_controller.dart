@@ -22,6 +22,7 @@ class RequestFormController extends GetxController {
   RxString grade = "".obs;
   RxString cnicNo = "".obs;
 
+
   RxBool isSubmitEnabled = false.obs;
 
   RxString organization = ''.obs;

@@ -9,9 +9,116 @@ class FormController extends GetxController {
   RxBool isFinancialInfoButtonEnabled = false.obs;
   RxInt selectedIndex = 0.obs;
 
-  RxBool isButtonEnabled = false.obs;
+  RxString selectedYes = ''.obs;
+  RxString Kalemat = ''.obs;
+  RxString memorized = ''.obs;
+  RxString waj = ''.obs;
+  RxString misaq = ''.obs;
+  RxString moharamat = ''.obs;
+  RxString shadi = ''.obs;
+  RxString zyarat = ''.obs;
+  RxString ashara = ''.obs;
+  RxString namaz = ''.obs;
+  RxString thali = ''.obs;
+  RxString thaliqty = ''.obs;
+  RxString bmi = ''.obs;
+  RxString spouseITS = ''.obs;
 
-  RxString organization = ''.obs;
+  RxString wajebaatExpenses = ''.obs;
+  RxString niyazExpenses = ''.obs;
+  RxString sabeelExpenses = ''.obs;
+  RxString zyaratExpenses = ''.obs;
+  RxString asharaExpenses = ''.obs;
+  RxString qardanHasana = ''.obs;
+  RxString otherExpenses = ''.obs;
+
+  // void validateFinancialAssetsFields() {
+  //   isFinancialComplete.value = personalIncome.value.isNotEmpty &&
+  //       _validateNumber(personalIncome.value, "") == null &&
+  //       otherFamilyIncome.value.isNotEmpty &&
+  //       _validateNumber(otherFamilyIncome.value, "") == null &&
+  //       studentIncome.isNotEmpty &&
+  //       _validateNumber(studentIncome.value, "") == null &&
+  //       (ownedProperty.value.isNotEmpty || rentProperty.value.isNotEmpty || goodwillProperty.value.isNotEmpty);
+  // }
+
+  RxString familymemname = "".obs;
+  RxString studentparttime = "".obs;
+
+  Rxn<int> causeInt = Rxn<int>();
+  Rxn<int> houseInt = Rxn<int>();
+  Rxn<int> areaInt = Rxn<int>();
+  Rxn<int> neighborInt = Rxn<int>();
+  Rxn<int> drinkingInt = Rxn<int>();
+  Rxn<int> sanitationInt = Rxn<int>();
+  Rxn<int> sourcesInt = Rxn<int>();
+  RxList<Map<String, dynamic>> causeOptions = [
+    {"id": 0, "name": "Accident",},
+    {"id": 1, "name": "Natural Cause",},
+    {"id": 2, "name": "Disease",},
+  ].obs;
+
+  RxList<Map<String, dynamic>> sourcesofIcomeOption = [
+    {"id": 0, "name": "Business",},
+    {"id": 1, "name": "Profession",},
+    {"id": 2, "name": "Salary",},
+    {"id": 3, "name": "Invesment",},
+  ].obs;
+
+  RxList<Map<String, dynamic>> houseTitleOptions = [
+    {"id": 0, "name": "Ownership - On Own Plot", "eligible": "N"},
+    {"id": 1, "name": "Ownership - In Society", "eligible": "N"},
+    {"id": 2, "name": "Ownership - In Slum Area", "eligible": "Y"},
+    {"id": 3, "name": "Pagdi - In Chawl", "eligible": "N"},
+    {"id": 4, "name": "Pagdi - In Slum Area", "eligible": "Y"},
+    {"id": 5, "name": "Heavy Deposit - In Society", "eligible": "N"},
+    {"id": 6, "name": "Heavy Deposit - In Chawl", "eligible": "N"},
+    {"id": 7, "name": "Heavy Deposit - In Slum Area", "eligible": "Y"},
+    {"id": 8, "name": "Rental - In Society", "eligible": "N"},
+    {"id": 9, "name": "Rental - In Chawl", "eligible": "N"},
+    {"id": 10, "name": "Rental - In Slum Area", "eligible": "Y"},
+    {"id": 11, "name": "Staying without rent", "eligible": "Y"},
+  ].obs;
+
+  RxList<Map<String, dynamic>> houseAreaOptions = [
+    {"id": 0, "name": "Smaller than 200 sqft"},
+    {"id": 1, "name": "200-300 sqft"},
+    {"id": 2, "name": "300-400 sqft"},
+    {"id": 3, "name": "400-500 sqft"},
+    {"id": 4, "name": "500-600 sqft"},
+    {"id": 5, "name": "600 sqft & above"},
+  ].obs;
+
+  RxList<Map<String, dynamic>> neighborhoodOptions = [
+    {"id": 0, "name": "Mumineen Mohalla", "eligible": "Y"},
+    {"id": 1, "name": "Muslimeen Area - Acceptable", "eligible": "N"},
+    {"id": 2, "name": "Muslimeen - Non Acceptable", "eligible": "Y"},
+    {"id": 3, "name": "Cosmopolitan Area - Acceptable", "eligible": "N"},
+    {"id": 4, "name": "Cosmopolitan - Non Acceptable", "eligible": "Y"},
+  ].obs;
+
+  RxList<Map<String, dynamic>> drinkingWaterOptions = [
+    {"id": 0, "name": "Handpump Drinkable Water", "eligible": "N"},
+    {"id": 1, "name": "Handpump Non-Drinkable Water", "eligible": "Y"},
+    {"id": 2, "name": "Boring Drinkable Water", "eligible": "Y"},
+    {"id": 3, "name": "Boring Non-Drinkable Water", "eligible": "Y"},
+    {"id": 4, "name": "Municipal Water - Filtered/RO Water", "eligible": "N"},
+    {"id": 5, "name": "Municipal Water - Non Filtered Water", "eligible": "Y"},
+  ].obs;
+
+  RxList<Map<String, dynamic>> sanitationOptions = [
+    {"id": 0, "name": "Combined Bathroom/Toilet - Inside House", "eligible": "N"},
+    {"id": 1, "name": "Separate Bathroom/Toilet - Inside House", "eligible": "N"},
+    {"id": 2, "name": "Outside in Chawl", "eligible": "Y"},
+    {"id": 3, "name": "Outside in Government Sauchalay", "eligible": "Y"},
+    {"id": 4, "name": "Outside in Jungle/Open", "eligible": "Y"},
+  ].obs;
+
+  RxBool isButtonEnabled = false.obs;
+  RxBool isChildDead = false.obs;
+  RxBool isSpouseButtonEnabled = false.obs;
+
+  RxString organization = 'aiut'.obs;
 
   bool checkFinancialInfo(){
     return isFinancialComplete.value

@@ -1,0 +1,61 @@
+//// {
+////   "title": "Main Occupation",
+////   "key": "occupationInfo",
+////   "type": "repeatable",
+////   "radioLabel": "Student",
+////   "fields": [
+////     {"label": "Occupation", "key": "occupation"},
+////     {"label": "Work Address", "key": "workAddress"},
+////     {"label": "Work Phone", "key": "workPhone"}
+////   ]
+//// },
+//// {
+////   "title": "Financials (Income)",
+////   "key": "occupationInfo",
+////   "type": "repeatable",
+////   "radioLabel": "Student",
+////   "fields": [
+////     {"label": "Occupation", "key": "occupation"},
+////     {"label": "Work Address", "key": "workAddress"},
+////     {"label": "Work Phone", "key": "workPhone"}
+////   ]
+//// },
+//{
+//  "title": "Financials (Expenses)",
+//  "key": "financialExpenses",
+//  "subSections":[
+//    {
+//      "title": "Travelling Info",
+//      "key":"travellingInfo",
+//      "type":"repeatable",
+//      "radioLabel": "Not Travelled",
+//      "fields": [
+//        {"label": "Place", "key": "travelPlace"},
+//        {"label": "Year", "key": "travelYear"},
+//        {"label": "Purpose", "key": "travelPurpose"}
+//      ]
+//    }
+//  ]
+//},
+//// {
+////   "title": "Financials (Others)",
+////   "key": "occupationInfo",
+////   "type": "repeatable",
+////   "radioLabel": "Student",
+////   "fields": [
+////     {"label": "Occupation", "key": "occupation"},
+////     {"label": "Work Address", "key": "workAddress"},
+////     {"label": "Work Phone", "key": "workPhone"}
+////   ]
+//// },
+//// {
+////   "title": "Upload Documents",
+////   "key": "occupationInfo",
+////   "type": "repeatable",
+////   "radioLabel": "Student",
+////   "fields": [
+////     {"label": "Occupation", "key": "occupation"},
+////     {"label": "Work Address", "key": "workAddress"},
+////     {"label": "Work Phone", "key": "workPhone"}
+////   ]
+//// }

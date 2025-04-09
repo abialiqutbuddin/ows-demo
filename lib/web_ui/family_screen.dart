@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ows/model/family_model.dart';
+import 'package:ows/web_ui/profile_preview_screen.dart';
 import '../api/api.dart';
 import '../constants/constants.dart';
 import '../controller/profile_pdf_controller.dart';
@@ -42,8 +44,13 @@ class FamilyScreenWState extends State<FamilyScreenW> {
     try {
       final userProfile = await Api.fetchUserProfile(itsId);
       if (userProfile != null) {
-        stateController.user.value = userProfile;
-        Get.to(() => ProfilePDFScreen());
+        if(stateController.updateProfile.value==true){
+          stateController.user.value = userProfile;
+          Get.to(() => ProfilePreview(member: userProfile, family: Family()));
+        }else {
+          stateController.user.value = userProfile;
+          Get.to(() => ProfilePDFScreen());
+        }
       } else {
         Get.snackbar("Error", "Profile not found for ITS ID: $itsId");
       }
