@@ -17,25 +17,23 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
   final RxMap<String, RxString> textFields = <String, RxString>{}.obs;
   final RxMap<String, Rxn<int>> dropdownFields = <String, Rxn<int>>{}.obs;
   final Map<String, RxBool> sectionStates = {};
-  final List<Map<String, dynamic>> formSections =
-      formConfig; // assuming it's flat now
+  final List<Map<String, dynamic>> formSections = formConfig;
   final RxMap<String, RxBool> sectionCompletion = <String, RxBool>{}.obs;
   final Map<String, RxInt> repeatableSectionRadio = {};
   final Map<String, RxList<Map<String, dynamic>>> repeatableEntries = {};
   late final Map<String, Function()> sectionValidators;
-  final Map<String, List<Map<String, dynamic>>> dropdownOptions =
-
-      dropdownOptions2;
+  final Map<String, List<Map<String, dynamic>>> dropdownOptions = dropdownOptions2;
   late final Map<String, String? Function(String, String)> customValidators;
-  final RxMap<String, MultiSelectDropdownController> multiSelectControllers =
-      <String, MultiSelectDropdownController>{}.obs;
-
+  final RxMap<String, MultiSelectDropdownController> multiSelectControllers = <String, MultiSelectDropdownController>{}.obs;
   final RxInt activeSectionIndex = 0.obs;
 
   @override
   void initState() {
     super.initState();
     initializeFormFields();
+    sectionCompletion["intendInfo"] = true.obs;
+    subsectionProgress["intendInfo"] = 100.0.obs;
+    activeSectionIndex.value = 1;
     sectionValidators = {
       for (var section in formSections)
         section['key']: () {
@@ -168,7 +166,6 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
       final options = getOptions(field['itemsKey']);
       final Rxn<int> selectedValue = dropdownFields[key]!;
 
-      // --- Conditional field logic ---
       Widget? conditionalField;
       if (field.containsKey("showTextFieldIf")) {
         final int showIf = field['showTextFieldIf'];
@@ -1013,6 +1010,11 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
   //final RxInt activeSectionIndex = 0.obs;
 
   double getSectionCompletionPercentByKey(String sectionKey) {
+
+    if (sectionCompletion[sectionKey]?.value == true) {
+      return 100.0;
+    }
+
     final section = formSections
         .cast<Map<String, dynamic>>()
         .firstWhere((s) => s['key'] == sectionKey, orElse: () => {});
@@ -1080,6 +1082,7 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         title: const Text("Imdaad Talimi Application Form"),
         backgroundColor: const Color(0xfffffcf6),
       ),
@@ -1087,30 +1090,33 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
       body: Column(
         spacing: 10,
         children: [
-          Obx(() {
-            final steps = formSections.map<SectionStep>((section) {
-              final key = section['key'];
-              final percent = getSectionCompletionPercentByKey(key);
-              return SectionStep(
-                title: section['title'],
-                completionPercent: percent,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 50.0),
+            child: Obx(() {
+              final steps = formSections.map<SectionStep>((section) {
+                final key = section['key'];
+                final percent = getSectionCompletionPercentByKey(key);
+                return SectionStep(
+                  title: section['title'],
+                  completionPercent: percent,
+                );
+              }).toList();
+
+              // Calculate overall progress across all sections
+              final double totalPercent = steps.isEmpty
+                  ? 0.0
+                  : steps
+                          .map((s) => s.completionPercent)
+                          .reduce((a, b) => a + b) /
+                      steps.length;
+
+              return SectionStepper(
+                sections: steps,
+                activeIndex: activeSectionIndex.value,
+                completionPercent: totalPercent,
               );
-            }).toList();
-
-            // Calculate overall progress across all sections
-            final double totalPercent = steps.isEmpty
-                ? 0.0
-                : steps
-                        .map((s) => s.completionPercent)
-                        .reduce((a, b) => a + b) /
-                    steps.length;
-
-            return SectionStepper(
-              sections: steps,
-              activeIndex: activeSectionIndex.value,
-              completionPercent: totalPercent,
-            );
-          }),
+            }),
+          ),
           Expanded(
             child: SingleChildScrollView(
               child: Padding(
@@ -1154,7 +1160,7 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
                           );
                         } else {
                           final regularSubsections =
-                              buildRegularSectionFields(section);
+                          buildRegularSectionFields(section, sectionIndex: activeSectionIndex.value);
                           sectionWidget = Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: regularSubsections,
@@ -1263,25 +1269,22 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
     );
   }
 
-  List<Widget> buildRegularSectionFields(Map<String, dynamic> section) {
+  List<Widget> buildRegularSectionFields(Map<String, dynamic> section, {required int sectionIndex}) {
     final List<Widget> children = [];
 
-    for (var sub in section['subSections'] ?? []) {
-      final String? subKey = sub['key'];
-      final String title = sub['title'] ?? 'Untitled Section';
-
-      if (subKey == null) {
-        children.add(Text("⚠️ Missing subsection key for '$title'",
-            style: TextStyle(color: Colors.red)));
-        continue;
-      }
+    final subSections = section['subSections'] ?? [];
+    for (int subIndex = 0; subIndex < subSections.length; subIndex++) {
+      final sub = subSections[subIndex];
+      final subKey = sub['key'];
+      final title = sub['title'] ?? 'Untitled';
+      final numberLabel = "${sectionIndex + 1}.${subIndex + 1} $title";
 
       final RxBool isSubComplete = sectionCompletion[subKey] ?? false.obs;
 
       if (sub['type'] == 'repeatable') {
         children.add(
           buildCollapsibleSection(
-            title: title,
+            title: numberLabel,
             complete: isSubComplete,
             sectionKey: subKey,
             children: [buildRepeatableGroup(sub)],
@@ -1290,39 +1293,38 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
       } else if (sub['type'] == 'totaling') {
         children.add(
           buildCollapsibleSection(
-            title: title,
+            title: numberLabel,
             complete: isSubComplete,
             sectionKey: subKey,
             children: [buildTotalingSubSection(sub, subKey)],
           ),
         );
       } else {
-        final List<dynamic> fields = sub['fields'] ?? [];
-
-        final fieldWidgets = LayoutBuilder(
-          builder: (context, constraints) {
-            final double fullWidth = constraints.maxWidth;
-            const double spacing = 16;
-
-            return Wrap(
-              spacing: spacing,
-              runSpacing: spacing,
-              children: fields.map<Widget>((field) {
-                return SizedBox(
-                  width: fullWidth,
-                  child: buildDynamicField(field, subKey),
-                );
-              }).toList(),
-            );
-          },
-        );
+        final fields = sub['fields'] ?? [];
 
         children.add(
           buildCollapsibleSection(
-            title: title,
+            title: numberLabel,
             complete: isSubComplete,
             sectionKey: subKey,
-            children: [fieldWidgets],
+            children: [
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final double fullWidth = constraints.maxWidth;
+                  const double spacing = 16;
+                  return Wrap(
+                    spacing: spacing,
+                    runSpacing: spacing,
+                    children: fields.map<Widget>((field) {
+                      return SizedBox(
+                        width: fullWidth,
+                        child: buildDynamicField(field, subKey),
+                      );
+                    }).toList(),
+                  );
+                },
+              ),
+            ],
           ),
         );
       }
@@ -1395,59 +1397,6 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
     });
   }
 
-  // List<Widget> buildRegularSectionFields(Map<String, dynamic> section) {
-  //   final List<Widget> children = [];
-  //   final sectionKey = section['key'];
-  //
-  //   for (var sub in section['subSections'] ?? []) {
-  //     if (sub['type'] == 'repeatable') {
-  //       children.add(buildRepeatableGroup(sub));
-  //       continue;
-  //     }
-  //     if (sub['title'] != null) {
-  //       children.add(
-  //         Padding(
-  //           padding: const EdgeInsets.only(top: 10, bottom: 5),
-  //           child: Align(
-  //             alignment: Alignment.centerLeft,
-  //             child: Text(
-  //               sub['title'],
-  //               style: const TextStyle(
-  //                 fontWeight: FontWeight.bold,
-  //                 fontSize: 16,
-  //                 color: Colors.brown,
-  //               ),
-  //             ),
-  //           ),
-  //         ),
-  //       );
-  //     }
-  //     children.add(
-  //       LayoutBuilder(
-  //         builder: (context, constraints) {
-  //           final double fullWidth = constraints.maxWidth;
-  //           const double spacing = 16;
-  //           return Wrap(
-  //             spacing: spacing,
-  //             runSpacing: spacing,
-  //             alignment: WrapAlignment.start,
-  //             runAlignment: WrapAlignment.start,
-  //             crossAxisAlignment: WrapCrossAlignment.start,
-  //             children: (sub['fields'] as List<dynamic>).map<Widget>((field) {
-  //               return SizedBox(
-  //                 width: fullWidth,
-  //                 child: buildDynamicField(field, sectionKey),
-  //               );
-  //             }).toList(),
-  //           );
-  //         },
-  //       ),
-  //     );
-  //   }
-  //
-  //   return children;
-  // }
-
   final RxDouble formCompletionPercent = 0.0.obs;
 
   void updateFormProgress() {
@@ -1465,7 +1414,6 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
     final formCompletion =
         totalSections == 0 ? 0.0 : (totalPercent / totalSections);
     formCompletionPercent.value = formCompletion;
-    print("🔥 Overall Form Progress: ${formCompletion.toStringAsFixed(1)}%");
   }
 }
 
@@ -1538,23 +1486,24 @@ class SectionStepper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width*0.1),
       child: Column(
+        spacing: 10,
         children: [
           Wrap(
-            spacing: 12,
+            spacing: MediaQuery.of(context).size.width*0.02,
             runSpacing: 10,
             alignment: WrapAlignment.center,
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 85.0),
+                padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width*0.015),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       "ITS: 30445124",
                       style:
-                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                     Text("Name: Abi Ali Qutbuddin",
                         style: TextStyle(
