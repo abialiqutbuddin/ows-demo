@@ -93,7 +93,7 @@ class Constants {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            height: height ?? 50,
+            height: height ?? 40,
             child: TextFormField(
               enabled: isEnabled ?? true,
               validator: validator,
@@ -188,27 +188,26 @@ class Constants {
     required bool isEnabled,
   }) {
     SuperTooltipController tooltipController = SuperTooltipController();
-    String? error = '';
+    String? error = 'This field is required';
     Timer? hoverTimer;
 
     return Container(
+      width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 15),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
-          color: const Color(0xffecdacc),
+          color: const Color(0xfffff7ec),
         ),
-        child: Column(
-            children: [
-        Obx(() => SizedBox(
-          height: 50,
-          child: Row(
-            children: [
-              Expanded(
-                  flex:3,
-                  child:
-                  Text(label,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 16,color: Colors.brown),)),
-              Expanded(
-                flex: 2,
+        child: Obx(() => Column(
+          spacing: 10,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label,style: TextStyle(fontWeight: FontWeight.bold,fontSize: 14,color: Colors.black),),
+            SizedBox(
+              width: double.infinity,
+              height: 40,
+              child: Center(
                 child: DropdownButtonFormField2<int>(
                   style: TextStyle(
                       letterSpacing: 0,
@@ -314,10 +313,9 @@ class Constants {
                   //disabledHint: Text("Select ${_getDisabledHint(label)}"),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         )),
-            ]),
       );
   }
 

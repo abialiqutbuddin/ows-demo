@@ -244,8 +244,8 @@ class ProfilePreview extends StatelessWidget {
 
     List<Map<String, dynamic>> matchedEducationList = [];
 
-    //for (var education in member.education!) {
-      for (var education in gController.user.value.education!) {
+    for (var education in member.education!) {
+    //  for (var education in gController.user.value.education!) {
       var matchedClass = allClasses.firstWhere(
             (cls) => cls["name"] == education.className,
         orElse: () => {},
@@ -340,7 +340,7 @@ class ProfilePreview extends StatelessWidget {
                 children: [
                   Constants().subHeading("Family"),
                   Divider(),
-                  familyContainer(context, family),
+                  //familyContainer(context, family),
                 ],
               ),
             ),

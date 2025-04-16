@@ -1,9 +1,11 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ows/constants/constants.dart';
-import 'constants/multi_select_dropdown.dart';
-import 'data/dropdown_options.dart';
-import 'data/form_config.dart';
+import 'package:ows/web_ui/forms/review_application.dart';
+import '../../constants/multi_select_dropdown.dart';
+import '../../data/dropdown_options.dart';
+import '../../data/form_config.dart';
 
 class DynamicFormBuilder extends StatefulWidget {
   const DynamicFormBuilder({super.key});
@@ -22,9 +24,11 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
   final Map<String, RxInt> repeatableSectionRadio = {};
   final Map<String, RxList<Map<String, dynamic>>> repeatableEntries = {};
   late final Map<String, Function()> sectionValidators;
-  final Map<String, List<Map<String, dynamic>>> dropdownOptions = dropdownOptions2;
+  final Map<String, List<Map<String, dynamic>>> dropdownOptions =
+      dropdownOptions2;
   late final Map<String, String? Function(String, String)> customValidators;
-  final RxMap<String, MultiSelectDropdownController> multiSelectControllers = <String, MultiSelectDropdownController>{}.obs;
+  final RxMap<String, MultiSelectDropdownController> multiSelectControllers =
+      <String, MultiSelectDropdownController>{}.obs;
   final RxInt activeSectionIndex = 0.obs;
 
   @override
@@ -180,17 +184,49 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
             visible: shouldShow,
             maintainState: true,
             maintainAnimation: true,
-            child: constants.buildField(
-              linkedLabel,
-              linkedVal,
-              this,
-              function: sectionValidators[sectionKey],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: constants.buildField(
+                linkedLabel,
+                linkedVal,
+                this,
+                function: sectionValidators[sectionKey],
+              ),
+            ),
+          );
+        });
+      } // ✅ Conditional Dropdown
+      else if (field.containsKey("showDropdownIf")) {
+        final int showIf = field['showDropdownIf'];
+        final String linkedKey = field["dropdownKey"];
+        final String linkedLabel = field["dropdownLabel"];
+        final String itemsKey2 = field["itemsKey2"];
+        final Rxn<int> linkedDropdownVal = dropdownFields[linkedKey]!;
+        final List<Map<String, dynamic>> dropdownItems = getOptions(itemsKey2);
+
+        conditionalField = Obx(() {
+          final shouldShow = selectedValue.value == showIf;
+          return Visibility(
+            visible: shouldShow,
+            maintainState: true,
+            maintainAnimation: true,
+            child: constants.buildDropdown2(
+              label: linkedLabel,
+              selectedValue: linkedDropdownVal,
+              items: dropdownItems,
+              isEnabled: true,
+              onChanged: (_) {
+                if (sectionValidators[sectionKey] != null) {
+                  sectionValidators[sectionKey]!();
+                }
+              },
             ),
           );
         });
       }
 
       return Column(
+        spacing: 5,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           constants.buildDropdown2(
@@ -303,49 +339,47 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
     VoidCallback? onChanged,
   }) {
     return Column(
+      spacing: 0,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
+          width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 15),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(8),
-            color: const Color(0xffecdacc),
+            color: Color(0xfffff7ec),
           ),
-          child: Row(
+          child: Column(
+            spacing: 10,
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Expanded(
-                flex: 1,
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: Colors.brown,
-                  ),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: Colors.black,
                 ),
               ),
-              const SizedBox(height: 10),
-              Expanded(
-                flex: 1,
-                child: Container(
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: const Color(0xfffffcf6),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.brown, width: 1),
-                  ),
-                  child: Obx(() => Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          _radioOption(option1, value,
-                              onChanged: () => onChanged!()),
-                          _radioOption(option2, value,
-                              onChanged: () => onChanged!()),
-                        ],
-                      )),
+              Container(
+                height: 40,
+                width: 400,
+                //margin: EdgeInsets.symmetric(horizontal: 340),
+                decoration: BoxDecoration(
+                  color: const Color(0xfffffcf6),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.brown, width: 1),
                 ),
+                child: Obx(() => Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        _radioOption(option1, value,
+                            onChanged: () => onChanged!()),
+                        _radioOption(option2, value,
+                            onChanged: () => onChanged!()),
+                      ],
+                    )),
               ),
             ],
           ),
@@ -360,13 +394,15 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
               maintainAnimation: true,
               child: conditionalField,
             );
-          })
+          }),
+        //Divider(height: 0,indent: 0,endIndent: 0,color: Colors.black,),
       ],
     );
   }
 
   void validateSection(String sectionKey) {
-    final section = formSections.firstWhereOrNull((s) => s['key'] == sectionKey);
+    final section =
+        formSections.firstWhereOrNull((s) => s['key'] == sectionKey);
     if (section == null) return;
 
     bool isValid = true;
@@ -396,17 +432,16 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
         final isSubValid = isNoExpense ||
             (entries.isNotEmpty &&
                 entries.every((entry) => fields.every((f) {
-                  final key = f['key'];
-                  final fieldType = f['type'];
-                  final val = entry[key];
+                      final key = f['key'];
+                      final fieldType = f['type'];
+                      final val = entry[key];
 
-                  if (fieldType == 'dropdown') {
-                    return val is Rxn<int> && val.value != null;
-                  } else {
-                    return val is RxString && val.value.trim().isNotEmpty;
-                  }
-                })
-                ));
+                      if (fieldType == 'dropdown') {
+                        return val is Rxn<int> && val.value != null;
+                      } else {
+                        return val is RxString && val.value.trim().isNotEmpty;
+                      }
+                    })));
 
         if (!isSubValid) isValid = false;
 
@@ -417,21 +452,22 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
         } else {
           final totalFields = entries.length * fields.length;
           final filledFields = entries.fold<int>(0, (sum, entry) {
-            return sum + fields.where((f) {
-              final key = f['key'];
-              final fieldType = f['type'];
-              final val = entry[key];
+            return sum +
+                fields.where((f) {
+                  final key = f['key'];
+                  final fieldType = f['type'];
+                  final val = entry[key];
 
-              if (fieldType == 'dropdown') {
-                return val is Rxn<int> && val.value != null;
-              } else {
-                return val is RxString && val.value.trim().isNotEmpty;
-              }
-            }).length as int;
+                  if (fieldType == 'dropdown') {
+                    return val is Rxn<int> && val.value != null;
+                  } else {
+                    return val is RxString && val.value.trim().isNotEmpty;
+                  }
+                }).length as int;
           });
 
           subPercent =
-          totalFields == 0 ? 0.0 : (filledFields / totalFields) * 100.0;
+              totalFields == 0 ? 0.0 : (filledFields / totalFields) * 100.0;
         }
 
         if (subsectionProgress.containsKey(subKey)) {
@@ -483,6 +519,14 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
     if (type == 'dropdown') {
       final val = dropdownFields[key]?.value;
       if (val == null) return false;
+
+      // ✅ Check conditional dropdown if visible
+      if (field.containsKey('showDropdownIf') &&
+          val == field['showDropdownIf']) {
+        final linkedKey = field['dropdownKey'];
+        final linkedVal = dropdownFields[linkedKey]?.value;
+        if (linkedVal == null) return false;
+      }
 
       if (field.containsKey('showTextFieldIf') &&
           val == field['showTextFieldIf']) {
@@ -538,7 +582,11 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
                   return val != null && val.isNotEmpty;
                 })));
 
-    subsectionProgress[repeatableKey] = RxDouble(isStudent ? 100.0 : isValid ? 100.0 : 0.0);
+    subsectionProgress[repeatableKey] = RxDouble(isStudent
+        ? 100.0
+        : isValid
+            ? 100.0
+            : 0.0);
     sectionCompletion[repeatableKey]?.value = isValid;
     updateFormProgress();
   }
@@ -588,14 +636,14 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
         Row(
           children: [
             Obx(() => Radio(
-              value: 1,
-              toggleable: true,
-              groupValue: selectedType.value,
-              onChanged: (value) {
-                selectedType.value = value ?? 0;
-                validateRepeatableSection(sectionKey);
-              },
-            )),
+                  value: 1,
+                  toggleable: true,
+                  groupValue: selectedType.value,
+                  onChanged: (value) {
+                    selectedType.value = value ?? 0;
+                    validateRepeatableSection(sectionKey);
+                  },
+                )),
             Text(
               radioLabel,
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -604,148 +652,153 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
         ),
         Obx(() => selectedType.value == 0
             ? Column(
-          spacing: 5,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ...List.generate(entries.length, (index) {
-              final entry = entries[index];
-
-              List<Widget> rows = [];
-              List<Widget> currentRow = [];
-
-              for (var field in fields) {
-                final String key = field['key'];
-                final String label = field['label'] ?? 'Field';
-                final String type = field['type'] ?? 'text';
-                final dynamic value = entry[key];
-
-                if (type == 'dropdown') {
-                  // Flush current row before adding dropdown
-                  if (currentRow.isNotEmpty) {
-                    rows.add(Row(
-                      children: currentRow
-                          .map((w) => Expanded(child: Padding(
-                        padding:
-                        const EdgeInsets.only(right: 12.0),
-                        child: w,
-                      )))
-                          .toList(),
-                    ));
-                    currentRow = [];
-                  }
-
-                  rows.add(Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: constants.buildDropdown2(
-                      label: label,
-                      selectedValue: value as Rxn<int>,
-                      items: getOptions(field['itemsKey']),
-                      isEnabled: true,
-                      onChanged: (_) =>
-                          validateRepeatableSection(sectionKey),
-                    ),
-                  ));
-                } else {
-                  // Add text field to current row
-                  currentRow.add(
-                    constants.buildField(
-                      label,
-                      value as RxString,
-                      this,
-                      validatorKey: field['validator'],
-                      validator: (v) => validateField(
-                          label, v ?? '', validatorKey: field['validator']),
-                      function: () => validateRepeatableSection(sectionKey),
-                    ),
-                  );
-
-                  if (currentRow.length == 3) {
-                    rows.add(Row(
-                      children: currentRow
-                          .map((w) => Expanded(child: Padding(
-                        padding:
-                        const EdgeInsets.only(right: 12.0),
-                        child: w,
-                      )))
-                          .toList(),
-                    ));
-                    currentRow = [];
-                  }
-                }
-              }
-
-              // Add leftover row if any
-              if (currentRow.isNotEmpty) {
-                rows.add(Row(
-                  children: currentRow
-                      .map((w) => Expanded(child: Padding(
-                    padding: const EdgeInsets.only(right: 12.0),
-                    child: w,
-                  )))
-                      .toList(),
-                ));
-              }
-
-              return Column(
+                spacing: 5,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  ...rows,
-                  const SizedBox(height: 8),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: IconButton(
-                      icon: const Icon(Icons.delete_forever,
-                          color: Colors.red),
-                      onPressed: () {
-                        entries.removeAt(index);
-                        repeatableEntries[sectionKey]!.refresh();
-                        validateRepeatableSection(sectionKey);
-                      },
+                  ...List.generate(entries.length, (index) {
+                    final entry = entries[index];
+
+                    List<Widget> rows = [];
+                    List<Widget> currentRow = [];
+
+                    for (var field in fields) {
+                      final String key = field['key'];
+                      final String label = field['label'] ?? 'Field';
+                      final String type = field['type'] ?? 'text';
+                      final dynamic value = entry[key];
+
+                      if (type == 'dropdown') {
+                        // Flush current row before adding dropdown
+                        if (currentRow.isNotEmpty) {
+                          rows.add(Row(
+                            children: currentRow
+                                .map((w) => Expanded(
+                                        child: Padding(
+                                      padding:
+                                          const EdgeInsets.only(right: 12.0),
+                                      child: w,
+                                    )))
+                                .toList(),
+                          ));
+                          currentRow = [];
+                        }
+
+                        rows.add(Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: constants.buildDropdown2(
+                            label: label,
+                            selectedValue: value as Rxn<int>,
+                            items: getOptions(field['itemsKey']),
+                            isEnabled: true,
+                            onChanged: (_) =>
+                                validateRepeatableSection(sectionKey),
+                          ),
+                        ));
+                      } else {
+                        // Add text field to current row
+                        currentRow.add(
+                          constants.buildField(
+                            label,
+                            value as RxString,
+                            this,
+                            validatorKey: field['validator'],
+                            validator: (v) => validateField(label, v ?? '',
+                                validatorKey: field['validator']),
+                            function: () =>
+                                validateRepeatableSection(sectionKey),
+                          ),
+                        );
+
+                        if (currentRow.length == 3) {
+                          rows.add(Row(
+                            children: currentRow
+                                .map((w) => Expanded(
+                                        child: Padding(
+                                      padding:
+                                          const EdgeInsets.only(right: 12.0),
+                                      child: w,
+                                    )))
+                                .toList(),
+                          ));
+                          currentRow = [];
+                        }
+                      }
+                    }
+
+                    // Add leftover row if any
+                    if (currentRow.isNotEmpty) {
+                      rows.add(Row(
+                        children: currentRow
+                            .map((w) => Expanded(
+                                    child: Padding(
+                                  padding: const EdgeInsets.only(right: 12.0),
+                                  child: w,
+                                )))
+                            .toList(),
+                      ));
+                    }
+
+                    return Column(
+                      children: [
+                        ...rows,
+                        const SizedBox(height: 8),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: IconButton(
+                            icon: const Icon(Icons.delete_forever,
+                                color: Colors.red),
+                            onPressed: () {
+                              entries.removeAt(index);
+                              repeatableEntries[sectionKey]!.refresh();
+                              validateRepeatableSection(sectionKey);
+                            },
+                          ),
+                        ),
+                        const Divider(thickness: 1, color: Colors.brown),
+                      ],
+                    );
+                  }),
+                  const SizedBox(height: 10),
+                  TextButton.icon(
+                    onPressed: () {
+                      final allValid =
+                          entries.every((entry) => fields.every((f) {
+                                final key = f['key'];
+                                final val = entry[key];
+
+                                if (f['type'] == 'dropdown') {
+                                  return val != null && val.value != null;
+                                }
+                                return val != null &&
+                                    val.value != null &&
+                                    val.value.trim().isNotEmpty;
+                              }));
+
+                      if (!allValid) return;
+
+                      final newEntry = <String, dynamic>{};
+                      for (var field in fields) {
+                        final String key = field['key'];
+                        if (field['type'] == 'dropdown') {
+                          newEntry[key] = Rxn<int>();
+                        } else {
+                          newEntry[key] = ''.obs;
+                        }
+                      }
+
+                      entries.add(newEntry);
+                      repeatableEntries[sectionKey]!.refresh();
+                      validateRepeatableSection(sectionKey);
+                    },
+                    icon: const Icon(Icons.add, color: Colors.green),
+                    label: const Text(
+                      "Add",
+                      style: TextStyle(
+                          color: Colors.green, fontWeight: FontWeight.bold),
                     ),
-                  ),
-                  const Divider(thickness: 1, color: Colors.brown),
+                  )
                 ],
-              );
-            }),
-            const SizedBox(height: 10),
-            TextButton.icon(
-              onPressed: () {
-                final allValid = entries.every((entry) => fields.every((f) {
-                  final key = f['key'];
-                  final val = entry[key];
-
-                  if (f['type'] == 'dropdown') {
-                    return val != null && val.value != null;
-                  }
-                  return val != null &&
-                      val.value != null &&
-                      val.value.trim().isNotEmpty;
-                }));
-
-                if (!allValid) return;
-
-                final newEntry = <String, dynamic>{};
-                for (var field in fields) {
-                  final String key = field['key'];
-                  if (field['type'] == 'dropdown') {
-                    newEntry[key] = Rxn<int>();
-                  } else {
-                    newEntry[key] = ''.obs;
-                  }
-                }
-
-                entries.add(newEntry);
-                repeatableEntries[sectionKey]!.refresh();
-                validateRepeatableSection(sectionKey);
-              },
-              icon: const Icon(Icons.add, color: Colors.green),
-              label: const Text(
-                "Add",
-                style: TextStyle(
-                    color: Colors.green, fontWeight: FontWeight.bold),
-              ),
-            )
-          ],
-        )
+              )
             : const SizedBox.shrink())
       ],
     );
@@ -766,10 +819,10 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
       final progressColor = percent >= 100
           ? Colors.green
           : percent >= 70
-          ? Colors.lightGreen
-          : percent >= 40
-          ? Colors.orange
-          : Colors.redAccent;
+              ? Colors.lightGreen
+              : percent >= 40
+                  ? Colors.orange
+                  : Colors.redAccent;
 
       return Stack(
         children: [
@@ -1010,7 +1063,6 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
   //final RxInt activeSectionIndex = 0.obs;
 
   double getSectionCompletionPercentByKey(String sectionKey) {
-
     if (sectionCompletion[sectionKey]?.value == true) {
       return 100.0;
     }
@@ -1078,6 +1130,185 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
     return percent;
   }
 
+  // Add this inside your _DynamicFormBuilderState class
+
+  // Add this inside your _DynamicFormBuilderState class
+
+  void fillWithMockData() {
+    // ================= Section: Family =================
+    textFields['father_name']?.value = 'qutbuddin';
+    textFields['father_cnic']?.value = '4203157223154';
+    textFields['mother_name']?.value = 'Tasneem';
+    textFields['mother_cnic']?.value = '4203157223154';
+
+    // ================= Section: Housing =================
+    multiSelectControllers['assets']?.selectedValues.value = [
+      'Gas Stove', 'TV', 'Bicycle', 'Car'
+    ];
+    dropdownFields['house_title']?.value = 0;
+    dropdownFields['area']?.value = 0;
+    dropdownFields['neighborhood']?.value = 0;
+    dropdownFields['drinking_water']?.value = 1;
+    dropdownFields['sanitation_bathroom']?.value = 1;
+    textFields['wallFlooring']?.value = 'Yes';
+    textFields['leakage']?.value = 'Yes';
+    textFields['personalBank']?.value = 'Yes';
+
+    // ================= Section: FMB =================
+    dropdownFields['taking_fmb']?.value = 0;
+    dropdownFields['fmb_quantity_sufficient']?.value = 0;
+    textFields['height']?.value = '150';
+    textFields['weight']?.value = '60';
+
+    // ================= Section: Medical =================
+    textFields['physically_mentally_challenged']?.value = 'Yes';
+    textFields['child_death_past_5yrs']?.value = 'Yes';
+    textFields['vaccination_status']?.value = 'Yes';
+    textFields['chronic_illness']?.value = 'Yes';
+
+    // ================= Section: Financials (Income) =================
+    dropdownFields['incomeType']?.value = 0;
+    textFields['familyMemberName']?.value = 'Arwa';
+    textFields['studentPartTimeIncome']?.value = '15000';
+    textFields['family_member_working']?.value = 'Yes';
+    textFields['family_member_disability']?.value = 'Yes';
+
+    // ================= Section: Financials (Expenses) =================
+    repeatableEntries['educationExpenses']?.add({
+      'eduName': 'Arwa'.obs,
+      'eduAge': '21'.obs,
+      'eduInsName': 'SZABIST'.obs,
+      'eduSemClass': '1'.obs,
+      'eduFee': '324'.obs,
+    });
+
+    repeatableEntries['dependentsExpense']?.add({
+      'dependentName': 'arwa'.obs,
+      'dependentAge': '22'.obs,
+    });
+
+    repeatableEntries['travellingExpense']?.add({
+      'travelPlace': 'karachi'.obs,
+      'travelYear': '2022'.obs,
+      'travelPurpose': 'travel'.obs,
+    });
+
+    // ================= Section: Financials (Others) =================
+    textFields['propAssets']?.value = '324';
+    textFields['JewAssets']?.value = '324';
+    textFields['tranAssets']?.value = '234';
+    textFields['OthAssets']?.value = '324';
+
+    repeatableEntries['personalAssets']?.add({
+      'businessAssetAmount': '324234'.obs,
+      'businessAssetDesc': 'Al Anwar'.obs,
+    });
+
+    repeatableEntries['enayatLiability']?.add({
+      'enayatLiabilityITS': '30445124'.obs,
+      'enayatLiabilityPurpose': 'ewerwe'.obs,
+      'enayatLiabilityAmount': '32423'.obs,
+      'enayatLiabilityDate': '2024-06-06'.obs,
+    });
+
+    // ================= Section: Khidmat (HR) =================
+    dropdownFields['khidmatCurrent']?.value = 0;
+    dropdownFields['khidmatIntent']?.value = 1;
+
+    // ================= Section: Deeni =================
+    textFields['studied_kalemat_daim']?.value = 'Yes';
+    textFields['memorized_names']?.value = 'Yes';
+    textFields['offers_sila_vajebaat']?.value = 'Yes';
+    textFields['attended_misaq_majlis']?.value = 'Yes';
+    textFields['contact_moharramaat']?.value = 'Yes';
+    dropdownFields['shaadi_status']?.value = 0;
+    textFields['spouse_name']?.value = 'arwa';
+    dropdownFields['ashara_attendance']?.value = 0;
+    textFields['ziyarat_raudat_tahera']?.value = 'Yes';
+    dropdownFields['namaz_daily']?.value = 1;
+
+    // ================= Mark Sections Complete =================
+    for (var section in formSections) {
+      final key = section['key'];
+      sectionCompletion[key]?.value = true;
+      subsectionProgress[key] = 100.0.obs;
+
+      for (var sub in section['subSections'] ?? []) {
+        final subKey = sub['key'];
+        sectionCompletion[subKey]?.value = true;
+        subsectionProgress[subKey] = 100.0.obs;
+      }
+    }
+
+    updateFormProgress();
+  }
+
+
+
+  void printFormData() {
+    debugPrint("\n====== 📄 Form Data (Keys + Values) ======");
+
+    for (var section in formSections) {
+      final sectionTitle = section['title'] ?? 'Untitled Section';
+      final sectionKey = section['key'];
+      debugPrint("\n📁 Section: $sectionTitle [$sectionKey]");
+
+      for (var sub in section['subSections'] ?? []) {
+        final subTitle = sub['title'] ?? 'Untitled Subsection';
+        final subKey = sub['key'];
+        debugPrint("  🔸 Subsection: $subTitle [$subKey]");
+
+        if (sub['type'] == 'repeatable') {
+          final entries = repeatableEntries[subKey] ?? [];
+          for (int i = 0; i < entries.length; i++) {
+            debugPrint("    🔁 Entry ${i + 1}:");
+            final entry = entries[i];
+            entry.forEach((key, value) {
+              if (value is RxString) {
+                debugPrint("      • $key: ${value.value}");
+              } else if (value is Rxn<int>) {
+                debugPrint("      • $key: ${value.value}");
+              } else {
+                debugPrint("      • $key: ${value.toString()}");
+              }
+            });
+          }
+        } else {
+          for (var field in sub['fields'] ?? []) {
+            final key = field['key'];
+            final label = field['label'] ?? key;
+            final type = field['type'];
+
+            debugPrint("    • [$key] $label:");
+
+            if (type == 'text' || type == 'radio') {
+              debugPrint("        → ${textFields[key]?.value ?? ''}");
+            } else if (type == 'dropdown') {
+              debugPrint("        → ${dropdownFields[key]?.value}");
+
+              if (field.containsKey('textFieldKey')) {
+                final linkedKey = field['textFieldKey'];
+                final linkedLabel = field['textFieldLabel'] ?? linkedKey;
+                debugPrint("        ↳ [$linkedKey] $linkedLabel: ${textFields[linkedKey]?.value ?? ''}");
+              }
+
+              if (field.containsKey('dropdownKey')) {
+                final linkedKey = field['dropdownKey'];
+                final linkedLabel = field['dropdownLabel'] ?? linkedKey;
+                debugPrint("        ↳ [$linkedKey] $linkedLabel: ${dropdownFields[linkedKey]?.value}");
+              }
+            } else if (type == 'multiselect') {
+              final values = multiSelectControllers[key]?.selectedValues ?? [];
+              debugPrint("        → ${values.join(', ')}");
+            }
+          }
+        }
+      }
+    }
+
+    debugPrint("====== ✅ End of Form Data ======\n");
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -1087,38 +1318,46 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
         backgroundColor: const Color(0xfffffcf6),
       ),
       backgroundColor: const Color(0xfffffcf6),
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () {
+      //     fillWithMockData();
+      //     printFormData();
+      //     ScaffoldMessenger.of(context).showSnackBar(
+      //       const SnackBar(content: Text('Dummy data filled')),
+      //     );
+      //   },
+      //   child: const Icon(Icons.bolt),
+      // ),
       body: Column(
         spacing: 10,
         children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 50.0),
-            child: Obx(() {
-              final steps = formSections.map<SectionStep>((section) {
-                final key = section['key'];
-                final percent = getSectionCompletionPercentByKey(key);
-                return SectionStep(
-                  title: section['title'],
-                  completionPercent: percent,
-                );
-              }).toList();
-
-              // Calculate overall progress across all sections
-              final double totalPercent = steps.isEmpty
-                  ? 0.0
-                  : steps
-                          .map((s) => s.completionPercent)
-                          .reduce((a, b) => a + b) /
-                      steps.length;
-
-              return SectionStepper(
-                sections: steps,
-                activeIndex: activeSectionIndex.value,
-                completionPercent: totalPercent,
+          Obx(() {
+            final steps = formSections.map<SectionStep>((section) {
+              final key = section['key'];
+              final percent = getSectionCompletionPercentByKey(key);
+              return SectionStep(
+                title: section['title'],
+                completionPercent: percent,
               );
-            }),
-          ),
+            }).toList();
+
+            // Calculate overall progress across all sections
+            final double totalPercent = steps.isEmpty
+                ? 0.0
+                : steps
+                        .map((s) => s.completionPercent)
+                        .reduce((a, b) => a + b) /
+                    steps.length;
+
+            return SectionStepper(
+              sections: steps,
+              activeIndex: activeSectionIndex.value,
+              completionPercent: totalPercent,
+            );
+          }),
           Expanded(
             child: SingleChildScrollView(
+              controller: scrollController,
               child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 150),
                   child: Column(
@@ -1159,8 +1398,9 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
                             children: [buildTotalingSection(section)],
                           );
                         } else {
-                          final regularSubsections =
-                          buildRegularSectionFields(section, sectionIndex: activeSectionIndex.value);
+                          final regularSubsections = buildRegularSectionFields(
+                              section,
+                              sectionIndex: activeSectionIndex.value);
                           sectionWidget = Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: regularSubsections,
@@ -1236,9 +1476,32 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
                                 onPressed: isComplete
                                     ? () {
                                         if (!isLastSection) {
+                                          printFormData();
                                           activeSectionIndex.value++;
+                                          scrollController.animateTo(
+                                            0.0,
+                                            duration:
+                                                Duration(milliseconds: 400),
+                                            curve: Curves.easeInOut,
+                                          );
                                         } else {
-                                          // 🔔 Final submit logic or go to review screen
+                                          if (isLastSection) {
+                                            printFormData();
+                                            Get.to(() => ReviewScreen(
+                                              formSections: formSections,
+                                              textFields: textFields,
+                                              dropdownFields: dropdownFields,
+                                              repeatableEntries: repeatableEntries,
+                                              dropdownOptions: dropdownOptions,
+                                              onBackToEdit: (String sectionKey) {
+                                                final index = formSections.indexWhere((s) => s['key'] == sectionKey);
+                                                if (index != -1) {
+                                                  activeSectionIndex.value = index;
+                                                  Get.back(); // return to the form
+                                                }
+                                              },
+                                            ));
+                                          }
                                         }
                                       }
                                     : null,
@@ -1254,12 +1517,30 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
                                 ),
                               ),
                             );
-                          })
+                          }),
                         ],
                       ),
                       SizedBox(
+                        height: 10,
+                      ),
+                      SizedBox(
+                        width: double.infinity,
+                        child: Column(
+                          mainAxisAlignment:MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("Application Filling Instructions:",style: TextStyle(fontWeight: FontWeight.bold),),
+                            Text("All fields are mandatory"),
+                            Text("Each tab has a separate display tab"),
+                            Text("Applicant may exit form and rejoin from exit point in between"),
+                            Text("Application fill tab by tab, no forward tab filling"),
+                            Text("In the end, preview full form with tab edit button"),
+                          ],
+                        ),
+                      ),
+                      SizedBox(
                         height: 20,
-                      )
+                      ),
                     ],
                   )),
             ),
@@ -1269,7 +1550,15 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
     );
   }
 
-  List<Widget> buildRegularSectionFields(Map<String, dynamic> section, {required int sectionIndex}) {
+  final ScrollController scrollController = ScrollController();
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  List<Widget> buildRegularSectionFields(Map<String, dynamic> section,
+      {required int sectionIndex}) {
     final List<Widget> children = [];
 
     final subSections = section['subSections'] ?? [];
@@ -1301,7 +1590,6 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
         );
       } else {
         final fields = sub['fields'] ?? [];
-
         children.add(
           buildCollapsibleSection(
             title: numberLabel,
@@ -1310,18 +1598,49 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
             children: [
               LayoutBuilder(
                 builder: (context, constraints) {
-                  final double fullWidth = constraints.maxWidth;
-                  const double spacing = 16;
-                  return Wrap(
-                    spacing: spacing,
-                    runSpacing: spacing,
-                    children: fields.map<Widget>((field) {
-                      return SizedBox(
-                        width: fullWidth,
-                        child: buildDynamicField(field, subKey),
+                  List<Widget> fieldRows = [];
+                  final fieldsList = fields.asMap().entries.toList();
+
+                  for (int i = 0; i < fieldsList.length; i += 2) {
+                    final rowChildren = <Widget>[];
+
+                    for (int j = i; j < i + 2 && j < fieldsList.length; j++) {
+                      final entry = fieldsList[j];
+                      final fieldIndex = entry.key;
+                      final field = entry.value;
+
+                      rowChildren.add(
+                        Expanded(
+                          child: Container(
+                            height: 155,
+                            margin: EdgeInsets.all(8),
+                            color: Color(0xfffff7ec),
+                            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "${sectionIndex + 1}.${subIndex + 1}.${fieldIndex + 1}",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.brown,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                                buildDynamicField(field, subKey),
+                              ],
+                            ),
+                          ),
+                        ),
                       );
-                    }).toList(),
-                  );
+                    }
+
+                    fieldRows.add(Row(
+                      children: rowChildren,
+                    ));
+                  }
+
+                  return Column(children: fieldRows);
                 },
               ),
             ],
@@ -1343,7 +1662,8 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
     return null;
   }
 
-  Widget buildTotalingSubSection(Map<String, dynamic> subSection, String subKey) {
+  Widget buildTotalingSubSection(
+      Map<String, dynamic> subSection, String subKey) {
     final fields = subSection['fields'] ?? [];
 
     return Obx(() {
@@ -1486,105 +1806,418 @@ class SectionStepper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width*0.1),
+      padding: const EdgeInsets.symmetric(horizontal: 30.0),
       child: Column(
+        mainAxisAlignment:MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
         spacing: 10,
         children: [
-          Wrap(
-            spacing: MediaQuery.of(context).size.width*0.02,
-            runSpacing: 10,
-            alignment: WrapAlignment.center,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width*0.015),
+              Text(
+                "ITS: 30445124",
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              Text("Name: Abi Ali Qutbuddin",
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          Wrap(
+            spacing: 15,
+            runSpacing: 8,
+            children: sections.asMap().entries.map((entry) {
+              final index = entry.key;
+              final section = entry.value;
+              final isActive = index == activeIndex;
+
+              Color textColor = Colors.grey.shade700;
+              FontWeight weight = FontWeight.w500;
+              Color bgColor = Colors.grey.shade200;
+              Color borderColor = Colors.transparent;
+
+              if (section.isComplete) {
+                textColor = Colors.green.shade700;
+                bgColor = Colors.green.shade50;
+                borderColor = Colors.green.shade300;
+              }
+
+              if (isActive) {
+                textColor = Colors.brown.shade900;
+                weight = FontWeight.bold;
+                bgColor = const Color(0xfffce8d5);
+                borderColor = Colors.brown;
+              }
+
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 6),
+                decoration: BoxDecoration(
+                  color: bgColor,
+                  borderRadius: BorderRadius.circular(25),
+                  border: Border.all(color: borderColor, width: 1.5),
+                  boxShadow: isActive
+                      ? [
+                    BoxShadow(
+                      color: Colors.brown.withOpacity(0.3),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    )
+                  ]
+                      : [],
+                ),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
-                      "ITS: 30445124",
-                      style:
-                      TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    Icon(
+                      section.isComplete
+                          ? Icons.check_circle
+                          : Icons.radio_button_unchecked,
+                      color: section.isComplete
+                          ? Colors.green
+                          : isActive
+                          ? Colors.brown
+                          : Colors.grey.shade400,
+                      size: 16,
                     ),
-                    Text("Name: Abi Ali Qutbuddin",
-                        style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.bold)),
+                    const SizedBox(width: 6),
+                    Text(
+                      section.title,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: weight,
+                        color: textColor,
+                      ),
+                    ),
                   ],
                 ),
-              ),
-              ...List.generate(sections.length, (index) {
-                final section = sections[index];
-                final isActive = index == activeIndex;
+              );
+            }).toList(),
+          ),
+          // Row(
+          //   spacing: 15,
+          //   // runAlignment: WrapAlignment.spaceEvenly,
+          //   // runSpacing: 10,
+          //   // alignment: WrapAlignment.center,
+          //   children: [
+          //     ...List.generate(sections.length, (index) {
+          //       final section = sections[index];
+          //       final isActive = index == activeIndex;
+          //
+          //       Color textColor = Colors.grey.shade700;
+          //       FontWeight weight = FontWeight.w500;
+          //       Color bgColor = Colors.grey.shade200;
+          //       Color borderColor = Colors.transparent;
+          //
+          //       if (section.isComplete) {
+          //         textColor = Colors.green.shade700;
+          //         bgColor = Colors.green.shade50;
+          //         borderColor = Colors.green.shade300;
+          //       }
+          //
+          //       if (isActive) {
+          //         textColor = Colors.brown.shade900;
+          //         weight = FontWeight.bold;
+          //         bgColor = const Color(0xfffce8d5);
+          //         borderColor = Colors.brown;
+          //       }
+          //
+          //       return AnimatedContainer(
+          //         duration: const Duration(milliseconds: 300),
+          //         curve: Curves.easeInOut,
+          //         padding:
+          //             const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
+          //         decoration: BoxDecoration(
+          //           color: bgColor,
+          //           borderRadius: BorderRadius.circular(25),
+          //           border: Border.all(color: borderColor, width: 1.5),
+          //           boxShadow: isActive
+          //               ? [
+          //                   BoxShadow(
+          //                     color: Colors.brown.withValues(alpha: 0.3),
+          //                     blurRadius: 4,
+          //                     offset: const Offset(0, 2),
+          //                   )
+          //                 ]
+          //               : [],
+          //         ),
+          //         child: Row(
+          //           spacing: 5,
+          //           mainAxisSize: MainAxisSize.min,
+          //           children: [
+          //             Icon(
+          //               section.isComplete
+          //                   ? Icons.check_circle
+          //                   : Icons.radio_button_unchecked,
+          //               color: section.isComplete
+          //                   ? Colors.green
+          //                   : isActive
+          //                       ? Colors.brown
+          //                       : Colors.grey.shade400,
+          //               size: 16,
+          //             ),
+          //             Text(
+          //               section.title,
+          //               style: TextStyle(
+          //                 fontSize: 12,
+          //                 fontWeight: weight,
+          //                 color: textColor,
+          //               ),
+          //             ),
+          //           ],
+          //         ),
+          //       );
+          //     })
+          //   ],
+          // ),
 
-                Color textColor = Colors.grey.shade700;
-                FontWeight weight = FontWeight.w500;
-                Color bgColor = Colors.grey.shade200;
-                Color borderColor = Colors.transparent;
-
-                if (section.isComplete) {
-                  textColor = Colors.green.shade700;
-                  bgColor = Colors.green.shade50;
-                  borderColor = Colors.green.shade300;
-                }
-
-                if (isActive) {
-                  textColor = Colors.brown.shade900;
-                  weight = FontWeight.bold;
-                  bgColor = const Color(0xfffce8d5);
-                  borderColor = Colors.brown;
-                }
-
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeInOut,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
-                  decoration: BoxDecoration(
-                    color: bgColor,
-                    borderRadius: BorderRadius.circular(25),
-                    border: Border.all(color: borderColor, width: 1.5),
-                    boxShadow: isActive
-                        ? [
-                            BoxShadow(
-                              color: Colors.brown.withValues(alpha: 0.3),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            )
-                          ]
-                        : [],
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 250),
+            child: Row(
+              spacing: 15,
+              children: [
+                Expanded(
+                  child: TweenAnimationBuilder<double>(
+                    tween:
+                    Tween<double>(begin: 0, end: completionPercent / 100),
+                    duration: const Duration(milliseconds: 500),
+                    curve: Curves.easeInOut,
+                    builder: (context, value, child) {
+                      return LinearProgressIndicator(
+                        value: value,
+                        minHeight: 4,
+                        borderRadius: BorderRadius.circular(20),
+                        backgroundColor: Colors.grey.shade200,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          value >= 1.0
+                              ? Colors.green
+                              : value >= 0.7
+                              ? Colors.lightGreen
+                              : value >= 0.4
+                              ? Colors.orange
+                              : Colors.redAccent,
+                        ),
+                      );
+                    },
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        section.isComplete
-                            ? Icons.check_circle
-                            : Icons.radio_button_unchecked,
-                        color: section.isComplete
-                            ? Colors.green
-                            : isActive
-                                ? Colors.brown
-                                : Colors.grey.shade400,
-                        size: 18,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
+                ),
+                Text(
+                  "${completionPercent.round()}%",
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.brown,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+class SectionStepper2 extends StatelessWidget {
+  final List<SectionStep> sections;
+  final int activeIndex;
+  final double completionPercent;
+
+  const SectionStepper2({
+    super.key,
+    required this.sections,
+    required this.activeIndex,
+    required this.completionPercent,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 30.0),
+      child: Column(
+        mainAxisAlignment:MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        spacing: 10,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "ITS: 30445124",
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+              Text("Name: Abi Ali Qutbuddin",
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          GridView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: sections.length,
+            gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+              mainAxisExtent: 32,
+              maxCrossAxisExtent: 200, // Max width per item
+              mainAxisSpacing: 8,
+              crossAxisSpacing: 15,
+            ),
+            itemBuilder: (context, index) {
+              final section = sections[index];
+              final isActive = index == activeIndex;
+
+              Color textColor = Colors.grey.shade700;
+              FontWeight weight = FontWeight.w500;
+              Color bgColor = Colors.grey.shade200;
+              Color borderColor = Colors.transparent;
+
+              if (section.isComplete) {
+                textColor = Colors.green.shade700;
+                bgColor = Colors.green.shade50;
+                borderColor = Colors.green.shade300;
+              }
+
+              if (isActive) {
+                textColor = Colors.brown.shade900;
+                weight = FontWeight.bold;
+                bgColor = const Color(0xfffce8d5);
+                borderColor = Colors.brown;
+              }
+
+              return AnimatedContainer(
+                alignment: Alignment.center,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: bgColor,
+                  borderRadius: BorderRadius.circular(25),
+                  border: Border.all(color: borderColor, width: 1.5),
+                  boxShadow: isActive
+                      ? [
+                          BoxShadow(
+                            color: Colors.brown.withValues(alpha: 0.3),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          )
+                        ]
+                      : [],
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Icon(
+                      section.isComplete
+                          ? Icons.check_circle
+                          : Icons.radio_button_unchecked,
+                      color: section.isComplete
+                          ? Colors.green
+                          : isActive
+                              ? Colors.brown
+                              : Colors.grey.shade400,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 6),
+                    Flexible(
+                      child: Text(
                         section.title,
+                        overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 12,
                           fontWeight: weight,
                           color: textColor,
                         ),
                       ),
-                    ],
-                  ),
-                );
-              })
-            ],
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
-          const SizedBox(height: 18),
+          // Row(
+          //   spacing: 15,
+          //   // runAlignment: WrapAlignment.spaceEvenly,
+          //   // runSpacing: 10,
+          //   // alignment: WrapAlignment.center,
+          //   children: [
+          //     ...List.generate(sections.length, (index) {
+          //       final section = sections[index];
+          //       final isActive = index == activeIndex;
+          //
+          //       Color textColor = Colors.grey.shade700;
+          //       FontWeight weight = FontWeight.w500;
+          //       Color bgColor = Colors.grey.shade200;
+          //       Color borderColor = Colors.transparent;
+          //
+          //       if (section.isComplete) {
+          //         textColor = Colors.green.shade700;
+          //         bgColor = Colors.green.shade50;
+          //         borderColor = Colors.green.shade300;
+          //       }
+          //
+          //       if (isActive) {
+          //         textColor = Colors.brown.shade900;
+          //         weight = FontWeight.bold;
+          //         bgColor = const Color(0xfffce8d5);
+          //         borderColor = Colors.brown;
+          //       }
+          //
+          //       return AnimatedContainer(
+          //         duration: const Duration(milliseconds: 300),
+          //         curve: Curves.easeInOut,
+          //         padding:
+          //             const EdgeInsets.symmetric(horizontal: 7, vertical: 5),
+          //         decoration: BoxDecoration(
+          //           color: bgColor,
+          //           borderRadius: BorderRadius.circular(25),
+          //           border: Border.all(color: borderColor, width: 1.5),
+          //           boxShadow: isActive
+          //               ? [
+          //                   BoxShadow(
+          //                     color: Colors.brown.withValues(alpha: 0.3),
+          //                     blurRadius: 4,
+          //                     offset: const Offset(0, 2),
+          //                   )
+          //                 ]
+          //               : [],
+          //         ),
+          //         child: Row(
+          //           spacing: 5,
+          //           mainAxisSize: MainAxisSize.min,
+          //           children: [
+          //             Icon(
+          //               section.isComplete
+          //                   ? Icons.check_circle
+          //                   : Icons.radio_button_unchecked,
+          //               color: section.isComplete
+          //                   ? Colors.green
+          //                   : isActive
+          //                       ? Colors.brown
+          //                       : Colors.grey.shade400,
+          //               size: 16,
+          //             ),
+          //             Text(
+          //               section.title,
+          //               style: TextStyle(
+          //                 fontSize: 12,
+          //                 fontWeight: weight,
+          //                 color: textColor,
+          //               ),
+          //             ),
+          //           ],
+          //         ),
+          //       );
+          //     })
+          //   ],
+          // ),
+
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 250),
             child: Row(
+              spacing: 15,
               children: [
                 Expanded(
                   child: TweenAnimationBuilder<double>(
@@ -1595,7 +2228,7 @@ class SectionStepper extends StatelessWidget {
                     builder: (context, value, child) {
                       return LinearProgressIndicator(
                         value: value,
-                        minHeight: 6,
+                        minHeight: 4,
                         borderRadius: BorderRadius.circular(20),
                         backgroundColor: Colors.grey.shade200,
                         valueColor: AlwaysStoppedAnimation<Color>(
@@ -1611,11 +2244,10 @@ class SectionStepper extends StatelessWidget {
                     },
                   ),
                 ),
-                const SizedBox(width: 15),
                 Text(
                   "${completionPercent.round()}%",
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.w600,
                     color: Colors.brown,
                   ),
@@ -1623,7 +2255,6 @@ class SectionStepper extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 10),
         ],
       ),
     );

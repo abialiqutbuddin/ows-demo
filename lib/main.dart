@@ -5,12 +5,15 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:ows/constants/app_routes.dart';
 import 'package:ows/controller/module_controller.dart';
 import 'package:ows/controller/update_paktalim_controller.dart';
+import 'package:ows/model/family_model.dart';
+import 'package:ows/web_ui/profile_preview_screen.dart';
+import 'constants/dummy_data.dart';
 import 'controller/admin/view_req_forms.dart';
 import 'controller/forms/form_screen_controller.dart';
 import 'controller/profile_pdf_controller.dart';
 import 'controller/request_form_controller.dart';
 import 'controller/state_management/state_manager.dart';
-import 'demo.dart';
+import 'web_ui/forms/application_form_web.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -43,7 +46,7 @@ class MyApp extends StatelessWidget {
      // home:LoginController(),
        // home: LoginController2(),
      // home:ProfilePDFScreen(member: userProfile1),
-    // home: ProfilePreview(member: userProfile1, family: dummyFamily),
+    //home: ProfilePreview(member: userProfile11, family: Family()),
     // home: IndexStackScreen(),
       //home: updatePakTalimForm(),
       //home:RequestForm(),

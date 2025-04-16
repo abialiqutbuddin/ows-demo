@@ -5,7 +5,7 @@ import 'package:ows/api/api.dart';
 import 'package:ows/constants/constants.dart';
 import 'package:super_tooltip/super_tooltip.dart';
 import '../../controller/forms/form_screen_controller.dart';
-import '../../demo.dart';
+import '../../web_ui/forms/application_form_web.dart';
 import 'financials.dart';
 
 class FormScreenM extends StatefulWidget {

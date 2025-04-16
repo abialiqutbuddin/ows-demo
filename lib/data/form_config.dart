@@ -1,38 +1,35 @@
 var formConfig = [
   {
-    "title": "Intended",
+    "title": "Intend",
     "key": "intendInfo",
   },
+  // {
+  //   "title": "Khidmat (HR)",
+  //   "key": "khidmatInfo",
+  //   "subSections": [
+  //
+  //   ]
+  // },
   {
-    "title": "Khidmat (HR)",
-    "key": "khidmatInfo",
+    "title": "Deeni",
+    "key": "deeniInfo",
     "subSections": [
       {
         "title": "Khidmat Details",
         "key": "khidmatInfo",
         "fields": [
           {
-            "label":
-                "Are you currently a part of any of the following khidmat avenues?",
-            "key": "currentKhidmat",
             "type": "dropdown",
-            "itemsKey": "khidmatOptions"
+            "label": "Are you currently a part of any of the following khidmat avenues?",
+            "key": "khidmatCurrent",
+            "itemsKey": "khidmatOptions",
+            "showDropdownIf": 5,
+            "dropdownLabel": "Are you intending to be a part of any of the following khidmat avenues?",
+            "dropdownKey": "khidmatIntent",
+            "itemsKey2": "khidmatOptions"
           },
-          {
-            "label":
-                "Are you intending to be a part of any of the following khidmat avenues?",
-            "key": "intentKhidmat",
-            "type": "dropdown",
-            "itemsKey": "khidmatOptions"
-          }
         ]
-      }
-    ]
-  },
-  {
-    "title": "Deeni Info",
-    "key": "deeniInfo",
-    "subSections": [
+      },
       {
         "title": "Deeni Info",
         "key": "deeniInfo",
@@ -103,9 +100,15 @@ var formConfig = [
       }
     ]
   },
+  // {
+  //   "title": "Family",
+  //   "key": "familyInfo",
+  //   "subSections": [
+  //   ]
+  // },
   {
-    "title": "Family Info",
-    "key": "familyInfo",
+    "title": "Housing",
+    "key": "housingInfo",
     "subSections": [
       {
         "title": "Father Info",
@@ -142,13 +145,7 @@ var formConfig = [
             "validator": "cnic"
           }
         ]
-      }
-    ]
-  },
-  {
-    "title": "Housing Info",
-    "key": "housingInfo",
-    "subSections": [
+      },
       {
         "title": "House Details",
         "key": "housingInfo",
@@ -189,12 +186,30 @@ var formConfig = [
             "key": "sanitation_bathroom",
             "itemsKey": "sanitationBathroomOptions"
           },
+          {
+            "type": "radio",
+            "label": "Are all walls/roof/flooring structure made of natural or light materials? (i.e mud,clay sand,cane, tree trunks, grass, bamboo, plastic, raw wood, stones, cardboard, tent etc.)",
+            "key": "wallFlooring",
+            "options": ["Yes", "No"]
+          },
+          {
+            "type": "radio",
+            "label": "Is there any leakage in the house?",
+            "key": "leakage",
+            "options": ["Yes", "No"]
+          },
+          {
+            "type": "radio",
+            "label": "Has a personal Bank Account?",
+            "key": "personalBank",
+            "options": ["Yes", "No"]
+          },
         ]
       }
     ]
   },
   {
-    "title": "FMB Info",
+    "title": "FMB",
     "key": "fmbInfo",
     "subSections": [
       {
@@ -217,6 +232,7 @@ var formConfig = [
       },
       {
         "title": "BMI",
+        "key": "bmiInfo",
         "fields": [
           {"type": "text", "label": "Height (in cm)", "key": "height"},
           {"type": "text", "label": "Weight (in kg)", "key": "weight"}
@@ -225,7 +241,7 @@ var formConfig = [
     ]
   },
   {
-    "title": "Medical Info",
+    "title": "Medical",
     "key": "medicalInfo",
     "subSections": [
       {
@@ -267,7 +283,7 @@ var formConfig = [
     ]
   },
   {
-    "title": "Financials (Income)",
+    "title": "Financials",
     "key": "financialInfo",
     "subSections": [
       {
@@ -311,249 +327,237 @@ var formConfig = [
             "showTextFieldIf": "Yes",
             "textFieldKey": "disabilityDetails",
             "textFieldLabel": "Give Details"
+          },
+          {
+            "title": "Expenses Breakdown",
+            "type": "totaling",
+            "key": "expenseBreakdown",
+            "fields": [
+              {
+                "label": "Wajebaat / Khumus",
+                "key": "wajebaatExpenses",
+                "type": "text",
+                "validator": "number"
+              },
+              {
+                "label": "FMB Thaali / Niyaaz",
+                "key": "niyazExpenses",
+                "type": "text",
+                "validator": "number"
+              },
+              {
+                "label": "Jamaat Expenses / Sabeel",
+                "key": "sabeelExpenses",
+                "type": "text",
+                "validator": "number"
+              },
+              {
+                "label": "Ziyarat",
+                "key": "zyaratExpenses",
+                "type": "text",
+                "validator": "number"
+              },
+              {
+                "label": "Ashara Mubarakah",
+                "key": "asharaExpenses",
+                "type": "text",
+                "validator": "number"
+              },
+              {
+                "label": "Qardan Hasana",
+                "key": "qardanHasana",
+                "type": "text",
+                "validator": "number"
+              },
+              {
+                "label": "Others",
+                "key": "otherExpenses",
+                "type": "text",
+                "validator": "number"
+              }
+            ]
+          },
+          {
+            "title": "Education",
+            "type": "repeatable",
+            "key": "educationExpenses",
+            "radioLabel": "No Education Expense",
+            "fields": [
+              {"label": "Name", "key": "eduName", "type": "text"},
+              {"label": "Age", "key": "eduAge", "type": "text", "validator": "age"},
+              {"label": "Institute Name", "key": "eduInsName", "type": "text"},
+              {
+                "label": "Class/Semester",
+                "key": "eduSemClass",
+                "type": "dropdown",
+                "itemsKey": "semesterOptions"
+              },
+              {
+                "label": "Fee",
+                "key": "eduFee",
+                "type": "text",
+                "validator": "number"
+              }
+            ]
+          },
+          {
+            "title": "Food Expense",
+            "key": "foodExpense",
+            "type": "totaling",
+            "fields": [
+              {
+                "label": "Groceries & Household supplies",
+                "key": "groceriesSupplies",
+                "type": "text",
+                "validator": "number"
+              },
+              {
+                "label": "Retaurants / Dine Out",
+                "key": "dineOutExpense",
+                "type": "text",
+                "validator": "number"
+              },
+              {
+                "label": "Essentials",
+                "key": "essentialExpense",
+                "type": "text",
+                "validator": "number"
+              },
+            ]
+          },
+          {
+            "title": "Health",
+            "key": "healthExpense",
+            "type": "totaling",
+            "fields": [
+              {
+                "label": "Doctor",
+                "key": "docExpenses",
+                "type": "text",
+                "validator": "number"
+              },
+              {
+                "label": "Dental",
+                "key": "dentalExpenses",
+                "type": "text",
+                "validator": "number"
+              },
+              {
+                "label": "Glasses & Eye Care",
+                "key": "glassExpenses",
+                "type": "text",
+                "validator": "number"
+              },
+              {
+                "label": "Medicines",
+                "key": "medsExpenses",
+                "type": "text",
+                "validator": "number"
+              },
+              {
+                "label": "Vacation",
+                "key": "vacationExpenses",
+                "type": "text",
+                "validator": "number"
+              },
+            ]
+          },
+          {
+            "title": "Standard of Living",
+            "key": "sosExpense",
+            "type": "totaling",
+            "fields": [
+              {
+                "label": "Rent",
+                "key": "rentExpense",
+                "type": "text",
+                "validator": "number"
+              },
+              {
+                "label": "Maintenance",
+                "key": "mainExpense",
+                "type": "text",
+                "validator": "number"
+              },
+              {
+                "label": "Gas",
+                "key": "gasExpense",
+                "type": "text",
+                "validator": "number"
+              },
+              {
+                "label": "Electricity",
+                "key": "electricityExpense",
+                "type": "text",
+                "validator": "number"
+              },
+              {
+                "label": "Mobile",
+                "key": "mobileExpense",
+                "type": "text",
+                "validator": "number"
+              },
+              {
+                "label": "Water",
+                "key": "waterExpense",
+                "type": "text",
+                "validator": "number"
+              },
+              {
+                "label": "Cable",
+                "key": "cableExpense",
+                "type": "text",
+                "validator": "number"
+              },
+              {
+                "label": "Internet",
+                "key": "internetExpense",
+                "type": "text",
+                "validator": "number"
+              },
+              {
+                "label": "Clothing & Accessories",
+                "key": "clothingExpense",
+                "type": "text",
+                "validator": "number"
+              },
+              {
+                "label": "Appliances (Maintenance)",
+                "key": "appliancesExpense",
+                "type": "text",
+                "validator": "number"
+              },
+              {
+                "label": "Others",
+                "key": "other2Expense",
+                "type": "text",
+                "validator": "number"
+              },
+            ]
+          },
+          {
+            "title": "Dependents",
+            "key": "dependentsExpense",
+            "type": "repeatable",
+            "radioLabel": "No Dependents",
+            "fields": [
+              {"label": "Dependent Name", "key": "dependentName", "type": "text"},
+              {"label": "Dependent Age", "key": "dependentAge", "type": "age"},
+            ]
+          },
+          {
+            "title": "Travelling (Last 5 Years)",
+            "key": "travellingExpense",
+            "type": "repeatable",
+            "radioLabel": "Not travelled",
+            "fields": [
+              {"label": "Place", "key": "travelPlace", "type": "text"},
+              {"label": "Year", "key": "travelYear", "type": "year"},
+              {"label": "Purpose", "key": "travelPurpose", "type": "text"},
+            ]
           }
         ]
-      }
-    ]
-  },
-  {
-    "title": "Financials (Expenses)",
-    "key": "financialsExpenses",
-    "subSections": [
-      {
-        "title": "Expenses Breakdown",
-        "type": "totaling",
-        "key": "expenseBreakdown",
-        "fields": [
-          {
-            "label": "Wajebaat / Khumus",
-            "key": "wajebaatExpenses",
-            "type": "text",
-            "validator": "number"
-          },
-          {
-            "label": "FMB Thaali / Niyaaz",
-            "key": "niyazExpenses",
-            "type": "text",
-            "validator": "number"
-          },
-          {
-            "label": "Jamaat Expenses / Sabeel",
-            "key": "sabeelExpenses",
-            "type": "text",
-            "validator": "number"
-          },
-          {
-            "label": "Ziyarat",
-            "key": "zyaratExpenses",
-            "type": "text",
-            "validator": "number"
-          },
-          {
-            "label": "Ashara Mubarakah",
-            "key": "asharaExpenses",
-            "type": "text",
-            "validator": "number"
-          },
-          {
-            "label": "Qardan Hasana",
-            "key": "qardanHasana",
-            "type": "text",
-            "validator": "number"
-          },
-          {
-            "label": "Others",
-            "key": "otherExpenses",
-            "type": "text",
-            "validator": "number"
-          }
-        ]
       },
-      {
-        "title": "Education",
-        "type": "repeatable",
-        "key": "educationExpenses",
-        "radioLabel": "No Education Expense",
-        "fields": [
-          {"label": "Name", "key": "eduName", "type": "text"},
-          {"label": "Age", "key": "eduAge", "type": "text", "validator": "age"},
-          {"label": "Institute Name", "key": "eduInsName", "type": "text"},
-          {
-            "label": "Class/Semester",
-            "key": "eduSemClass",
-            "type": "dropdown",
-            "itemsKey": "semesterOptions"
-          },
-          {
-            "label": "Fee",
-            "key": "eduFee",
-            "type": "text",
-            "validator": "number"
-          }
-        ]
-      },
-      {
-        "title": "Food Expense",
-        "key": "foodExpense",
-        "type": "totaling",
-        "fields": [
-          {
-            "label": "Groceries & Household supplies",
-            "key": "groceriesSupplies",
-            "type": "text",
-            "validator": "number"
-          },
-          {
-            "label": "Retaurants / Dine Out",
-            "key": "dineOutExpense",
-            "type": "text",
-            "validator": "number"
-          },
-          {
-            "label": "Essentials",
-            "key": "essentialExpense",
-            "type": "text",
-            "validator": "number"
-          },
-        ]
-      },
-      {
-        "title": "Health",
-        "key": "healthExpense",
-        "type": "totaling",
-        "fields": [
-          {
-            "label": "Doctor",
-            "key": "docExpenses",
-            "type": "text",
-            "validator": "number"
-          },
-          {
-            "label": "Dental",
-            "key": "dentalExpenses",
-            "type": "text",
-            "validator": "number"
-          },
-          {
-            "label": "Glasses & Eye Care",
-            "key": "glassExpenses",
-            "type": "text",
-            "validator": "number"
-          },
-          {
-            "label": "Medicines",
-            "key": "medsExpenses",
-            "type": "text",
-            "validator": "number"
-          },
-          {
-            "label": "Vacation",
-            "key": "vacationExpenses",
-            "type": "text",
-            "validator": "number"
-          },
-        ]
-      },
-      {
-        "title": "Standard of Living",
-        "key": "sosExpense",
-        "type": "totaling",
-        "fields": [
-          {
-            "label": "Rent",
-            "key": "docExpenses",
-            "type": "text",
-            "validator": "number"
-          },
-          {
-            "label": "Maintenance",
-            "key": "dentalExpenses",
-            "type": "text",
-            "validator": "number"
-          },
-          {
-            "label": "Gas",
-            "key": "glassExpenses",
-            "type": "text",
-            "validator": "number"
-          },
-          {
-            "label": "Electricity",
-            "key": "medsExpenses",
-            "type": "text",
-            "validator": "number"
-          },
-          {
-            "label": "Mobile",
-            "key": "vacationExpenses",
-            "type": "text",
-            "validator": "number"
-          },
-          {
-            "label": "Water",
-            "key": "vacationExpenses",
-            "type": "text",
-            "validator": "number"
-          },
-          {
-            "label": "Cable",
-            "key": "vacationExpenses",
-            "type": "text",
-            "validator": "number"
-          },
-          {
-            "label": "Internet",
-            "key": "vacationExpenses",
-            "type": "text",
-            "validator": "number"
-          },
-          {
-            "label": "Clothing & Accessories",
-            "key": "vacationExpenses",
-            "type": "text",
-            "validator": "number"
-          },
-          {
-            "label": "Appliances (Maintenance)",
-            "key": "vacationExpenses",
-            "type": "text",
-            "validator": "number"
-          },
-          {
-            "label": "Others",
-            "key": "vacationExpenses",
-            "type": "text",
-            "validator": "number"
-          },
-        ]
-      },
-      {
-        "title": "Dependents",
-        "key": "dependentsExpense",
-        "type": "repeatable",
-        "radioLabel": "No Dependents",
-        "fields": [
-          {"label": "Dependent Name", "key": "dependentName", "type": "text"},
-          {"label": "Dependent Age", "key": "dependentAge", "type": "age"},
-        ]
-      },
-      {
-        "title": "Travelling (Last 5 Years)",
-        "key": "travellingExpense",
-        "type": "repeatable",
-        "radioLabel": "Not travelled",
-        "fields": [
-          {"label": "Place", "key": "travelPlace", "type": "text"},
-          {"label": "Year", "key": "travelYear", "type": "year"},
-          {"label": "Purpose", "key": "travelPurpose", "type": "text"},
-        ]
-      }
-    ]
-  },
-  {
-    "title": "Financials (Others)",
-    "key": "financialsOthers",
-    "subSections": [
       {
         "title": "Assets (Personal)",
         "key": "personalAssets",
@@ -666,4 +670,18 @@ var formConfig = [
       },
     ]
   },
+  // {
+  //   "title": "Financials (Expenses)",
+  //   "key": "financialsExpenses",
+  //   "subSections": [
+  //
+  //   ]
+  // },
+  // {
+  //   "title": "Financials (Others)",
+  //   "key": "financialsOthers",
+  //   "subSections": [
+  //
+  //   ]
+  // },
 ];
