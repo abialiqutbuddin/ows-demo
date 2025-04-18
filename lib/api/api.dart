@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
@@ -22,9 +23,9 @@ class Api {
   static const String baseUrl =
       //"http://36.50.12.171:3002";
       // "http://172.16.109.94:3002";
-        "https://mode.imadiinnovations.com:3002";
-     // "https://dev.imadiinnovations.com:3003";
-  // "http://localhost:3003";
+      // "https://mode.imadiinnovations.com:3002";
+      // "https://dev.imadiinnovations.com:3003";
+      "http://localhost:3002";
 
   static final GlobalStateController permissionsController =
       Get.find<GlobalStateController>();
@@ -83,7 +84,6 @@ class Api {
     try {
       final response = await http.post(url, headers: headers, body: body);
       if (response.statusCode == 200) {
-
         final jsonResponse = jsonDecode(response.body);
 
         if (jsonResponse['family_members'] != null) {
@@ -751,7 +751,7 @@ class Api {
     }
   }
 
-  static Future<Map<String,dynamic>> updateGuardian({
+  static Future<Map<String, dynamic>> updateGuardian({
     required String its, // Guardian ITS
     required String name,
     required String contact,
@@ -782,7 +782,44 @@ class Api {
       }
     } catch (error) {
       //Get.snackbar('Error updating guardian', error.toString());
-      return {'message':error};
+      return {'message': error};
+    }
+  }
+
+  static Future<Map<String, dynamic>> loadDraftFromBackend(String appId) async {
+    final uri = Uri.parse('$baseUrl/load-draft/$appId');
+    try {
+      final response = await http.get(uri);
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+    } catch (e) {
+      debugPrint("❌ Failed to fetch draft data: $e");
+    }
+    return {};
+  }
+
+  static Future<void> postDraftUpdateToBackend(
+      Map<String, dynamic> data) async {
+    final appId = '1';
+    final uri = Uri.parse('$baseUrl/save-draft');
+
+    final payload = {
+      'application_id': appId,
+      'draft_data': data,
+    };
+
+    try {
+      final response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(payload),
+      );
+      if (response.statusCode != 200) {
+        print("❌ Failed to save draft: ${response.body}");
+      }
+    } catch (e) {
+      print("❌ Error saving draft: $e");
     }
   }
 }

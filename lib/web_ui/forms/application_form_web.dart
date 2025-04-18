@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:ows/api/api.dart';
 import 'package:ows/constants/constants.dart';
 import 'package:ows/web_ui/forms/review_application.dart';
 import '../../constants/multi_select_dropdown.dart';
@@ -34,20 +37,26 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
   @override
   void initState() {
     super.initState();
-    initializeFormFields();
+    initializeFormFields().then((_) => loadDraftFromBackend('1'));
     sectionCompletion["intendInfo"] = true.obs;
     subsectionProgress["intendInfo"] = 100.0.obs;
     activeSectionIndex.value = 1;
     sectionValidators = {
-      for (var section in formSections)
+      for (var section in formSections) ...{
         section['key']: () {
           final type = section['type'];
           if (type == 'repeatable') {
             validateRepeatableSection(section['key']);
           } else {
-            validateSection(section['key']); // includes 'totaling' and normal
+            validateSection(section['key']);
           }
-        }
+        },
+        // Add all subsection keys to the map
+        for (var sub in (section['subSections'] ?? []))
+          sub['key']: () {
+            validateSection(section['key']); // Call parent section validator
+          },
+      }
     };
 
     customValidators = {
@@ -61,14 +70,302 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
       'phone': (val, label) => _validatePhoneNumber(val, label),
       'year': (val, label) => _validateYear(val, label),
       'age': (val, label) => _validateAge(val, label),
+      'amount': (val, label) => _validateAmount(val, label),
     };
   }
 
-  String? validateField(String label, String value, {String? validatorKey}) {
-    if (value.trim().isEmpty) return "* $label is required";
+  Future<void> saveSubsectionAsDraft(String subsectionKey) async {
+    final dataToSave = <String, dynamic>{};
+
+    final subConfig = getSectionOrSubSectionByKey(subsectionKey);
+    if (subConfig == null) {
+      return;
+    }
+
+    for (var field in subConfig['fields'] ?? []) {
+      final key = field['key'];
+      final type = field['type'];
+
+      if ((type == 'text' || type == 'radio') && textFields.containsKey(key)) {
+        dataToSave[key] = textFields[key]?.value;
+
+        // ✅ Check for conditional text field (shown conditionally)
+        if (field.containsKey('textFieldKey')) {
+          final subKey = field['textFieldKey'];
+          if (textFields.containsKey(subKey)) {
+            dataToSave[subKey] = textFields[subKey]?.value;
+          } else {
+            print("⚠️ Text field $subKey not found in textFields map.");
+          }
+        }
+
+        // ✅ Check for conditional dropdown field (shown based on radio)
+        if (field.containsKey('dropdownKey')) {
+          final subKey = field['dropdownKey'];
+          final selectedId = dropdownFields[subKey]?.value;
+          final itemsKey = field['itemsKey'];
+          final optionList = dropdownOptions2[itemsKey];
+          final selectedName = optionList?.firstWhere(
+            (item) => item['id'] == selectedId,
+            orElse: () => {},
+          )['name'];
+          dataToSave[subKey] = selectedName ?? selectedId;
+        }
+      } else if (type == 'dropdown' && dropdownFields.containsKey(key)) {
+        final selectedId = dropdownFields[key]?.value;
+        final optionsKey = field['itemsKey'];
+        final optionList = dropdownOptions2[optionsKey];
+
+        final selectedName = optionList?.firstWhere(
+          (item) => item['id'] == selectedId,
+          orElse: () => {},
+        )['name'];
+
+        dataToSave[key] = selectedName ?? selectedId;
+
+        if (field.containsKey('textFieldKey')) {
+          final subKey = field['textFieldKey'];
+          if (textFields.containsKey(subKey)) {
+            dataToSave[subKey] = textFields[subKey]?.value;
+          } else {
+            print("⚠️ Text field $subKey not found in textFields map.");
+          }
+        }
+
+        if (field.containsKey('dropdownKey')) {
+          final subKey = field['dropdownKey'];
+          final selectedId = dropdownFields[subKey]?.value;
+          final itemsKey2 = field['itemsKey2'];
+          final optionList2 = dropdownOptions2[itemsKey2];
+          final selectedName = optionList2?.firstWhere(
+            (item) => item['id'] == selectedId,
+            orElse: () => {},
+          )['name'];
+          dataToSave[subKey] = selectedName ?? selectedId;
+        }
+      } else if (type == 'multiselect' &&
+          multiSelectControllers.containsKey(key)) {
+        final values =
+            multiSelectControllers[key]?.selectedValues.toList() ?? [];
+
+        dataToSave[key] = values;
+
+        // Also save in base64 format
+        final encoded = base64Encode(utf8.encode(jsonEncode(values)));
+        dataToSave['${key}_base64'] = encoded;
+      } else {
+        print("⚠️ Field $key ($type) not found in any controller maps.");
+      }
+    }
+
+    print(subConfig);
+
+    // Encode JSON and base64 for repeatable sections
+    if (subConfig['type'] == 'repeatable') {
+      print("🔁 Processing repeatable subsection: $subsectionKey");
+
+      final entries = repeatableEntries[subsectionKey];
+      if (entries != null) {
+        print("📦 Found ${entries.length} entries for $subsectionKey");
+
+        final List<Map<String, dynamic>> rawData = entries.map((entry) {
+          final mappedEntry = entry
+              .map((k, v) => MapEntry(k, v is RxString ? v.value : v.value));
+          print("🔍 Mapped entry: $mappedEntry");
+          return mappedEntry;
+        }).toList();
+
+        final jsonEncoded = jsonEncode(rawData);
+        final encoded = base64Encode(utf8.encode(jsonEncoded));
+
+        print("📝 JSON Encoded: $jsonEncoded");
+        print("🔐 Base64 Encoded: $encoded");
+
+        dataToSave['${subsectionKey}_base64'] = encoded;
+        print("✅ Saved encoded data under key: ${subsectionKey}_base64");
+      } else {
+        print("⚠️ No entries found for $subsectionKey");
+      }
+    }
+
+    if (dataToSave.isEmpty) {
+      print("⚠️ No data collected for subsection: $subsectionKey");
+    }
+
+    await Api.postDraftUpdateToBackend(dataToSave);
+  }
+
+  Future<void> loadDraftFromBackend(String appId) async {
+    try {
+      final data = await Api.loadDraftFromBackend(appId);
+      data.forEach((key, value) {
+        if (key.endsWith('_base64')) {
+          try {
+            if (value != null && value is String) {
+              final decodedJson = utf8.decode(base64Decode(value));
+
+              final parsed = jsonDecode(decodedJson);
+
+              final fieldKey = key.replaceAll('_base64', '');
+
+              // Case 1: Multiselect – List<String>
+              if (multiSelectControllers.containsKey(fieldKey) &&
+                  parsed is List) {
+                final values = List<String>.from(parsed);
+                multiSelectControllers[fieldKey]
+                    ?.selectedValues
+                    .assignAll(values);
+              }
+
+              // Case 2: Repeatable Section – List<Map<String, dynamic>>
+              else if (repeatableEntries.containsKey(fieldKey) &&
+                  parsed is List) {
+                final mappedList = parsed.map<Map<String, dynamic>>((e) {
+                  return (e as Map<String, dynamic>).map((k, v) {
+                    if (v is int) return MapEntry(k, Rxn<int>(v));
+                    if (v is String) return MapEntry(k, v.obs);
+                    return MapEntry(k, ''.obs); // fallback
+                  });
+                }).toList();
+
+                repeatableEntries[fieldKey]?.assignAll(mappedList);
+              }
+            }
+          } catch (e) {
+            throw Exception(e);
+          }
+        } else if (textFields.containsKey(key)) {
+          textFields[key]?.value = value?.toString() ?? '';
+
+          // ⬇️ Check if it's a radio with conditional fields
+          final fieldConfig = formSections
+              .expand((s) => s['subSections'] ?? [])
+              .expand((sub) => sub['fields'] ?? [])
+              .cast<Map<String, dynamic>>()
+              .firstWhere((f) => f['key'] == key, orElse: () => {});
+
+          if (fieldConfig.isNotEmpty && fieldConfig['type'] == 'radio') {
+            final String? radioValue = value?.toString();
+
+            // 🟠 Conditional Text Field
+            if (fieldConfig.containsKey('showTextFieldIf') &&
+                radioValue == fieldConfig['showTextFieldIf']) {
+              final subKey = fieldConfig['textFieldKey'];
+              if (subKey != null && textFields.containsKey(subKey)) {
+                textFields[subKey]?.value = data[subKey]?.toString() ?? '';
+              }
+            }
+
+            // 🟡 Conditional Dropdown Field
+            if (fieldConfig.containsKey('showDropdownIf') &&
+                radioValue == fieldConfig['showDropdownIf']) {
+              final subKey = fieldConfig['dropdownKey'];
+              final itemsKey = fieldConfig['itemsKey'];
+              final optionList = dropdownOptions2[itemsKey];
+              final dropdownValue = data[subKey];
+
+              Map<String, dynamic>? match;
+              try {
+                match = optionList?.firstWhere(
+                  (item) =>
+                      item['name']?.toString().trim() ==
+                      dropdownValue?.toString().trim(),
+                  orElse: () => {},
+                );
+              } catch (_) {
+                match = null;
+              }
+
+              if (subKey != null && dropdownFields.containsKey(subKey)) {
+                Future.delayed(Duration.zero, () {
+                  dropdownFields[subKey]?.value = match?['id'] ??
+                      int.tryParse(dropdownValue?.toString() ?? '');
+                });
+              }
+            }
+          }
+        } else if (dropdownFields.containsKey(key)) {
+          final fieldConfig = formSections
+              .expand((s) => s['subSections'] ?? [])
+              .expand((sub) => sub['fields'] ?? [])
+              .where((f) => f['key'] == key)
+              .cast<Map<String, dynamic>>()
+              .toList()
+              .firstWhere((_) => true, orElse: () => {});
+
+          if (fieldConfig.isNotEmpty && fieldConfig.containsKey('itemsKey')) {
+            final optionsKey = fieldConfig['itemsKey'];
+            final optionList = dropdownOptions2[optionsKey];
+
+            Map<String, dynamic>? matched;
+            try {
+              matched = optionList?.firstWhere(
+                (item) =>
+                    item['name']?.toString().trim() == value?.toString().trim(),
+                orElse: () => {},
+              );
+            } catch (_) {
+              matched = null;
+            }
+
+            if (matched != null && matched.containsKey('id')) {
+              dropdownFields[key]?.value = matched['id'];
+            }
+          } else {
+            final parsed = int.tryParse(value?.toString() ?? '');
+            dropdownFields[key]?.value = parsed;
+          }
+
+          // ✅ Conditional dropdown logic
+          if (fieldConfig.containsKey('dropdownKey')) {
+            final conditionalKey = fieldConfig['dropdownKey'];
+            if (dropdownFields.containsKey(conditionalKey) &&
+                data.containsKey(conditionalKey)) {
+              final optionList = dropdownOptions2[fieldConfig['itemsKey2']];
+              final conditionalValue = data[conditionalKey];
+
+              Map<String, dynamic>? match;
+              try {
+                match = optionList?.firstWhere(
+                  (item) =>
+                      item['name']?.toString().trim() ==
+                      conditionalValue?.toString().trim(),
+                  orElse: () => {},
+                );
+              } catch (_) {
+                match = null;
+              }
+
+              if (match != null && match.containsKey('id')) {
+                // 👇 ensure reactive update after frame build
+                Future.delayed(Duration.zero, () {
+                  dropdownFields[conditionalKey]?.value = match!['id'];
+                });
+              }
+            }
+          }
+        } else if (multiSelectControllers.containsKey(key)) {
+          final listVal = value is List ? value.cast<String>() : <String>[];
+          multiSelectControllers[key]?.selectedValues.assignAll(listVal);
+        }
+      });
+
+      // ✅ Call validators after all assignments
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        sectionValidators.forEach((_, v) => v());
+        updateFormProgress();
+      });
+    } catch (e) {
+      debugPrint("❌ Failed to load draft: $e");
+    }
+  }
+
+  String? validateField(String label, dynamic value, {String? validatorKey}) {
+    final strValue = value?.toString() ?? '';
+    if (strValue.trim().isEmpty) return "* $label is required";
 
     if (validatorKey != null && customValidators.containsKey(validatorKey)) {
-      return customValidators[validatorKey]!(value, label);
+      return customValidators[validatorKey]!(strValue, label);
     }
 
     return null;
@@ -87,18 +384,18 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
       sectionStates[sectionKey] = false.obs;
       sectionCompletion[sectionKey] = false.obs;
 
-      if (section['type'] == 'repeatable') {
-        repeatableSectionRadio[sectionKey] = 0.obs;
-        repeatableEntries[sectionKey] = <Map<String, dynamic>>[].obs;
-        continue;
-      } else if (section['type'] == 'totaling') {
-        for (var sub in section['subSections'] ?? []) {
-          for (var field in sub['fields']) {
-            final key = field['key'];
-            textFields.putIfAbsent(key, () => ''.obs);
-          }
-        }
-      }
+      // if (section['type'] == 'repeatable') {
+      //   repeatableSectionRadio[sectionKey] = 0.obs;
+      //   repeatableEntries[sectionKey] = <Map<String, dynamic>>[].obs;
+      //   continue;
+      // } else if (section['type'] == 'totaling') {
+      //   for (var sub in section['subSections'] ?? []) {
+      //     for (var field in sub['fields']) {
+      //       final key = field['key'];
+      //       textFields.putIfAbsent(key, () => ''.obs);
+      //     }
+      //   }
+      // }
 
       for (var sub in section['subSections'] ?? []) {
         final subKey = sub['key'];
@@ -420,7 +717,6 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
     for (var sub in section['subSections'] ?? []) {
       final subKey = sub['key'];
       final fields = sub['fields'] ?? [];
-
       if (sub['type'] == 'repeatable') {
         final entries = repeatableEntries[subKey];
         final radio = repeatableSectionRadio[subKey];
@@ -445,7 +741,6 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
 
         if (!isSubValid) isValid = false;
 
-        // ✅ FIX: If 'No Expense' selected, force 100% progress
         final double subPercent;
         if (isNoExpense) {
           subPercent = 100.0;
@@ -475,10 +770,12 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
         } else {
           subsectionProgress[subKey] = subPercent.obs;
         }
-
         sectionCompletion[subKey]?.value = isSubValid;
+        if (subsectionProgress[subKey]!.value == 100.0) {
+          print("📥 SUb section progress ${subsectionProgress[subKey]!.value}");
+          saveSubsectionAsDraft(subKey);
+        }
       } else {
-        // Non-repeatable subsection logic
         int filled = fields.where((f) => validateSingleField(f)).length;
         int total = fields.length;
         final subPercent = total == 0 ? 100.0 : (filled / total) * 100.0;
@@ -487,6 +784,10 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
           subsectionProgress[subKey]!.value = subPercent;
         } else {
           subsectionProgress[subKey] = subPercent.obs;
+        }
+
+        if (subsectionProgress[subKey]!.value == 100.0) {
+          saveSubsectionAsDraft(subKey);
         }
 
         if (filled != total) isValid = false;
@@ -574,13 +875,19 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
 
     final isStudent = selectedType.value == 1;
 
-    final isValid = isStudent ||
-        (entries.isNotEmpty &&
-            entries.every((entry) => fields.every((f) {
-                  final key = f['key'];
-                  final val = entry[key]?.value.trim();
-                  return val != null && val.isNotEmpty;
-                })));
+    final isValid = (entries.isNotEmpty &&
+        entries.every((entry) => fields.every((f) {
+              final key = f['key'];
+              final type = f['type'];
+              final val = entry[key];
+
+              if (type == 'dropdown') {
+                return val is Rxn<int> && val.value != null;
+              } else {
+                return val is RxString &&
+                    val.value.toString().trim().isNotEmpty;
+              }
+            })));
 
     subsectionProgress[repeatableKey] = RxDouble(isStudent
         ? 100.0
@@ -919,6 +1226,19 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
     return null;
   }
 
+  String? _validateAmount(String value, String label) {
+    if (value.isEmpty) {
+      return "$label is required";
+    }
+
+    // Match integers or decimals like 25 or 25.00 or 120.5
+    if (!RegExp(r'^\d+(\.\d{1,2})?$').hasMatch(value)) {
+      return "$label must be a valid number (up to 2 decimal places)";
+    }
+
+    return null;
+  }
+
   String? _validateYear(String value, String label) {
     if (value.isEmpty) {
       return "$label is required";
@@ -1032,10 +1352,27 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
                         return Wrap(
                           spacing: spacing,
                           runSpacing: spacing,
-                          children: fields.map<Widget>((field) {
+                          children: fields.asMap().entries.map<Widget>((entry) {
+                            final index = entry.key;
+                            final field = entry.value;
+                            final fieldNumber =
+                                "${formSections.indexOf(section) + 1}.${subSections.indexOf(sub) + 1}.${index + 1}";
+
                             return SizedBox(
                               width: itemWidth,
-                              child: buildDynamicField(field, sectionKey),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    fieldNumber,
+                                    style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13,
+                                        color: Colors.brown),
+                                  ),
+                                  buildDynamicField(field, sectionKey),
+                                ],
+                              ),
                             );
                           }).toList(),
                         );
@@ -1143,7 +1480,10 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
 
     // ================= Section: Housing =================
     multiSelectControllers['assets']?.selectedValues.value = [
-      'Gas Stove', 'TV', 'Bicycle', 'Car'
+      'Gas Stove',
+      'TV',
+      'Bicycle',
+      'Car'
     ];
     dropdownFields['house_title']?.value = 0;
     dropdownFields['area']?.value = 0;
@@ -1243,9 +1583,7 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
     updateFormProgress();
   }
 
-
-
-  void printFormData() {
+  void printFormData2() {
     debugPrint("\n====== 📄 Form Data (Keys + Values) ======");
 
     for (var section in formSections) {
@@ -1289,13 +1627,15 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
               if (field.containsKey('textFieldKey')) {
                 final linkedKey = field['textFieldKey'];
                 final linkedLabel = field['textFieldLabel'] ?? linkedKey;
-                debugPrint("        ↳ [$linkedKey] $linkedLabel: ${textFields[linkedKey]?.value ?? ''}");
+                debugPrint(
+                    "        ↳ [$linkedKey] $linkedLabel: ${textFields[linkedKey]?.value ?? ''}");
               }
 
               if (field.containsKey('dropdownKey')) {
                 final linkedKey = field['dropdownKey'];
                 final linkedLabel = field['dropdownLabel'] ?? linkedKey;
-                debugPrint("        ↳ [$linkedKey] $linkedLabel: ${dropdownFields[linkedKey]?.value}");
+                debugPrint(
+                    "        ↳ [$linkedKey] $linkedLabel: ${dropdownFields[linkedKey]?.value}");
               }
             } else if (type == 'multiselect') {
               final values = multiSelectControllers[key]?.selectedValues ?? [];
@@ -1316,6 +1656,13 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
         centerTitle: true,
         title: const Text("Imdaad Talimi Application Form"),
         backgroundColor: const Color(0xfffffcf6),
+        actions: [
+          ElevatedButton(
+              onPressed: () {
+                validateSection('deenInfo');
+              },
+              child: Text("demo"))
+        ],
       ),
       backgroundColor: const Color(0xfffffcf6),
       // floatingActionButton: FloatingActionButton(
@@ -1476,7 +1823,7 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
                                 onPressed: isComplete
                                     ? () {
                                         if (!isLastSection) {
-                                          printFormData();
+                                          //printFormData();
                                           activeSectionIndex.value++;
                                           scrollController.animateTo(
                                             0.0,
@@ -1486,21 +1833,29 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
                                           );
                                         } else {
                                           if (isLastSection) {
-                                            printFormData();
+                                            //printFormData();
                                             Get.to(() => ReviewScreen(
-                                              formSections: formSections,
-                                              textFields: textFields,
-                                              dropdownFields: dropdownFields,
-                                              repeatableEntries: repeatableEntries,
-                                              dropdownOptions: dropdownOptions,
-                                              onBackToEdit: (String sectionKey) {
-                                                final index = formSections.indexWhere((s) => s['key'] == sectionKey);
-                                                if (index != -1) {
-                                                  activeSectionIndex.value = index;
-                                                  Get.back(); // return to the form
-                                                }
-                                              },
-                                            ));
+                                                  formSections: formSections,
+                                                  textFields: textFields,
+                                                  dropdownFields:
+                                                      dropdownFields,
+                                                  repeatableEntries:
+                                                      repeatableEntries,
+                                                  dropdownOptions:
+                                                      dropdownOptions,
+                                                  onBackToEdit:
+                                                      (String sectionKey) {
+                                                    final index = formSections
+                                                        .indexWhere((s) =>
+                                                            s['key'] ==
+                                                            sectionKey);
+                                                    if (index != -1) {
+                                                      activeSectionIndex.value =
+                                                          index;
+                                                      Get.back(); // return to the form
+                                                    }
+                                                  },
+                                                ));
                                           }
                                         }
                                       }
@@ -1526,15 +1881,21 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
                       SizedBox(
                         width: double.infinity,
                         child: Column(
-                          mainAxisAlignment:MainAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text("Application Filling Instructions:",style: TextStyle(fontWeight: FontWeight.bold),),
+                            Text(
+                              "Application Filling Instructions:",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
                             Text("All fields are mandatory"),
                             Text("Each tab has a separate display tab"),
-                            Text("Applicant may exit form and rejoin from exit point in between"),
-                            Text("Application fill tab by tab, no forward tab filling"),
-                            Text("In the end, preview full form with tab edit button"),
+                            Text(
+                                "Applicant may exit form and rejoin from exit point in between"),
+                            Text(
+                                "Application fill tab by tab, no forward tab filling"),
+                            Text(
+                                "In the end, preview full form with tab edit button"),
                           ],
                         ),
                       ),
@@ -1612,10 +1973,12 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
                       rowChildren.add(
                         Expanded(
                           child: Container(
-                            height: 155,
+                            constraints: BoxConstraints(minHeight: 155),
+                            //height: 155,
                             margin: EdgeInsets.all(8),
                             color: Color(0xfffff7ec),
-                            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 10, vertical: 6),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -1701,10 +2064,33 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
                   return Wrap(
                     spacing: spacing,
                     runSpacing: spacing,
-                    children: fields.map<Widget>((field) {
+                    children: fields.asMap().entries.map<Widget>((entry) {
+                      final index = entry.key;
+                      final field = entry.value;
+                      final sectionIndex = formSections.indexWhere((s) =>
+                          s['subSections']
+                              ?.any((sub) => sub['key'] == subKey) ??
+                          false);
+                      final subIndex = formSections[sectionIndex]['subSections']
+                          .indexWhere((sub) => sub['key'] == subKey);
+                      final fieldNumber =
+                          "${sectionIndex + 1}.${subIndex + 1}.${index + 1}";
+
                       return SizedBox(
                         width: itemWidth,
-                        child: buildDynamicField(field, subKey),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              fieldNumber,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  color: Colors.brown),
+                            ),
+                            buildDynamicField(field, subKey),
+                          ],
+                        ),
                       );
                     }).toList(),
                   );
@@ -1808,7 +2194,7 @@ class SectionStepper extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 30.0),
       child: Column(
-        mainAxisAlignment:MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         spacing: 10,
         children: [
@@ -1852,19 +2238,20 @@ class SectionStepper extends StatelessWidget {
               return AnimatedContainer(
                 duration: const Duration(milliseconds: 300),
                 curve: Curves.easeInOut,
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 30, vertical: 6),
                 decoration: BoxDecoration(
                   color: bgColor,
                   borderRadius: BorderRadius.circular(25),
                   border: Border.all(color: borderColor, width: 1.5),
                   boxShadow: isActive
                       ? [
-                    BoxShadow(
-                      color: Colors.brown.withOpacity(0.3),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
-                    )
-                  ]
+                          BoxShadow(
+                            color: Colors.brown.withOpacity(0.3),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          )
+                        ]
                       : [],
                 ),
                 child: Row(
@@ -1877,8 +2264,8 @@ class SectionStepper extends StatelessWidget {
                       color: section.isComplete
                           ? Colors.green
                           : isActive
-                          ? Colors.brown
-                          : Colors.grey.shade400,
+                              ? Colors.brown
+                              : Colors.grey.shade400,
                       size: 16,
                     ),
                     const SizedBox(width: 6),
@@ -1981,7 +2368,7 @@ class SectionStepper extends StatelessWidget {
                 Expanded(
                   child: TweenAnimationBuilder<double>(
                     tween:
-                    Tween<double>(begin: 0, end: completionPercent / 100),
+                        Tween<double>(begin: 0, end: completionPercent / 100),
                     duration: const Duration(milliseconds: 500),
                     curve: Curves.easeInOut,
                     builder: (context, value, child) {
@@ -1994,10 +2381,10 @@ class SectionStepper extends StatelessWidget {
                           value >= 1.0
                               ? Colors.green
                               : value >= 0.7
-                              ? Colors.lightGreen
-                              : value >= 0.4
-                              ? Colors.orange
-                              : Colors.redAccent,
+                                  ? Colors.lightGreen
+                                  : value >= 0.4
+                                      ? Colors.orange
+                                      : Colors.redAccent,
                         ),
                       );
                     },
@@ -2020,7 +2407,6 @@ class SectionStepper extends StatelessWidget {
   }
 }
 
-
 class SectionStepper2 extends StatelessWidget {
   final List<SectionStep> sections;
   final int activeIndex;
@@ -2038,7 +2424,7 @@ class SectionStepper2 extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 30.0),
       child: Column(
-        mainAxisAlignment:MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         spacing: 10,
         children: [
