@@ -423,7 +423,7 @@ class ReviewScreen extends StatelessWidget {
                                   ? null
                                   : () => handleSubmit(context),
                               icon: const Icon(Icons.send, color: Colors.white),
-                              label: const Text("Submit Application"),
+                              label: const Text("Submit Application",style: TextStyle(color: Colors.white),),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Constants().green,
                                 shape: RoundedRectangleBorder(

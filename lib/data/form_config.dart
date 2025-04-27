@@ -4,9 +4,71 @@ var formConfig = [
     "key": "intendInfo",
   },
   {
-    "title": "Deeni",
-    "key": "deenInfo",
+    "title": "Work Information",
+    "key": "workInfo",
     "subSections": [
+      {
+        "title": "Occupation",
+        "key": "occupationInfo",
+        "fields": [
+          {
+            "type": "text",
+            "label": "Mode of Work",
+            "enable": false,
+            "key": "work",
+            "validator": "name"
+          },
+          {
+            "type": "text",
+            "label": "Name of Organization",
+            "enable": false,
+            "key": "work",
+            "validator": "name"
+          },
+          {
+            "type": "text",
+            "label": "Work Phone",
+            "enable": false,
+            "key": "work",
+            "validator": "name"
+          },
+          {
+            "type": "text",
+            "label": "Website Address",
+            "enable": false,
+            "key": "work",
+            "validator": "name"
+          },
+          {
+            "type": "text",
+            "label": "Current Form of Business",
+            "enable": false,
+            "key": "work",
+            "validator": "name"
+          },
+          {
+            "type": "text",
+            "label": "Address of Organization",
+            "enable": false,
+            "key": "work",
+            "validator": "name"
+          },
+          {
+            "type": "text",
+            "label": "Work Email",
+            "enable": false,
+            "key": "work",
+            "validator": "name"
+          },
+          {
+            "type": "text",
+            "label": "Business Description",
+            "enable": false,
+            "key": "work",
+            "validator": "name"
+          },
+        ]
+      },
       {
         "title": "Khidmat Details",
         "key": "khidmatInfo",
@@ -14,17 +76,23 @@ var formConfig = [
           {
             "type": "dropdown",
             "label":
-                "Are you currently a part of any of the following khidmat avenues?",
+            "Are you currently a part of any of the following khidmat avenues?",
             "key": "khidmat_current",
             "itemsKey": "khidmatOptions",
             "showDropdownIf": 5,
             "dropdownLabel":
-                "Are you intending to be a part of any of the following khidmat avenues?",
+            "Are you intending to be a part of any of the following khidmat avenues?",
             "dropdownKey": "khidmat_intent",
             "itemsKey2": "khidmatOptions"
           },
         ]
       },
+    ]
+  },
+  {
+    "title": "Deeni",
+    "key": "deenInfo",
+    "subSections": [
       {
         "title": "Deeni Info",
         "key": "deeniInfo",

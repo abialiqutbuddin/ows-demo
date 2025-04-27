@@ -42,6 +42,7 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
   final GlobalStateController globalController =
       Get.find<GlobalStateController>();
   late final imageUrl;
+  late bool fromEdit = false;
 
   @override
   void initState() {
@@ -53,7 +54,7 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
 
     //Api.fetchImage(globalController.user.value.imageUrl!);
     initializeFormFields().then((_) async {
-      //await loadDraftFromBackend('1');
+     // await loadDraftFromBackend('1');
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
         // Jump to the first incomplete section
@@ -62,42 +63,31 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
           return !(sectionCompletion[key]?.value ?? false);
         });
 
+        // sectionCompletion["intendInfo"] = true.obs;
+        // subsectionProgress["intendInfo"] = 100.0.obs;
+
+        ///REMOVE
+        sectionValidators['workInfo']?.call();
+
+
         if (firstIncompleteIndex != -1) {
-          activeSectionIndex.value = firstIncompleteIndex;
+          ///CHANGE -1 to 0
+          activeSectionIndex.value = firstIncompleteIndex-1;
         }
 
         Future.delayed(const Duration(seconds: 2), () {
           isLoading.value = false;
-          activeSectionIndex.value = 5;
+          //activeSectionIndex.value = 5;
         });
 
-        Get.to(() => ReviewScreen(
-          formSections: formSections,
-          textFields: textFields,
-          dropdownFields:
-          dropdownFields,
-          repeatableEntries:
-          repeatableEntries,
-          dropdownOptions:
-          dropdownOptions,
-          onBackToEdit:
-              (String sectionKey) {
-            final index = formSections
-                .indexWhere((s) =>
-            s['key'] ==
-                sectionKey);
-            if (index != -1) {
-              activeSectionIndex
-                  .value = index;
-              Get.back();
-            }
-          },
-        ));
       });
     });
 
     sectionCompletion["intendInfo"] = true.obs;
     subsectionProgress["intendInfo"] = 100.0.obs;
+
+    sectionCompletion["workInfo"] = true.obs;
+    subsectionProgress["workInfo"] = 100.0.obs;
 
     sectionValidators = {
       for (var section in formSections) ...{
@@ -471,6 +461,10 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
 
           if (field['type'] == 'text' || field['type'] == 'fetch-its') {
             textFields.putIfAbsent(key, () => ''.obs);
+            // 🚀 Initialize the “work” field:
+            if (key == 'work') {
+               textFields[key]!.value = 'Demo Text';
+            }
             if (field.containsKey('unitKey')) {
               final unitKey = field['unitKey'];
               dropdownFields.putIfAbsent(
@@ -1903,6 +1897,31 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
                                     onPressed: isComplete
                                         ? () {
                                             //saveDraft(sectionKey: sectionKey);
+                                      if(fromEdit){
+                                        Get.to(() => ReviewScreen(
+                                          formSections: formSections,
+                                          textFields: textFields,
+                                          dropdownFields:
+                                          dropdownFields,
+                                          repeatableEntries:
+                                          repeatableEntries,
+                                          dropdownOptions:
+                                          dropdownOptions,
+                                          onBackToEdit:
+                                              (String sectionKey) {
+                                            final index = formSections
+                                                .indexWhere((s) =>
+                                            s['key'] ==
+                                                sectionKey);
+                                            if (index != -1) {
+                                              activeSectionIndex
+                                                  .value = index;
+                                              Get.back();
+                                            }
+                                              fromEdit = true;
+                                          },
+                                        ));
+                                      }
                                             if (!isLast) {
                                               activeSectionIndex.value++;
                                               scrollController.animateTo(
@@ -1932,6 +1951,7 @@ class _DynamicFormBuilderState extends State<DynamicFormBuilder> {
                                                             .value = index;
                                                         Get.back();
                                                       }
+fromEdit = true;
                                                     },
                                                   ));
                                             }
