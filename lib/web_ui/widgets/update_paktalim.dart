@@ -7,10 +7,10 @@ import 'package:get/get.dart';
 import 'package:ows/controller/state_management/state_manager.dart';
 import 'package:ows/controller/update_paktalim_controller.dart';
 import 'package:super_tooltip/super_tooltip.dart';
-import '../api/api.dart';
-import '../constants/constants.dart';
-import '../constants/dropdown_search.dart';
-import '../model/update_paktalim_model.dart';
+import '../../api/api.dart';
+import '../../constants/constants.dart';
+import '../../constants/dropdown_search.dart';
+import '../../model/update_paktalim_model.dart';
 
 class updatePakTalimForm {
   final UpdatePaktalimController controller =
@@ -251,7 +251,9 @@ class updatePakTalimForm {
           Row(
             spacing: 8,
             children: [
-              Flexible(child: Constants().buildField("Qardan:", controller.qardan, controller)),
+              Flexible(
+                  child: Constants()
+                      .buildField("Qardan:", controller.qardan, controller)),
               Flexible(child: _buildField2("Scholarship", controller.scholar)),
             ],
           ),

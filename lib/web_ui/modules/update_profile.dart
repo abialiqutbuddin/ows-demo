@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:ows/model/member_model.dart';
 import 'package:ows/constants/constants.dart';
 import 'package:ows/constants/expandable_container.dart';
-import 'package:ows/web_ui/update_paktalim.dart';
+import 'package:ows/web_ui/widgets/update_paktalim.dart';
 import 'package:timelines_plus/timelines_plus.dart';
 import 'package:get/get.dart';
-import '../api/api.dart';
-import '../controller/state_management/state_manager.dart';
-import '../model/family_model.dart';
+import '../../api/api.dart';
+import '../../controller/state_management/state_manager.dart';
+import '../../model/family_model.dart';
 
 class ProfilePreview extends StatelessWidget {
   final UserProfile member;
@@ -19,8 +19,6 @@ class ProfilePreview extends StatelessWidget {
   ];
 
   final GlobalStateController gController = Get.find<GlobalStateController>();
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -173,11 +171,15 @@ class ProfilePreview extends StatelessWidget {
                 children: [
                   profileBox('Jamaat:', member.tanzeem!, context),
                   profileBox(
-                      'Hifz Sanad:', (member.hifzSanad == null || member.hifzSanad!.isEmpty) ? '-' : member.hifzSanad.toString(), context),
+                      'Hifz Sanad:',
+                      (member.hifzSanad == null || member.hifzSanad!.isEmpty)
+                          ? '-'
+                          : member.hifzSanad.toString(),
+                      context),
                   profileBox(
                       'Current:', member.currentClass.toString(), context),
-                  profileBox(
-                      'Marhala Status:', (member.status == 1) ? 'Completed' : 'Ongoing', context),
+                  profileBox('Marhala Status:',
+                      (member.status == 1) ? 'Completed' : 'Ongoing', context),
                   profileBox('Ambition', member.ambitionId.toString(), context),
                 ],
               ),
@@ -192,14 +194,27 @@ class ProfilePreview extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: 10,
               children: [
-                Text("Your profile is 100% Completed!",
-                    softWrap: false, overflow: TextOverflow.ellipsis,style: TextStyle(fontWeight: FontWeight.bold,color: Colors.green),),
-                Text("HOF ITS: ${member.hofId}",
-                    softWrap: false, overflow: TextOverflow.ellipsis,style: TextStyle(fontWeight: FontWeight.bold),),
+                Text(
+                  "Your profile is 100% Completed!",
+                  softWrap: false,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold, color: Colors.green),
+                ),
+                Text(
+                  "HOF ITS: ${member.hofId}",
+                  softWrap: false,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 Text("Idara: ${member.idara}",
-                    softWrap: false, overflow: TextOverflow.ellipsis,style: TextStyle(fontWeight: FontWeight.bold)),
+                    softWrap: false,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontWeight: FontWeight.bold)),
                 Text("Organization: ${member.organization}",
-                    softWrap: false, overflow: TextOverflow.ellipsis,style: TextStyle(fontWeight: FontWeight.bold) )
+                    softWrap: false,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontWeight: FontWeight.bold))
               ],
             ),
           ),
@@ -209,7 +224,6 @@ class ProfilePreview extends StatelessWidget {
   }
 
   Widget otherItems(BuildContext context) {
-
     List<Map<String, dynamic>> allClasses = [
       {"id": 1, "name": "Play Group", "rank": 1, "marhala": 1},
       {"id": 2, "name": "Nursery", "rank": 2, "marhala": 1},
@@ -229,14 +243,34 @@ class ProfilePreview extends StatelessWidget {
       {"id": 16, "name": "O-Level(II)", "rank": 15, "marhala": 4},
       {"id": 17, "name": "11th", "rank": 16, "marhala": 5},
       {"id": 18, "name": "AS-Level", "rank": 16, "marhala": 5},
-      {"id": 19, "name": "Diploma/ Vocational Training", "rank": 17, "marhala": 5},
-      {"id": 20, "name": "Diploma of Associate Engineer (DAE)", "rank": 17, "marhala": 5},
+      {
+        "id": 19,
+        "name": "Diploma/ Vocational Training",
+        "rank": 17,
+        "marhala": 5
+      },
+      {
+        "id": 20,
+        "name": "Diploma of Associate Engineer (DAE)",
+        "rank": 17,
+        "marhala": 5
+      },
       {"id": 21, "name": "12th", "rank": 17, "marhala": 5},
       {"id": 22, "name": "A2-Level", "rank": 17, "marhala": 5},
-      {"id": 23, "name": "Associated Degree Programs", "rank": 18, "marhala": 6},
+      {
+        "id": 23,
+        "name": "Associated Degree Programs",
+        "rank": 18,
+        "marhala": 6
+      },
       {"id": 24, "name": "Bachelors Degree Programs", "rank": 18, "marhala": 6},
       {"id": 25, "name": "Professional Programs", "rank": 18, "marhala": 6},
-      {"id": 26, "name": "Diploma/ Vocational Training", "rank": 18, "marhala": 6},
+      {
+        "id": 26,
+        "name": "Diploma/ Vocational Training",
+        "rank": 18,
+        "marhala": 6
+      },
       {"id": 27, "name": "Masters/ M. Phil.", "rank": 19, "marhala": 7},
       {"id": 28, "name": "Ph.D", "rank": 19, "marhala": 7},
       {"id": 29, "name": "Post Doctorate", "rank": 19, "marhala": 7},
@@ -245,9 +279,9 @@ class ProfilePreview extends StatelessWidget {
     List<Map<String, dynamic>> matchedEducationList = [];
 
     for (var education in member.education!) {
-    //  for (var education in gController.user.value.education!) {
+      //  for (var education in gController.user.value.education!) {
       var matchedClass = allClasses.firstWhere(
-            (cls) => cls["name"] == education.className,
+        (cls) => cls["name"] == education.className,
         orElse: () => {},
       );
 
@@ -256,8 +290,10 @@ class ProfilePreview extends StatelessWidget {
       }
     }
 
-    final groupedEducation = groupEducationByMarhala(gController.user.value.education ?? []);
-    final groupedFutureEducation = groupFutureEducationByMarhala(gController.user.value.future ?? []);
+    final groupedEducation =
+        groupEducationByMarhala(gController.user.value.education ?? []);
+    final groupedFutureEducation =
+        groupFutureEducationByMarhala(gController.user.value.future ?? []);
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -348,17 +384,18 @@ class ProfilePreview extends StatelessWidget {
         ),
         Expanded(
           child: Container(
-            margin: EdgeInsets.only(right: 20,left: 20),
+            margin: EdgeInsets.only(right: 20, left: 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(
-                  height: 35 ,
+                  height: 35,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF008759),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(5.0), // Rounded corners
+                        borderRadius:
+                            BorderRadius.circular(5.0), // Rounded corners
                       ),
                     ),
                     onPressed: () async {
@@ -376,26 +413,32 @@ class ProfilePreview extends StatelessWidget {
                 ),
                 // Future Education Section
                 if (groupedFutureEducation.values.first.isEmpty)
-                  ExpandableEducation(title: "Future Education", subEducation: futureSubEducation)
+                  ExpandableEducation(
+                      title: "Future Education",
+                      subEducation: futureSubEducation)
                 else
                   ...groupedFutureEducation.entries.map((entry) {
                     return ExpandableEducation(
                       title: "Future Education",
-                      subEducation: entry.value.map((future) => futureEducationDetails(future)).toList(),
+                      subEducation: entry.value
+                          .map((future) => futureEducationDetails(future))
+                          .toList(),
                     );
                   }),
                 // Grouped Education Section
                 ...groupedEducation.entries.map((entry) {
                   return ExpandableEducation(
                     title: "Marhala ${entry.key}",
-                    subEducation: entry.value.map((edu) => educationDetails(edu, edu.imaniOtherSchool ?? 0)).toList(),
+                    subEducation: entry.value
+                        .map((edu) =>
+                            educationDetails(edu, edu.imaniOtherSchool ?? 0))
+                        .toList(),
                   );
                 }),
               ],
             ),
           ),
         )
-
       ],
     );
   }
@@ -438,7 +481,7 @@ class ProfilePreview extends StatelessWidget {
     );
   }
 
-  Widget educationDetails(Education education,int type) {
+  Widget educationDetails(Education education, int type) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       spacing: 5,
@@ -471,7 +514,6 @@ class ProfilePreview extends StatelessWidget {
               Text("Duration: ${education.duration ?? '-'} months"),
               Text("Scholarship: ${education.scholarship ?? '-'}"),
               Text("Qarzan: ${education.qardan ?? '-'}"),
-
             ],
           ),
         )
@@ -511,11 +553,12 @@ class ProfilePreview extends StatelessWidget {
         final String imageUrl =
             (member is Parent ? member.image : (member as Family).image) ??
                 ''; // Use imageUrl if available
-        final String fullName =
-            (member is Parent ? member.fullName : (member as Family).fullName) ??
-                ''; // Fallback for fullName
+        final String fullName = (member is Parent
+                ? member.fullName
+                : (member as Family).fullName) ??
+            ''; // Fallback for fullName
         final String itsId =
-            (member is Parent ? member.its: (member as Family).its)
+            (member is Parent ? member.its : (member as Family).its)
                 .toString(); // ITS ID fallback
 
         return Row(
@@ -683,7 +726,8 @@ class ProfilePreview extends StatelessWidget {
     );
   }
 
-  Map<int, List<FuturePlan>> groupFutureEducationByMarhala(List<FuturePlan> educationList) {
+  Map<int, List<FuturePlan>> groupFutureEducationByMarhala(
+      List<FuturePlan> educationList) {
     return {0: educationList}; // Using key `0` or any arbitrary key
   }
 

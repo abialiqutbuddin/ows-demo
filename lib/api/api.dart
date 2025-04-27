@@ -23,9 +23,9 @@ class Api {
   static const String baseUrl =
       //"http://36.50.12.171:3002";
       // "http://172.16.109.94:3002";
-      // "https://mode.imadiinnovations.com:3002";
-      // "https://dev.imadiinnovations.com:3003";
-      "http://localhost:3002";
+      "https://ows-backend.attalimiyah.com.pk:3002";
+  //"https://dev.imadiinnovations.com:3003";
+  //"http://localhost:3002";
 
   static final GlobalStateController permissionsController =
       Get.find<GlobalStateController>();

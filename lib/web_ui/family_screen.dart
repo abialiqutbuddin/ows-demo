@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:ows/constants/app_routes.dart';
+import 'package:ows/controller/module_controller.dart';
 import 'package:ows/model/family_model.dart';
-import 'package:ows/web_ui/profile_preview_screen.dart';
+import 'package:ows/web_ui/modules/update_profile.dart';
 import '../api/api.dart';
 import '../constants/constants.dart';
 import '../controller/profile_pdf_controller.dart';
@@ -12,7 +15,9 @@ import '../controller/state_management/state_manager.dart';
 class FamilyScreenW extends StatefulWidget {
   //final List<FamilyMember> familyMembers;
 
-  const FamilyScreenW({super.key,});
+  const FamilyScreenW({
+    super.key,
+  });
 
   @override
   FamilyScreenWState createState() => FamilyScreenWState();
@@ -44,16 +49,41 @@ class FamilyScreenWState extends State<FamilyScreenW> {
     try {
       final userProfile = await Api.fetchUserProfile(itsId);
       if (userProfile != null) {
-        if(stateController.updateProfile.value==true){
-          stateController.user.value = userProfile;
-          Get.to(() => ProfilePreview(member: userProfile, family: Family()));
-        }else {
-          stateController.user.value = userProfile;
-          Get.to(() => ProfilePDFScreen());
-        }
+        stateController.user.value = userProfile;
+        //   Get.to(() => AppRoutes.select_module);
+        //   // if(stateController.updateProfile.value==true){
+        //   //   stateController.user.value = userProfile;
+        //   //   //Get.to(() => ProfilePreview(member: userProfile, family: Family()));
+        //   // }else {
+        //   //   stateController.user.value = userProfile;
+        //   //   //Get.to(() => ProfilePDFScreen());
+        //   // }
       } else {
         Get.snackbar("Error", "Profile not found for ITS ID: $itsId");
       }
+      var response = await Api.getToken(itsId);
+      if (response.containsKey('token')) {
+        String token = response['token'];
+        stateController.userRole.value = response["user"]["role"];
+        stateController.userMohalla.value = response["user"]["mohalla"];
+        stateController.userUmoor.value = response["user"]["umoor"] ?? "";
+        stateController.userIts.value = itsId;
+        GetStorage().write("token", token);
+        Get.to(() => ModuleScreenController());
+      }
+
+      // if (userProfile != null) {
+      //   Get.to(() => AppRoutes.select_module);
+      //   // if(stateController.updateProfile.value==true){
+      //   //   stateController.user.value = userProfile;
+      //   //   //Get.to(() => ProfilePreview(member: userProfile, family: Family()));
+      //   // }else {
+      //   //   stateController.user.value = userProfile;
+      //   //   //Get.to(() => ProfilePDFScreen());
+      //   // }
+      // } else {
+      //   Get.snackbar("Error", "Profile not found for ITS ID: $itsId");
+      // }
     } catch (e) {
       Get.snackbar("Error", "Failed to fetch user profile: $e");
     } finally {
@@ -112,7 +142,9 @@ class FamilyScreenWState extends State<FamilyScreenW> {
             elevation: WidgetStateProperty.all(0),
           ),
           onPressed: () => Constants().Logout(),
-          child: Text("Logout", style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+          child: Text("Logout",
+              style:
+                  TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
         ),
       ],
     );
@@ -152,13 +184,15 @@ class FamilyScreenWState extends State<FamilyScreenW> {
                     children: [
                       Text(
                         'Education Assistance Form For:',
-                        style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                            fontSize: 22, fontWeight: FontWeight.bold),
                       ),
                       SizedBox(height: 16),
                       Expanded(
                         child: GridView.builder(
                           shrinkWrap: true,
-                          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                          gridDelegate:
+                              SliverGridDelegateWithMaxCrossAxisExtent(
                             maxCrossAxisExtent: 500,
                             crossAxisSpacing: 16,
                             mainAxisSpacing: 16,
@@ -172,7 +206,8 @@ class FamilyScreenWState extends State<FamilyScreenW> {
                             return GestureDetector(
                               onTap: () {
                                 setState(() {
-                                  _selectedIndex = index == _selectedIndex ? null : index;
+                                  _selectedIndex =
+                                      index == _selectedIndex ? null : index;
                                 });
                               },
                               child: Container(
@@ -181,7 +216,9 @@ class FamilyScreenWState extends State<FamilyScreenW> {
                                   color: Color(0xffffead1),
                                   borderRadius: BorderRadius.circular(12),
                                   border: Border.all(
-                                    color: _selectedIndex == index ? Colors.green : Colors.transparent,
+                                    color: _selectedIndex == index
+                                        ? Colors.green
+                                        : Colors.transparent,
                                     width: 2,
                                   ),
                                 ),
@@ -189,24 +226,32 @@ class FamilyScreenWState extends State<FamilyScreenW> {
                                   children: [
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(8),
-                                      child: _buildProfileImage(member.profileImage),
+                                      child: _buildProfileImage(
+                                          member.profileImage),
                                     ),
                                     SizedBox(width: 10),
                                     Expanded(
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
                                           Container(
                                             alignment: Alignment.centerRight,
                                             child: _selectedIndex == index
-                                                ? Icon(Icons.check_circle, color: Colors.green, size: 20)
-                                                : Icon(Icons.check_circle, color: Colors.transparent, size: 20),
+                                                ? Icon(Icons.check_circle,
+                                                    color: Colors.green,
+                                                    size: 20)
+                                                : Icon(Icons.check_circle,
+                                                    color: Colors.transparent,
+                                                    size: 20),
                                           ),
                                           Text(
                                             member.fullName ?? '',
                                             softWrap: false,
                                             overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                            style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold),
                                           ),
                                           SizedBox(height: 4),
                                           Text(
@@ -230,9 +275,11 @@ class FamilyScreenWState extends State<FamilyScreenW> {
                         child: ElevatedButton(
                           onPressed: _selectedIndex != null && !_isLoading
                               ? () {
-                            final selectedMember = stateController.familyMembers[_selectedIndex!];
-                            fetchUserProfile(selectedMember.itsNumber.toString());
-                          }
+                                  final selectedMember = stateController
+                                      .familyMembers[_selectedIndex!];
+                                  fetchUserProfile(
+                                      selectedMember.itsNumber.toString());
+                                }
                               : null,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF008759),
@@ -241,8 +288,12 @@ class FamilyScreenWState extends State<FamilyScreenW> {
                             ),
                           ),
                           child: _isLoading
-                              ? CircularProgressIndicator(valueColor: AlwaysStoppedAnimation<Color>(Colors.white))
-                              : Text('Continue', style: TextStyle(fontSize: 18, color: Colors.white)),
+                              ? CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white))
+                              : Text('Continue',
+                                  style: TextStyle(
+                                      fontSize: 18, color: Colors.white)),
                         ),
                       ),
                     ],

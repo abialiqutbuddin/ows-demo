@@ -5,9 +5,7 @@ import 'package:ows/controller/module_controller.dart';
 import 'package:ows/controller/state_management/state_manager.dart';
 
 class ModuleSelectionScreenM extends StatefulWidget {
-  final String its;
-
-  const ModuleSelectionScreenM({super.key, required this.its});
+  const ModuleSelectionScreenM({super.key});
 
   @override
   ModuleSelectionScreenState createState() => ModuleSelectionScreenState();
@@ -15,14 +13,13 @@ class ModuleSelectionScreenM extends StatefulWidget {
 
 class ModuleSelectionScreenState extends State<ModuleSelectionScreenM> {
   final ModuleController controller = Get.find<ModuleController>();
-  final GlobalStateController globalController = Get.find<GlobalStateController>();
+  final GlobalStateController globalController =
+      Get.find<GlobalStateController>();
   late final String its;
 
   @override
   void initState() {
     super.initState();
-    its = widget.its;
-    controller.fetchModules(its);
   }
 
   @override
@@ -30,7 +27,8 @@ class ModuleSelectionScreenState extends State<ModuleSelectionScreenM> {
     return Scaffold(
       backgroundColor: const Color(0xFFFFF7EC),
       appBar: AppBar(
-        title: Text("Select a Module", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text("Select a Module",
+            style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -54,7 +52,10 @@ class ModuleSelectionScreenState extends State<ModuleSelectionScreenM> {
                 itemBuilder: (context, index) {
                   var module = controller.modules[index];
                   return GestureDetector(
-                    onTap: () => module.onModuleOpen?.call(module.featureIds, globalController.userIts.value,"KHI (AL-MAHALAT-TUL-BURHANIYAH)"),
+                    onTap: () => module.onModuleOpen?.call(
+                        module.featureIds,
+                        globalController.userIts.value,
+                        "KHI (AL-MAHALAT-TUL-BURHANIYAH)"),
                     child: Container(
                       decoration: BoxDecoration(
                         color: Color(0xffffead1),
@@ -78,7 +79,8 @@ class ModuleSelectionScreenState extends State<ModuleSelectionScreenM> {
                             Text(
                               module.moduleTitle, // Display module title
                               textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                              style: TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.w600),
                             ),
                           ],
                         ),
@@ -89,20 +91,20 @@ class ModuleSelectionScreenState extends State<ModuleSelectionScreenM> {
               ),
             );
           }),
-          Obx(() {
-            if (controller.isLoading.value) {
-              return Container(
-                color: Colors.black.withValues(alpha: 0.5),
-                child: Center(
-                  child: LoadingAnimationWidget.discreteCircle(
-                    color: Colors.white,
-                    size: 50,
-                  ),
-                ),
-              );
-            }
-            return const SizedBox.shrink();
-          }),
+          // Obx(() {
+          //   if (controller.isLoading.value) {
+          //     return Container(
+          //       color: Colors.black.withValues(alpha: 0.5),
+          //       child: Center(
+          //         child: LoadingAnimationWidget.discreteCircle(
+          //           color: Colors.white,
+          //           size: 50,
+          //         ),
+          //       ),
+          //     );
+          //   }
+          //   return const SizedBox.shrink();
+          // }),
         ],
       ),
     );

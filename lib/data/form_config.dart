@@ -52,16 +52,19 @@ var formConfig = [
           {
             "type": "radio",
             "label":
-                "When have you latest attended misaq majlis to Dai-al-Zamaan TUS?",
+                "Have you latest attended misaq majlis to Dai-al-Zamaan TUS?",
             "key": "attended_misaq_majlis",
-            "options": ["Yes", "No"]
+            "options": ["Yes", "No"],
           },
           {
             "type": "radio",
             "label":
                 "Have you come to contact with any moharramaat – (prohibited activities) - Alcoholic substances/drugs/cigarette/Riba/ in your life?",
             "key": "moharramaat_survey",
-            "options": ["Yes", "No"]
+            "options": ["Yes", "No"],
+            "conditional_value": "Is He/She still involved?",
+            "condition_options": ["Yes", "No"],
+            "on_condition": "Yes"
           },
           {
             "type": "dropdown",
@@ -70,7 +73,8 @@ var formConfig = [
             "itemsKey": "shaadiOptions",
             "showTextFieldIf": 0,
             "textFieldKey": "spouse_name",
-            "textFieldLabel": "Spouse Name"
+            "textFieldLabel": "Spouse Name",
+            "textFieldValidator": "name"
           },
           {
             "type": "dropdown",
@@ -83,7 +87,10 @@ var formConfig = [
             "type": "radio",
             "label": "Has he/she done ziyarat of Raudat Tahera?",
             "key": "ziarat_raudat_tahera",
-            "options": ["Yes", "No"]
+            "options": ["Yes", "No"],
+            "conditional_value": "Both Moula?",
+            "condition_options": ["Yes", "No"],
+            "on_condition": "Yes"
           },
           {
             "type": "dropdown",
@@ -104,8 +111,17 @@ var formConfig = [
         "key": "fatherInfo",
         "fields": [
           {
+            "type": "fetch-its",
+            "label": "Father ITS",
+            "fill-field": "father_name",
+            "key": "father_its",
+            "function": "fetchFatherITS",
+            "validator": "its",
+          },
+          {
             "type": "text",
             "label": "Name",
+            "enable": false,
             "key": "father_name",
             "validator": "name"
           },
@@ -122,7 +138,16 @@ var formConfig = [
         "key": "motherInfo",
         "fields": [
           {
+            "type": "fetch-its",
+            "label": "Mother ITS",
+            "key": "mother_its",
+            "fill-field": "mother_name",
+            "function": "fetchMotherITS",
+            "validator": "its",
+          },
+          {
             "type": "text",
+            "enable": false,
             "label": "Name",
             "key": "mother_name",
             "validator": "name"
@@ -224,8 +249,21 @@ var formConfig = [
         "title": "BMI",
         "key": "bmiInfo",
         "fields": [
-          {"type": "text", "label": "Height (in cm)", "key": "height"},
-          {"type": "text", "label": "Weight (in kg)", "key": "weight"}
+          {
+            "type": "text",
+            "label": "Height",
+            "key": "height",
+            "validator": "number",
+            "hasUnitDropdown": true,
+            "unitKey": "heightUnit",
+            "unitOptions": ["cm", "feet", "inches", "m"]
+          },
+          {
+            "type": "text",
+            "label": "Weight (in KG)",
+            "key": "weight",
+            "validator": "number"
+          }
         ]
       }
     ]
@@ -264,7 +302,7 @@ var formConfig = [
           },
           {
             "type": "radio",
-            "label": "Any Chronic (long term, incurable) illness? (e.g.)",
+            "label": "Any Chronic (long term, incurable) illness?",
             "key": "chronic_illness",
             "options": ["Yes", "No"]
           }
@@ -281,22 +319,49 @@ var formConfig = [
         "key": "sourcesofIncome",
         "fields": [
           {
-            "label": "Income Type",
-            "key": "incomeType",
-            "type": "dropdown",
-            "itemsKey": "incomeTypeOptions"
+            "label": "Types of Income",
+            "key": "incomeTypes",
+            "type": "repeatable",
+            "fields": [
+              {
+                "label": "Income Type",
+                "key": "incomeType",
+                "type": "dropdown",
+                "itemsKey": "incomeTypeOptions"
+              },
+              {
+                "label": "Amount",
+                "key": "incomeTypeAmount",
+                "type": "text",
+                "validator": "amount"
+              }
+            ]
           },
           {
-            "label": "Family Member Name",
-            "key": "familyMemberName",
-            "type": "text",
-            "validator": "name"
+            "label": "Other Family Income",
+            "key": "otherFamilyIncome",
+            "type": "repeatable",
+            "fields": [
+              {
+                "label": "Member Name",
+                "key": "memberName",
+                "type": "text",
+                "itemsKey": "name"
+              },
+              {
+                "label": "Income Amount",
+                "key": "incomeAmount",
+                "type": "text",
+                "validator": "amount"
+              }
+            ]
           },
           {
-            "label": "Student Part Time",
+            "label": "Student Part Time (Amount)",
             "key": "studentPartTimeIncome",
             "type": "text",
-            "validator": "amount"
+            "validator": "amount",
+            "hint": "Enter 0 if not applicable"
           },
           {
             "type": "radio",
@@ -305,7 +370,7 @@ var formConfig = [
             "key": "family_member_working",
             "options": ["Yes", "No"],
             "showTextFieldIf": "Yes",
-            "textFieldKey": "workingDetails",
+            "textFieldKey": "working_details",
             "textFieldLabel": "Give Details"
           },
           {
@@ -315,7 +380,7 @@ var formConfig = [
             "key": "family_member_disability",
             "options": ["Yes", "No"],
             "showTextFieldIf": "Yes",
-            "textFieldKey": "disabilityDetails",
+            "textFieldKey": "disability_details",
             "textFieldLabel": "Give Details"
           },
         ]
@@ -329,43 +394,50 @@ var formConfig = [
             "label": "Wajebaat / Khumus",
             "key": "wajebaat_expenses",
             "type": "text",
-            "validator": "amount"
+            "validator": "amount",
+            "hint": "Enter 0 if not applicable"
           },
           {
             "label": "FMB Thaali / Niyaaz",
             "key": "niyaz_expenses",
             "type": "text",
-            "validator": "amount"
+            "validator": "amount",
+            "hint": "Enter 0 if not applicable"
           },
           {
             "label": "Jamaat Expenses / Sabeel",
             "key": "sabeel_expenses",
             "type": "text",
-            "validator": "amount"
+            "validator": "amount",
+            "hint": "Enter 0 if not applicable"
           },
           {
             "label": "Ziyarat",
             "key": "zyarat_expenses",
             "type": "text",
-            "validator": "amount"
+            "validator": "amount",
+            "hint": "Enter 0 if not applicable"
           },
           {
             "label": "Ashara Mubarakah",
             "key": "ashara_expenses",
             "type": "text",
-            "validator": "amount"
+            "validator": "amount",
+            "hint": "Enter 0 if not applicable"
           },
           {
             "label": "Qardan Hasana",
             "key": "qardanhasana",
             "type": "text",
-            "validator": "amount"
+            "validator": "amount",
+            "hint": "Enter 0 if not applicable"
           },
           {
             "label": "Others Expenses",
             "key": "other_deeni_expenses",
             "type": "text",
-            "validator": "amount"
+            "validator": "amount",
+            "hint": "Enter 0 if not applicable"
           }
         ]
       },
@@ -375,9 +447,19 @@ var formConfig = [
         "key": "education_expenses",
         "radioLabel": "No Education Expense",
         "fields": [
-          {"label": "Name", "key": "eduName", "type": "text"},
+          {
+            "label": "Name",
+            "key": "eduName",
+            "type": "text",
+            "validator": "name"
+          },
           {"label": "Age", "key": "eduAge", "type": "text", "validator": "age"},
-          {"label": "Institute Name", "key": "eduInsName", "type": "text"},
+          {
+            "label": "Institute Name",
+            "key": "eduInsName",
+            "type": "text",
+            "validator": "name"
+          },
           {
             "label": "Class/Semester",
             "key": "eduSemClass",
@@ -388,7 +470,7 @@ var formConfig = [
             "label": "Fee",
             "key": "eduFee",
             "type": "text",
-            "validator": "number"
+            "validator": "amount"
           }
         ]
       },
@@ -401,19 +483,22 @@ var formConfig = [
             "label": "Groceries & Household supplies",
             "key": "groceries_supplies",
             "type": "text",
-            "validator": "amount"
+            "validator": "amount",
+            "hint": "Enter 0 if not applicable"
           },
           {
             "label": "Retaurants / Dine Out",
             "key": "dineout_expense",
             "type": "text",
-            "validator": "amount"
+            "validator": "amount",
+            "hint": "Enter 0 if not applicable"
           },
           {
             "label": "Essentials",
             "key": "essential_expense",
             "type": "text",
-            "validator": "amount"
+            "validator": "amount",
+            "hint": "Enter 0 if not applicable"
           },
         ]
       },
@@ -426,31 +511,36 @@ var formConfig = [
             "label": "Doctor",
             "key": "doctor_expenses",
             "type": "text",
-            "validator": "amount"
+            "validator": "amount",
+            "hint": "Enter 0 if not applicable"
           },
           {
             "label": "Dental",
             "key": "dental_expenses",
             "type": "text",
-            "validator": "amount"
+            "validator": "amount",
+            "hint": "Enter 0 if not applicable"
           },
           {
             "label": "Glasses & Eye Care",
             "key": "glass_expenses",
             "type": "text",
-            "validator": "amount"
+            "validator": "amount",
+            "hint": "Enter 0 if not applicable"
           },
           {
             "label": "Medicines",
             "key": "meds_expenses",
             "type": "text",
-            "validator": "amount"
+            "validator": "amount",
+            "hint": "Enter 0 if not applicable"
           },
           {
             "label": "Vacation",
             "key": "vacation_expenses",
             "type": "text",
-            "validator": "amount"
+            "validator": "amount",
+            "hint": "Enter 0 if not applicable"
           },
         ]
       },
@@ -463,67 +553,78 @@ var formConfig = [
             "label": "Rent",
             "key": "rent_expense",
             "type": "text",
-            "validator": "amount"
+            "validator": "amount",
+            "hint": "Enter 0 if not applicable"
           },
           {
             "label": "Maintenance",
             "key": "maintenance_expense",
             "type": "text",
-            "validator": "amount"
+            "validator": "amount",
+            "hint": "Enter 0 if not applicable"
           },
           {
             "label": "Gas",
             "key": "gas_expense",
             "type": "text",
-            "validator": "amount"
+            "validator": "amount",
+            "hint": "Enter 0 if not applicable"
           },
           {
             "label": "Electricity",
             "key": "electricity_expense",
             "type": "text",
-            "validator": "amount"
+            "validator": "amount",
+            "hint": "Enter 0 if not applicable"
           },
           {
             "label": "Mobile",
             "key": "mobile_expense",
             "type": "text",
-            "validator": "amount"
+            "validator": "amount",
+            "hint": "Enter 0 if not applicable"
           },
           {
             "label": "Water",
             "key": "water_expense",
             "type": "text",
-            "validator": "amount"
+            "validator": "amount",
+            "hint": "Enter 0 if not applicable"
           },
           {
             "label": "Cable",
             "key": "cable_expense",
             "type": "text",
-            "validator": "amount"
+            "validator": "amount",
+            "hint": "Enter 0 if not applicable"
           },
           {
             "label": "Internet",
             "key": "internet_expense",
             "type": "text",
-            "validator": "amount"
+            "validator": "amount",
+            "hint": "Enter 0 if not applicable"
           },
           {
             "label": "Clothing & Accessories",
             "key": "clothing_expense",
             "type": "text",
-            "validator": "amount"
+            "validator": "amount",
+            "hint": "Enter 0 if not applicable"
           },
           {
             "label": "Appliances (Maintenance)",
             "key": "appliances_expense",
             "type": "text",
-            "validator": "amount"
+            "validator": "amount",
+            "hint": "Enter 0 if not applicable"
           },
           {
             "label": "Other Expenses",
             "key": "other_expenses",
             "type": "text",
-            "validator": "amount"
+            "validator": "amount",
+            "hint": "Enter 0 if not applicable"
           },
         ]
       },
@@ -533,8 +634,18 @@ var formConfig = [
         "type": "repeatable",
         "radioLabel": "No Dependents",
         "fields": [
-          {"label": "Dependent Name", "key": "dependentName", "type": "text"},
-          {"label": "Dependent Age", "key": "dependentAge", "type": "age"},
+          {
+            "label": "Dependent Name",
+            "key": "dependentName",
+            "type": "text",
+            "validator": "name"
+          },
+          {
+            "label": "Dependent Age",
+            "key": "dependentAge",
+            "type": "text",
+            "validator": "age"
+          },
         ]
       },
       {
@@ -543,9 +654,24 @@ var formConfig = [
         "type": "repeatable",
         "radioLabel": "Not travelled",
         "fields": [
-          {"label": "Place", "key": "travelPlace", "type": "text"},
-          {"label": "Year", "key": "travelYear", "type": "year"},
-          {"label": "Purpose", "key": "travelPurpose", "type": "text"},
+          {
+            "label": "Place",
+            "key": "travelPlace",
+            "type": "text",
+            "validator": "name"
+          },
+          {
+            "label": "Year",
+            "key": "travelYear",
+            "type": "text",
+            "validator": "year"
+          },
+          {
+            "label": "Purpose",
+            "key": "travelPurpose",
+            "type": "text",
+            "validator": "text"
+          },
         ]
       },
       {
@@ -557,25 +683,29 @@ var formConfig = [
             "label": "Property",
             "key": "property_assets",
             "type": "text",
-            "validator": "amount"
+            "validator": "amount",
+            "hint": "Enter 0 if not applicable"
           },
           {
             "label": "Jewelry",
             "key": "jewelry_Assets",
             "type": "text",
-            "validator": "amount"
+            "validator": "amount",
+            "hint": "Enter 0 if not applicable"
           },
           {
             "label": "Transport",
             "key": "transport_assets",
             "type": "text",
-            "validator": "amount"
+            "validator": "amount",
+            "hint": "Enter 0 if not applicable"
           },
           {
             "label": "Others",
             "key": "other_assets",
             "type": "text",
-            "validator": "amount"
+            "validator": "amount",
+            "hint": "Enter 0 if not applicable"
           },
         ]
       },

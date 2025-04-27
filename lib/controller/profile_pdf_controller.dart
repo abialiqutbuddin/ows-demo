@@ -7,7 +7,7 @@ import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import '../mobile_ui/profile_pdf_screen.dart';
 import '../model/family_model.dart';
 import '../model/member_model.dart';
-import '../web_ui/profile_pdf_screen.dart';
+import '../web_ui/modules/imdad_talimi/profile_pdf_screen.dart';
 
 class PDFScreenController extends GetxController {
   Rxn<Uint8List> pdfData = Rxn<Uint8List>(); // Pass the PDF data as Uint8List
@@ -24,18 +24,15 @@ class PDFScreenController extends GetxController {
       }
 
       pdfData.value = fetchedData;
-
     } catch (e) {
       if (Get.overlayContext != null) {
         Get.snackbar("Notice", "Failed to Load PDF.");
       }
     }
   }
-
 }
 
 class ProfilePDFScreen extends StatefulWidget {
-
   const ProfilePDFScreen({
     super.key,
   });
@@ -50,7 +47,6 @@ class ProfilePDFScreenState extends State<ProfilePDFScreen> {
   final PDFScreenController controller = Get.find<PDFScreenController>();
   final GlobalStateController gController = Get.find<GlobalStateController>();
 
-
   @override
   void initState() {
     super.initState();
@@ -63,19 +59,18 @@ class ProfilePDFScreenState extends State<ProfilePDFScreen> {
     final double screenWidth = MediaQuery.of(context).size.width;
     // Define the breakpoint for mobile
     const double mobileBreakpoint = 600;
-      // Show loading indicator while PDF is loading
-      return Scaffold(
-        backgroundColor: Color(0xffdbbb99),
-        body: screenWidth <= mobileBreakpoint
-              ? ProfilePDFScreenM(
-            member: gController.user.value,
-            //pdfData: pdfData,
-          )
-              :
-          ProfilePDFScreenW(
-            member: gController.user.value,
-          ),
-      );
+    // Show loading indicator while PDF is loading
+    return Scaffold(
+      backgroundColor: Color(0xffdbbb99),
+      body: screenWidth <= mobileBreakpoint
+          ? ProfilePDFScreenM(
+              member: gController.user.value,
+              //pdfData: pdfData,
+            )
+          : ProfilePDFScreenW(
+              member: gController.user.value,
+            ),
+    );
   }
 
   void fetchAndLoadPDF(String its) async {
@@ -96,15 +91,11 @@ class ProfilePDFScreenState extends State<ProfilePDFScreen> {
         throw Exception("PDF data is null or empty");
       }
     } catch (e) {
-
       // If there's an error, load the default PDF from assets
       // ByteData byteData = await rootBundle.load("profile.pdf");
       // pdfData = byteData.buffer.asUint8List(); // Convert ByteData to Uint8List
 
-      Get.snackbar(
-          "Notice",
-          "Failed to Load PDF."
-      );
+      Get.snackbar("Notice", "Failed to Load PDF.");
     } finally {
       setState(() {
         _isLoading = false; // Stop loading in all cases

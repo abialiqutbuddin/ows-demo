@@ -10,12 +10,12 @@ import 'package:ows/controller/profile_pdf_controller.dart';
 import 'package:ows/model/request_form_model.dart';
 import 'package:super_tooltip/super_tooltip.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../api/api.dart';
+import '../../../api/api.dart';
 import 'package:get/get.dart';
-import '../controller/request_form_controller.dart';
-import '../controller/state_management/state_manager.dart';
-import '../constants/dropdown_search.dart';
-import '../model/funding_record_model.dart';
+import '../../../controller/request_form_controller.dart';
+import '../../../controller/state_management/state_manager.dart';
+import '../../../constants/dropdown_search.dart';
+import '../../../model/funding_record_model.dart';
 
 class RequestFormW extends StatefulWidget {
   const RequestFormW({super.key});
@@ -412,7 +412,8 @@ class RequestFormWState extends State<RequestFormW> {
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {
-                          return GuardianFormDialog(ITS:statecontroller.user.value.itsId.toString());
+                          return GuardianFormDialog(
+                              ITS: statecontroller.user.value.itsId.toString());
                         },
                       );
                     },
@@ -1081,8 +1082,7 @@ class RequestFormWState extends State<RequestFormW> {
           Row(
             spacing: 10,
             children: [
-              Flexible(
-                  flex: 2, child: _buildField2("Funds", controller.funds)),
+              Flexible(flex: 2, child: _buildField2("Funds", controller.funds)),
               Flexible(
                 flex: 5,
                 child: _buildField2("Description", controller.description,
@@ -1111,11 +1111,11 @@ class RequestFormWState extends State<RequestFormW> {
 
                 String? classDegree;
                 if (controller.marhala4Index.value != null) {
-                  classDegree = controller.marhala4Class.firstWhere((e) =>
-                      e["id"] == controller.marhala4Index.value)["name"];
+                  classDegree = controller.marhala4Class.firstWhere(
+                      (e) => e["id"] == controller.marhala4Index.value)["name"];
                 } else if (controller.marhala5Index.value != null) {
-                  classDegree = controller.marhala5Class.firstWhere((e) =>
-                      e["id"] == controller.marhala5Index.value)["name"];
+                  classDegree = controller.marhala5Class.firstWhere(
+                      (e) => e["id"] == controller.marhala5Index.value)["name"];
                 } else if (controller.degreeProgramIndex.value != null) {
                   classDegree = controller.degreePrograms.firstWhere((e) =>
                       e["id"] == controller.degreeProgramIndex.value)["name"];
@@ -1147,10 +1147,14 @@ class RequestFormWState extends State<RequestFormW> {
                 if (controller.selectedCategory.value == "Dunyawi") {
                   requestData = RequestFormModel(
                     ITS: statecontroller.user.value.itsId.toString(),
-                    studentFirstName: statecontroller.user.value.firstName.toString(),
-                    studentFullName: statecontroller.user.value.fullName.toString(),
+                    studentFirstName:
+                        statecontroller.user.value.firstName.toString(),
+                    studentFullName:
+                        statecontroller.user.value.fullName.toString(),
                     reqByITS: statecontroller.appliedByITS.value,
-                    reqByName: statecontroller.appliedByName.value,
+                    //reqByITS: '30445124',
+                    reqByName: 'Abiali',
+                    //reqByName: statecontroller.appliedByName.value,
                     mohalla:
                         statecontroller.user.value.tanzeem?.toString() ?? "",
                     address:
@@ -1185,8 +1189,10 @@ class RequestFormWState extends State<RequestFormW> {
 
                   requestData = RequestFormModel(
                     ITS: statecontroller.user.value.itsId.toString(),
-                    studentFirstName: statecontroller.user.value.firstName.toString(),
-                    studentFullName: statecontroller.user.value.fullName.toString(),
+                    studentFirstName:
+                        statecontroller.user.value.firstName.toString(),
+                    studentFullName:
+                        statecontroller.user.value.fullName.toString(),
                     reqByITS: statecontroller.appliedByITS.value,
                     reqByName: statecontroller.appliedByName.value,
                     mohalla:
@@ -1902,10 +1908,10 @@ class RequestFormWState extends State<RequestFormW> {
                 )),
                 Flexible(
                     child: _buildField2(
-                      "CNIC No.",
-                      controller.cnicNo,
-                      isEnabled: true,
-                    )),
+                  "CNIC No.",
+                  controller.cnicNo,
+                  isEnabled: true,
+                )),
                 Flexible(child: _buildField2("Year", controller.year)),
               ],
             ),
@@ -1982,10 +1988,10 @@ class RequestFormWState extends State<RequestFormW> {
                 )),
                 Flexible(
                     child: _buildField2(
-                      "CNIC No.",
-                      controller.cnicNo,
-                      isEnabled: true,
-                    )),
+                  "CNIC No.",
+                  controller.cnicNo,
+                  isEnabled: true,
+                )),
                 Flexible(child: _buildField2("Year", controller.year)),
               ],
             ),
@@ -2062,10 +2068,10 @@ class RequestFormWState extends State<RequestFormW> {
                 ),
                 Flexible(
                     child: _buildField2(
-                      "CNIC No.",
-                      controller.cnicNo,
-                      isEnabled: true,
-                    )),
+                  "CNIC No.",
+                  controller.cnicNo,
+                  isEnabled: true,
+                )),
                 Flexible(child: _buildField2("Year", controller.year)),
               ],
             ),
@@ -2312,7 +2318,7 @@ class RequestFormWState extends State<RequestFormW> {
       children: [
         Flexible(
             child: _buildField2(
-              "CNIC No.",
+          "CNIC No.",
           controller.cnicNo,
           isEnabled: true,
         )),
@@ -2557,51 +2563,54 @@ class RequestFormWState extends State<RequestFormW> {
                               Icons.check_circle_rounded,
                               color: Colors.green,
                             )
-                          : error=='' ? SuperTooltip(
-                              elevation: 1,
-                              barrierColor: Colors.transparent,
-                              // Keep it visible without dark overlay
-                              controller: tooltipController,
-                              arrowTipDistance: 10,
-                              showBarrier: false,
-                              arrowTipRadius: 2,
-                              arrowLength: 10,
-                              borderColor: Color(0xffE9D502),
-                              borderWidth: 2,
-                              backgroundColor:
-                                  Color(0xffE9D502).withValues(alpha: 0.9),
-                              boxShadows: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(
-                                      alpha: 0.2), // Light shadow color
-                                  blurRadius: 6, // Soft blur effect
-                                  spreadRadius: 2,
-                                  offset: Offset(0, 4),
-                                ),
-                              ],
-                              content: Text(error,
-                                  style: const TextStyle(
-                                      color: Colors.black, fontSize: 12)),
-                              child: MouseRegion(
-                                onEnter: (_) {
-                                  hoverTimer = Timer(
-                                      const Duration(milliseconds: 300), () {
-                                    if (!tooltipController.isVisible) {
-                                      tooltipController.showTooltip();
-                                    }
-                                  });
-                                },
-                                onExit: (_) {
-                                  hoverTimer
-                                      ?.cancel(); // ✅ Prevent tooltip from showing if mouse leaves quickly
-                                  tooltipController.hideTooltip();
-                                },
-                                child: Icon(
-                                  Icons.error,
-                                  color: Colors.amber,
-                                ),
-                              ),
-                            ) : SizedBox.shrink(),
+                          : error == ''
+                              ? SuperTooltip(
+                                  elevation: 1,
+                                  barrierColor: Colors.transparent,
+                                  // Keep it visible without dark overlay
+                                  controller: tooltipController,
+                                  arrowTipDistance: 10,
+                                  showBarrier: false,
+                                  arrowTipRadius: 2,
+                                  arrowLength: 10,
+                                  borderColor: Color(0xffE9D502),
+                                  borderWidth: 2,
+                                  backgroundColor:
+                                      Color(0xffE9D502).withValues(alpha: 0.9),
+                                  boxShadows: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(
+                                          alpha: 0.2), // Light shadow color
+                                      blurRadius: 6, // Soft blur effect
+                                      spreadRadius: 2,
+                                      offset: Offset(0, 4),
+                                    ),
+                                  ],
+                                  content: Text(error,
+                                      style: const TextStyle(
+                                          color: Colors.black, fontSize: 12)),
+                                  child: MouseRegion(
+                                    onEnter: (_) {
+                                      hoverTimer = Timer(
+                                          const Duration(milliseconds: 300),
+                                          () {
+                                        if (!tooltipController.isVisible) {
+                                          tooltipController.showTooltip();
+                                        }
+                                      });
+                                    },
+                                    onExit: (_) {
+                                      hoverTimer
+                                          ?.cancel(); // ✅ Prevent tooltip from showing if mouse leaves quickly
+                                      tooltipController.hideTooltip();
+                                    },
+                                    child: Icon(
+                                      Icons.error,
+                                      color: Colors.amber,
+                                    ),
+                                  ),
+                                )
+                              : SizedBox.shrink(),
                       floatingLabelBehavior: FloatingLabelBehavior.always,
                       label: Text(label),
                       labelStyle: TextStyle(
@@ -2658,7 +2667,7 @@ class RequestFormWState extends State<RequestFormW> {
 
 class GuardianFormDialog extends StatefulWidget {
   final String ITS;
-   const GuardianFormDialog({super.key, required this.ITS});
+  const GuardianFormDialog({super.key, required this.ITS});
 
   @override
   GuardianFormDialogState createState() => GuardianFormDialogState();
@@ -2797,8 +2806,8 @@ class GuardianFormDialogState extends State<GuardianFormDialog> {
                   ),
                   filled: true,
                   fillColor: const Color(0xfffffcf6),
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 10),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 ),
               ),
             ),
@@ -2831,8 +2840,8 @@ class GuardianFormDialogState extends State<GuardianFormDialog> {
                   ),
                   filled: true,
                   fillColor: const Color(0xfffffcf6),
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 10),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 ),
               ),
             ),
@@ -2857,8 +2866,8 @@ class GuardianFormDialogState extends State<GuardianFormDialog> {
                   ),
                   filled: true,
                   fillColor: const Color(0xfffffcf6),
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 10),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 ),
               ),
             ),
@@ -2883,8 +2892,8 @@ class GuardianFormDialogState extends State<GuardianFormDialog> {
                   ),
                   filled: true,
                   fillColor: const Color(0xfffffcf6),
-                  contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 10, vertical: 10),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                 ),
               ),
             ),
@@ -2928,13 +2937,15 @@ class GuardianFormDialogState extends State<GuardianFormDialog> {
                   ),
                   onPressed: () async {
                     //if (_formKey1.currentState!.validate()) {
-                      var response = await Api.updateGuardian(its: itsController.text,
-                          name: nameController.text,
-                          contact: contactController.text,
-                          relation: relationController.text,
-                          studentIts: widget.ITS);
-                      Navigator.pop(context);
-                      Get.snackbar("Response", response["message"]);// Close the dialog
+                    var response = await Api.updateGuardian(
+                        its: itsController.text,
+                        name: nameController.text,
+                        contact: contactController.text,
+                        relation: relationController.text,
+                        studentIts: widget.ITS);
+                    Navigator.pop(context);
+                    Get.snackbar(
+                        "Response", response["message"]); // Close the dialog
                     //}
                   },
                   child: Text(

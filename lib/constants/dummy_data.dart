@@ -12,10 +12,10 @@ final Map<String, dynamic> familyJson = {
   "middle_name": "Taherali",
   "last_name": "Khumusi",
   "residence_address":
-  "Flat No.B6, 2nd Floor, KDA Apartments, Block A, N.Nazimabad, Karachi, 74700",
+      "Flat No.B6, 2nd Floor, KDA Apartments, Block A, N.Nazimabad, Karachi, 74700",
   "residence_phone": "+923362780552",
   "image":
-  "https://followup.qardanhasana.in/assets/img/mumin_photos/20377228.jpg",
+      "https://followup.qardanhasana.in/assets/img/mumin_photos/20377228.jpg",
   "imani_institute": "NO",
   "previous_institute": "Jinnah Government College",
   "previous_class": "Bachelors Degree Programs",
@@ -66,7 +66,7 @@ final Map<String, dynamic> familyJson = {
     "website": null,
     "profession": null,
     "image_url":
-    "https://followup.qardanhasana.in/assets/img/mumin_photos/no_user.png",
+        "https://followup.qardanhasana.in/assets/img/mumin_photos/no_user.png",
     "its_status": null,
     "marhala_ongoing": null,
     "ambition_id": 0,
@@ -85,7 +85,7 @@ final Map<String, dynamic> familyJson = {
 // Create a Family instance from JSON
 Family dummyFamily = Family.fromJson(familyJson);
 
-UserProfile userProfile11 = UserProfile(
+UserProfile userProfile111 = UserProfile(
   id: 3678,
   itsId: 20377228,
   hofId: 20377228,

@@ -10,10 +10,9 @@ import '../api/api.dart';
 import '../mobile_ui/request_form_screen.dart';
 import '../model/institutes_model.dart';
 import '../model/member_model.dart';
-import '../web_ui/request_form.dart';
+import '../web_ui/modules/imdad_talimi/request_form.dart';
 
 class RequestFormController extends GetxController {
-
   RxString selectedEducationType = "".obs;
   Rxn<int> selectedMarhala = Rxn<int>();
   RxString selectedCategory = "".obs;
@@ -21,7 +20,6 @@ class RequestFormController extends GetxController {
   RxString purpose = "".obs;
   RxString grade = "".obs;
   RxString cnicNo = "".obs;
-
 
   RxBool isSubmitEnabled = false.obs;
 
@@ -42,7 +40,6 @@ class RequestFormController extends GetxController {
   // RxBool isYearSelected = false.obs;
   // RxBool isFundsSelected = false.obs;
   // RxBool isDescriptionSelected = false.obs;
-
 
   // Convert to Rxn<int> for dropdown selections
   Rxn<int> standardIndex = Rxn<int>(null);
@@ -136,7 +133,7 @@ class RequestFormController extends GetxController {
   RxString hifzProgress = "".obs;
   RxString hifzProgramName = "".obs;
 
-  void resetFields(){
+  void resetFields() {
     madrasaName.value = "";
     darajaName.value = "";
     hifzProgress.value = "";
@@ -156,11 +153,11 @@ class RequestFormController extends GetxController {
     studyOptions.clear();
     filteredStudies.clear();
     courseOptions.clear();
-    selectedInstitute.value=null;
-    selectedCity.value='Select City';
-    selectedInstituteName.value='';
-    year.value='';
-    selectedCityId.value=null;
+    selectedInstitute.value = null;
+    selectedCity.value = 'Select City';
+    selectedInstituteName.value = '';
+    year.value = '';
+    selectedCityId.value = null;
     standardIndex.value = null;
     selectedCategory.value = '';
     fieldOfStudyIndex.value = null;
@@ -171,8 +168,8 @@ class RequestFormController extends GetxController {
     darajaIndex.value = null;
     hifzProgramIndex.value = null;
     madrasaIndex.value = null;
-    funds.value='';
-    description.value='';
+    funds.value = '';
+    description.value = '';
   }
 
   RxList<Map<String, dynamic>> studyOptions = <Map<String, dynamic>>[].obs;
@@ -211,19 +208,16 @@ class RequestFormController extends GetxController {
 
   // Define Marhalas
   final List<Map<String, dynamic>> predefinedMarhalas = [
-    {'id': 1, 'marhala': 'Marhala 1','name': 'Pre Primary'},
-    {'id': 2, 'marhala': 'Marhala 2 ','name': '1st - 4th'},
-    {'id': 3, 'marhala': 'Marhala 3 ','name': '5th - 8th'},
-    {'id': 4, 'marhala': 'Marhala 4 ','name': '9th - 10th'},
-    {'id': 5, 'marhala': 'Marhala 5 ','name': '11th - 12th'},
-    {'id': 6, 'marhala': 'Marhala 6 ','name': 'Undergraduate'},
-    {'id': 7, 'marhala': 'Marhala 7 ','name': 'Postgraduate'},
+    {'id': 1, 'marhala': 'Marhala 1', 'name': 'Pre Primary'},
+    {'id': 2, 'marhala': 'Marhala 2 ', 'name': '1st - 4th'},
+    {'id': 3, 'marhala': 'Marhala 3 ', 'name': '5th - 8th'},
+    {'id': 4, 'marhala': 'Marhala 4 ', 'name': '9th - 10th'},
+    {'id': 5, 'marhala': 'Marhala 5 ', 'name': '11th - 12th'},
+    {'id': 6, 'marhala': 'Marhala 6 ', 'name': 'Undergraduate'},
+    {'id': 7, 'marhala': 'Marhala 7 ', 'name': 'Postgraduate'},
   ];
 
-
-  void resetSelections() {
-  }
-
+  void resetSelections() {}
 
   var isDeeniSelected = false.obs;
   var filteredStudies = <Map<String, dynamic>>[].obs;
@@ -296,17 +290,15 @@ class RequestFormController extends GetxController {
     update();
   }
 
-
-
   void filterStudies(int marhalaId) {
-    if(marhalaId>3) {
+    if (marhalaId > 3) {
       studyOptions.assignAll(
-      _extractUniqueValues(
-        allData.where((item) => item['marhala_id'] == marhalaId).toList(),
-        'study_id',
-        (item) => {'id': item['study_id'], 'name': item['study']},
-      ),
-    );
+        _extractUniqueValues(
+          allData.where((item) => item['marhala_id'] == marhalaId).toList(),
+          'study_id',
+          (item) => {'id': item['study_id'], 'name': item['study']},
+        ),
+      );
     }
     //selectedStudy.value = null;
     //filteredFields.clear();
@@ -349,29 +341,28 @@ class RequestFormController extends GetxController {
 
   // Function to Validate Form Based on Selections
   void validateForm() {
-    List<String> requiredFields = ["purpose","marhala"];
+    List<String> requiredFields = ["purpose", "marhala"];
     List<String> missingFields = []; // To store missing required fields
 
     if (marhala4Index.value != null) {
-      classDegree.value = marhala4Class.firstWhere((e) =>
-      e["id"] == marhala4Index.value)["name"];
+      classDegree.value = marhala4Class
+          .firstWhere((e) => e["id"] == marhala4Index.value)["name"];
     } else if (marhala5Index.value != null) {
-      classDegree.value = marhala5Class.firstWhere((e) =>
-      e["id"] == marhala5Index.value)["name"];
+      classDegree.value = marhala5Class
+          .firstWhere((e) => e["id"] == marhala5Index.value)["name"];
     } else if (degreeProgramIndex.value != null) {
-      classDegree.value = degreePrograms.firstWhere((e) =>
-      e["id"] == degreeProgramIndex.value)["name"];
+      classDegree.value = degreePrograms
+          .firstWhere((e) => e["id"] == degreeProgramIndex.value)["name"];
     }
 
     if (fieldOfStudyIndex.value != null) {
-      fieldOfStudy.value = studyOptions.firstWhere((e) =>
-      e["id"] == fieldOfStudyIndex.value)["name"];
-
+      fieldOfStudy.value = studyOptions
+          .firstWhere((e) => e["id"] == fieldOfStudyIndex.value)["name"];
     }
 
     if (courseIndexPoint.value != null) {
-      subject.value = courseOptions.firstWhere((e) =>
-      e["id"] == courseIndexPoint.value)["name"];
+      subject.value = courseOptions
+          .firstWhere((e) => e["id"] == courseIndexPoint.value)["name"];
     }
 
     // 🔹 **Dynamically determine subjectCourse**
@@ -388,17 +379,63 @@ class RequestFormController extends GetxController {
 
     if (isMarhalaSelected.value && isDunyawiSelected.value) {
       if (isStandardBetween1_3.value) {
-        requiredFields = ["purpose","marhala","standard", "city", "institute", "year", "funds", "description"];
+        requiredFields = [
+          "purpose",
+          "marhala",
+          "standard",
+          "city",
+          "institute",
+          "year",
+          "funds",
+          "description"
+        ];
       } else if (isStandardBetween4_5.value) {
-        requiredFields = ["classDegree","purpose","marhala","fieldOfStudy", "subject", "city", "institute", "year", "funds", "description"];
+        requiredFields = [
+          "classDegree",
+          "purpose",
+          "marhala",
+          "fieldOfStudy",
+          "subject",
+          "city",
+          "institute",
+          "year",
+          "funds",
+          "description"
+        ];
       } else if (isStandardBetween6_7.value) {
-        requiredFields = ["purpose","marhala","classDegree", "fieldOfStudy", "subject", "city", "institute", "year", "funds", "description"];
+        requiredFields = [
+          "purpose",
+          "marhala",
+          "classDegree",
+          "fieldOfStudy",
+          "subject",
+          "city",
+          "institute",
+          "year",
+          "funds",
+          "description"
+        ];
       }
     } else if (isMarhalaSelected.value && isDeeniiSelected.value) {
       if (isMadrasaSelected.value) {
-        requiredFields = ["purpose","marhala","madrasaName", "darajaName", "year", "funds", "description"];
+        requiredFields = [
+          "purpose",
+          "marhala",
+          "madrasaName",
+          "darajaName",
+          "year",
+          "funds",
+          "description"
+        ];
       } else if (isHifzSelected.value) {
-        requiredFields = ["purpose","marhala","hifzProgramName", "year", "funds", "description"];
+        requiredFields = [
+          "purpose",
+          "marhala",
+          "hifzProgramName",
+          "year",
+          "funds",
+          "description"
+        ];
       }
     }
 
@@ -411,7 +448,8 @@ class RequestFormController extends GetxController {
 
     // Debugging Output
     print("🔹 Required Fields: $requiredFields");
-    print("✅ Filled Fields: ${requiredFields.where((field) => getFieldValue(field).isNotEmpty).toList()}");
+    print(
+        "✅ Filled Fields: ${requiredFields.where((field) => getFieldValue(field).isNotEmpty).toList()}");
     print("❌ Missing Fields: $missingFields");
 
     isSubmitEnabled.value = missingFields.isEmpty;
@@ -428,7 +466,7 @@ class RequestFormController extends GetxController {
         return (selectedMarhala.value != null && selectedMarhala.value! > 0)
             ? selectedMarhala.value.toString()
             : '';
-        case "purpose":
+      case "purpose":
         return purpose.value;
       case "standard":
         return grade.value;
@@ -509,10 +547,8 @@ class RequestFormController extends GetxController {
       grade
     ], (_) => validateForm());
 
-
     loadData();
     loadInstitute();
-
   }
 
   Future<void> loadInstitute() async {
@@ -525,8 +561,7 @@ class RequestFormController extends GetxController {
     Set<String> uniqueCities = institutes.map((u) => u.cityName).toSet();
     cities.value = [
       {"id": -1, "name": "Select City"},
-      ...uniqueCities
-          .map((city) => {"id": city.hashCode, "name": city})
+      ...uniqueCities.map((city) => {"id": city.hashCode, "name": city})
     ];
   }
 
@@ -736,7 +771,7 @@ class RequestFormController extends GetxController {
     if (selectedValue.value == null) {
       return "* $label is required";
     }
-    if (selectedValue.value == -1){
+    if (selectedValue.value == -1) {
       return "* $label is required";
     }
     return null;
@@ -762,7 +797,6 @@ class RequestFormController extends GetxController {
 }
 
 class RequestForm extends StatefulWidget {
-
   const RequestForm({
     super.key,
   });
@@ -773,12 +807,12 @@ class RequestForm extends StatefulWidget {
 
 class RequestFormState extends State<RequestForm> {
   final RequestFormController controller = Get.find<RequestFormController>();
-  final GlobalStateController stateController = Get.find<GlobalStateController>();
+  final GlobalStateController stateController =
+      Get.find<GlobalStateController>();
 
   @override
   void initState() {
-
-    stateController.user.value = userProfile11;
+    //stateController.user.value = userProfile11;
 
     fetchDefaultValues(stateController.user.value);
     super.initState();
@@ -790,23 +824,26 @@ class RequestFormState extends State<RequestForm> {
     controller.whatsapp.value = member.whatsappNo ?? '';
 
     if (member.future != null && member.future!.isNotEmpty) {
-      controller.classDegree.value = member.future!.first.subject ?? ''; // ✅ Use RxString
+      controller.classDegree.value =
+          member.future!.first.subject ?? ''; // ✅ Use RxString
       controller.institution.value = member.future!.first.institute ?? '';
 
       controller.selectedSubject.value = member.future!.first.study ?? '';
 
       // Check if `selectedCity.value` already has a value
-      String? currentCity = controller.selectedCity.value.isNotEmpty && controller.selectedCity.value != 'Select City'
+      String? currentCity = controller.selectedCity.value.isNotEmpty &&
+              controller.selectedCity.value != 'Select City'
           ? controller.selectedCity.value
           : member.future!.first.city;
 
       // Find matching city ID
       int cityId = controller.cities.firstWhere(
-            (city) => city['name'] == currentCity,
+        (city) => city['name'] == currentCity,
         orElse: () => {"id": -1}, // Default to -1 if not found
       )['id'];
 
-      if (controller.selectedCity.value != (cityId == -1 ? "Select City" : currentCity!)) {
+      if (controller.selectedCity.value !=
+          (cityId == -1 ? "Select City" : currentCity!)) {
         controller.selectCity(cityId); // ✅
       }
       controller.update();
@@ -820,8 +857,6 @@ class RequestFormState extends State<RequestForm> {
     // Define the breakpoint for mobile
     const double mobileBreakpoint = 600;
 
-    return screenWidth <= mobileBreakpoint
-        ? RequestFormM()
-        : RequestFormW();
+    return screenWidth <= mobileBreakpoint ? RequestFormM() : RequestFormW();
   }
 }

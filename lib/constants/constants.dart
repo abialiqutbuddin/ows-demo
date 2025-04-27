@@ -2,15 +2,12 @@ import 'dart:async';
 
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:super_tooltip/super_tooltip.dart';
 import 'package:url_launcher/url_launcher.dart';
-//import 'dart:html' as html; // Only works for Flutter Web
-import '../controller/module_controller.dart';
-import '../controller/profile_pdf_controller.dart';
-import '../controller/request_form_controller.dart';
-import '../controller/state_management/state_manager.dart';
+import 'dart:html' as html; // Only works for Flutter Web
 
 class Constants {
   Color green = Color(0xFF008759);
@@ -53,15 +50,16 @@ class Constants {
   void Logout() async {
     clearSharedPreferences();
     //GetStorage().
-    Get.delete<RequestFormController>();
-    Get.delete<PDFScreenController>();
-    Get.delete<GlobalStateController>();
-    Get.delete<ModuleController>();
+    // Get.delete<RequestFormController>();
+    // Get.delete<PDFScreenController>();
+    // Get.delete<GlobalStateController>();
+    // Get.delete<ModuleController>();
 
     // Redirect to external website
     const String url = "https://www.its52.com";
     if (GetPlatform.isWeb) {
-      //html.window.location.href = url;
+      // Get.to(() => AppRoutes.login);
+      html.window.location.href = url;
     } else {
       launchUrl(Uri.parse(url),
           mode: LaunchMode.inAppWebView); // Opens inside the app (Mobile)
@@ -76,8 +74,67 @@ class Constants {
     bool? isEnabled,
     Function()? function,
     String? Function(String?)? validator,
-    String? validatorKey, // 👈 ADD THIS
+    String? validatorKey,
+    Function(String)? onChanged,
+    String? hint,
   }) {
+    String fieldType = validatorKey ?? 'text';
+    TextInputType inputType = TextInputType.text;
+    List<TextInputFormatter> inputFormatters = [];
+
+    switch (fieldType) {
+      case 'number':
+      case 'age':
+      case 'year':
+        inputType = TextInputType.number;
+        inputFormatters = [FilteringTextInputFormatter.digitsOnly];
+        break;
+      case 'amount':
+        inputType = const TextInputType.numberWithOptions(decimal: true);
+        inputFormatters = [
+          FilteringTextInputFormatter.allow(RegExp(r'^\d+\.?\d{0,2}')),
+        ];
+        break;
+      case 'name':
+        inputType = TextInputType.name;
+        inputFormatters = [
+          FilteringTextInputFormatter.allow(RegExp(r"[a-zA-Z\s]")),
+        ];
+        break;
+      case 'its':
+        inputType = TextInputType.number;
+        inputFormatters = [
+          FilteringTextInputFormatter.digitsOnly,
+          LengthLimitingTextInputFormatter(8),
+        ];
+        break;
+      case 'cnic':
+        inputType = TextInputType.number;
+        inputFormatters = [
+          FilteringTextInputFormatter.allow(RegExp(r'\d|-')),
+          TextInputFormatter.withFunction((oldValue, newValue) {
+            String digits = newValue.text.replaceAll(RegExp(r'\D'), '');
+            String formatted = digits;
+            if (digits.length >= 5) {
+              formatted = digits.substring(0, 5);
+              if (digits.length >= 12) {
+                formatted +=
+                    '-${digits.substring(5, 12)}-${digits.substring(12, digits.length.clamp(12, 13))}';
+              } else if (digits.length > 5) {
+                formatted += '-${digits.substring(5)}';
+              }
+            }
+
+            return TextEditingValue(
+              text: formatted,
+              selection: TextSelection.collapsed(offset: formatted.length),
+            );
+          }),
+        ];
+        break;
+      default:
+        inputType = TextInputType.text;
+    }
     bool isDescription = height != null;
     SuperTooltipController tooltipController = SuperTooltipController();
 
@@ -115,6 +172,8 @@ class Constants {
               height: height ?? 40,
               child: TextFormField(
                 enabled: isEnabled ?? true,
+                keyboardType: inputType,
+                inputFormatters: inputFormatters,
                 validator: validator,
                 textInputAction: TextInputAction.done,
                 cursorColor: Colors.brown,
@@ -125,13 +184,20 @@ class Constants {
                   rxValue.value = value;
                   controller.validateForm();
                   if (function != null) {
-                    function.call(); // Call function safely
+                    function.call();
                   }
-                  //controller.validatePersonalInfoFields();
+                  if (onChanged != null) {
+                    onChanged(value); // 👈 call custom onChanged if provided
+                  }
                 },
                 textCapitalization: TextCapitalization.sentences,
                 maxLines: isDescription ? 3 : 1,
                 decoration: InputDecoration(
+                  hintText: hint ?? '',
+                  hintStyle: TextStyle(
+                      fontWeight: FontWeight.w400,
+                      letterSpacing: -0.5,
+                      color: Colors.grey.withValues(alpha: 0.8)),
                   floatingLabelBehavior: FloatingLabelBehavior.always,
                   suffixIcon: isValid
                       ? Icon(
@@ -308,9 +374,10 @@ class Constants {
                               ),
                             ),
                       floatingLabelBehavior: FloatingLabelBehavior.always,
-                      label: Text(''),
-                      labelStyle: TextStyle(
-                          fontWeight: FontWeight.bold, color: Colors.brown),
+                      // label: Text(''),
+                      // labelStyle: TextStyle(
+                      //     fontWeight: FontWeight.bold, color: Colors.brown),
+                      contentPadding: EdgeInsets.zero,
                       filled: true,
                       enabled: isEnabled,
                       enabledBorder: OutlineInputBorder(

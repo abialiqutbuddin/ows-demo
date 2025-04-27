@@ -5,13 +5,13 @@ import 'package:ows/controller/state_management/state_manager.dart';
 import 'package:ows/model/member_model.dart';
 import 'package:ows/constants/constants.dart';
 import 'package:get/get.dart';
-import 'package:ows/web_ui/profile_preview_screen.dart';
+import 'package:ows/web_ui/modules/update_profile.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../api/api.dart';
-import '../constants/custom_dialog.dart';
-import '../controller/profile_pdf_controller.dart';
+import '../../../api/api.dart';
+import '../../../constants/custom_dialog.dart';
+import '../../../controller/profile_pdf_controller.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
-import '../model/family_model.dart';
+import '../../../model/family_model.dart';
 
 class ProfilePDFScreenW extends StatefulWidget {
   final UserProfile member;
@@ -65,7 +65,7 @@ class ProfilePDFScreenWState extends State<ProfilePDFScreenW> {
           return Center(
             child: LoadingAnimationWidget.discreteCircle(
               color: Colors.white,
-              size: 50,
+              size: 80,
             ),
           );
         }
@@ -191,41 +191,41 @@ class ProfilePDFScreenWState extends State<ProfilePDFScreenW> {
             //         style: TextStyle(color: Colors.white),
             //       )),
             // ),
-            SizedBox(
-              height: 35,
-              child: ElevatedButton(
-                style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.resolveWith<Color>(
-                        (Set<WidgetState> states) {
-                      if (states.contains(WidgetState.hovered)) {
-                        return Colors.transparent; // No hover effect
-                      }
-                      return Colors.transparent; // Default color
-                    },
-                  ),
-                  overlayColor: WidgetStateProperty.all(
-                      Colors.transparent), // No ripple effect
-                  shape: WidgetStateProperty.all(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(5),
-                      side: BorderSide(
-                        color: const Color(0xFF008759),
-                        width: 2, // Green border
-                      ),
-                    ),
-                  ),
-                  elevation: WidgetStateProperty.all(0), // Flat button
-                ),
-                onPressed: () async {
-                  //Get.to(()=>IndexStackScreen());
-                },
-                child: Text(
-                  "Application Form",
-                  style: TextStyle(
-                      color: Colors.black, fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
+            // SizedBox(
+            //   height: 35,
+            //   child: ElevatedButton(
+            //     style: ButtonStyle(
+            //       backgroundColor: WidgetStateProperty.resolveWith<Color>(
+            //         (Set<WidgetState> states) {
+            //           if (states.contains(WidgetState.hovered)) {
+            //             return Colors.transparent; // No hover effect
+            //           }
+            //           return Colors.transparent; // Default color
+            //         },
+            //       ),
+            //       overlayColor: WidgetStateProperty.all(
+            //           Colors.transparent), // No ripple effect
+            //       shape: WidgetStateProperty.all(
+            //         RoundedRectangleBorder(
+            //           borderRadius: BorderRadius.circular(5),
+            //           side: BorderSide(
+            //             color: const Color(0xFF008759),
+            //             width: 2, // Green border
+            //           ),
+            //         ),
+            //       ),
+            //       elevation: WidgetStateProperty.all(0), // Flat button
+            //     ),
+            //     onPressed: () async {
+            //       //Get.to(()=>IndexStackScreen());
+            //     },
+            //     child: Text(
+            //       "Application Form",
+            //       style: TextStyle(
+            //           color: Colors.black, fontWeight: FontWeight.bold),
+            //     ),
+            //   ),
+            // ),
             SizedBox(
               height: 35,
               child: ElevatedButton(
@@ -236,60 +236,62 @@ class ProfilePDFScreenWState extends State<ProfilePDFScreenW> {
                     ),
                   ),
                   onPressed: () async {
-                    var data = await Api.fetchProxiedData(
-                        "https://paktalim.com/admin/ws_app/GetFamilyCompletionStatus/${gController.user.value.itsId}?access_key=622ae1838756026b9500e50e778f131ac180bf70&username=40459629");
-                    print(data);
-                    //data['profile_complete'] = "true";
-                    //data['family_complete'] = "false";
-                    if (data["profile_complete"] == "true" &&
-                        data["family_complete"] == "true") {
-                      Get.toNamed(AppRoutes.request_form);
-                    } else {
-                      String message = "";
-                      if (data["profile_complete"] != "true") {
-                        message = "Kindly complete your Pak Talim profile.";
-                        showCustomDialog(
-                          title: "Incomplete Data",
-                          message: message,
-                          confirmText: "Update Profile",
-                          cancelText: "Cancel",
-                          onCancel: () {
-                            Get.back();
-                          },
-                          onConfirm: () {
-                            Family family = Family();
-                            Get.toNamed(AppRoutes.profile_preview);
-                            // Get.to(() => ProfilePreview(
-                            //     member: gController.user.value,
-                            //     family: family));
-                          },
-                        );
-                      } else {
-                        message =
-                            "Kindly complete your family’s Paktalim profile. Contact your mohallah UT committee for further guidance.";
-                        showCustomDialog(
-                          title: "Incomplete Data",
-                          message: message,
-                          confirmText: "Go to Paktalim",
-                          cancelText: "Cancel",
-                          onCancel: () {
-                            Get.back();
-                          },
-                          onConfirm: () async {
-                            final url =
-                                'https://paktalim.com/admin/profile/create';
-                            if (await canLaunchUrl(Uri.parse(url))) {
-                              await launchUrl(
-                                Uri.parse(url),
-                                mode: LaunchMode.externalApplication,
-                              );
-                            } else {
-                              throw 'Could not launch $url';
-                            }
-                          },
-                        );
-                      }
-                    }
+                    Get.toNamed(AppRoutes.request_form);
+
+                    // var data = await Api.fetchProxiedData(
+                    //     "https://paktalim.com/admin/ws_app/GetFamilyCompletionStatus/${gController.user.value.itsId}?access_key=622ae1838756026b9500e50e778f131ac180bf70&username=40459629");
+                    // print(data);
+                    // //data['profile_complete'] = "true";
+                    // //data['family_complete'] = "false";
+                    // if (data["profile_complete"] == "true" &&
+                    //     data["family_complete"] == "true") {
+                    //   Get.toNamed(AppRoutes.request_form);
+                    // } else {
+                    //   String message = "";
+                    //   if (data["profile_complete"] != "true") {
+                    //     message = "Kindly complete your Pak Talim profile.";
+                    //     showCustomDialog(
+                    //       title: "Incomplete Data",
+                    //       message: message,
+                    //       confirmText: "Update Profile",
+                    //       cancelText: "Cancel",
+                    //       onCancel: () {
+                    //         Get.back();
+                    //       },
+                    //       onConfirm: () {
+                    //         Family family = Family();
+                    //         Get.toNamed(AppRoutes.profile_preview);
+                    //         // Get.to(() => ProfilePreview(
+                    //         //     member: gController.user.value,
+                    //         //     family: family));
+                    //       },
+                    //     );
+                    //   } else {
+                    //     message =
+                    //         "Kindly complete your family’s Paktalim profile. Contact your mohallah UT committee for further guidance.";
+                    //     showCustomDialog(
+                    //       title: "Incomplete Data",
+                    //       message: message,
+                    //       confirmText: "Go to Paktalim",
+                    //       cancelText: "Cancel",
+                    //       onCancel: () {
+                    //         Get.back();
+                    //       },
+                    //       onConfirm: () async {
+                    //         final url =
+                    //             'https://paktalim.com/admin/profile/create';
+                    //         if (await canLaunchUrl(Uri.parse(url))) {
+                    //           await launchUrl(
+                    //             Uri.parse(url),
+                    //             mode: LaunchMode.externalApplication,
+                    //           );
+                    //         } else {
+                    //           throw 'Could not launch $url';
+                    //         }
+                    //       },
+                    //     );
+                    //   }
+                    // }
                   },
                   child: Text(
                     "Request Form",

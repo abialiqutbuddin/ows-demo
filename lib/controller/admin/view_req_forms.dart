@@ -10,25 +10,55 @@ class ReqFormController extends GetxController {
 
   // ✅ List of all available fields
   final List<String> allFields = [
-    'reqId', 'reqByName', 'city', 'mohalla', 'institution', 'fieldOfStudy',
-    'subjectCourse', 'yearOfStart', 'grade', 'email', 'contactNo', 'purpose',
-    'fundAsking', 'classification', 'organization', 'description', 'currentStatus'
+    'reqId',
+    'reqByName',
+    'city',
+    'mohalla',
+    'institution',
+    'fieldOfStudy',
+    'subjectCourse',
+    'yearOfStart',
+    'grade',
+    'email',
+    'contactNo',
+    'purpose',
+    'fundAsking',
+    'classification',
+    'organization',
+    'description',
+    'currentStatus'
   ].obs;
 
   // ✅ List of selected fields (Default selection)
   var selectedFields = [
-    'reqId', 'reqByName', 'city', 'mohalla', 'institution', 'fieldOfStudy',
-    'subjectCourse', 'yearOfStart', 'grade', 'email', 'contactNo', 'purpose',
-    'fundAsking', 'classification', 'organization', 'description', 'currentStatus'
+    'reqId',
+    'reqByName',
+    'city',
+    'mohalla',
+    'institution',
+    'fieldOfStudy',
+    'subjectCourse',
+    'yearOfStart',
+    'grade',
+    'email',
+    'contactNo',
+    'purpose',
+    'fundAsking',
+    'classification',
+    'organization',
+    'description',
+    'currentStatus'
   ].obs;
 
   // ✅ Fetch Requests by Mohalla
-  Future<void> fetchRequests(String mohalla,String org,String ITS,String role) async {
+  Future<void> fetchRequests(
+      String mohalla, String org, String ITS, String role) async {
     //isLoading(true);
     errorMessage('');
     try {
-      var results = await Api.fetchRequestsByMohalla(mohalla,org,ITS,role);
+      var results = await Api.fetchRequestsByMohalla(mohalla, org, ITS, role);
       reqForms.assignAll(results);
+      print(reqForms);
     } catch (e) {
       errorMessage(e.toString());
     } finally {
@@ -40,9 +70,9 @@ class ReqFormController extends GetxController {
   Future<void> updateStatus(int reqId, String newStatus) async {
     bool success = await Api.updateRequestStatus(reqId, newStatus);
     if (success) {
-      reqForms[reqForms.indexWhere((r) => r.reqId == reqId)] =
-          reqForms.firstWhere((r) => r.reqId == reqId)
-              .copyWith(currentStatus: newStatus);
+      reqForms[reqForms.indexWhere((r) => r.reqId == reqId)] = reqForms
+          .firstWhere((r) => r.reqId == reqId)
+          .copyWith(currentStatus: newStatus);
       reqForms.refresh();
     }
   }

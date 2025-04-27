@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../model/request_form_model.dart';
+import '../../model/request_form_model.dart';
 
 class ReqFormTableUI extends StatelessWidget {
   final List<RequestFormModel> requests;
@@ -17,60 +17,61 @@ class ReqFormTableUI extends StatelessWidget {
     required this.onViewDetails,
   });
 
+  final bool admin = false;
+
   @override
   Widget build(BuildContext context) {
     int totalRequests = requests.length;
-    int totalAIUT = requests.where((r) => r.toJson()["organization"] == "AIUT").length;
-    int totalSTSMF = requests.where((r) => r.toJson()["organization"] == "STSMF").length;
-    int totalAMBT = requests.where((r) => r.toJson()["organization"] == "AMBT").length;
-    int totalDeeni = requests
-        .where((r) {
+    int totalAIUT =
+        requests.where((r) => r.toJson()["organization"] == "AIUT").length;
+    int totalSTSMF =
+        requests.where((r) => r.toJson()["organization"] == "STSMF").length;
+    int totalAMBT =
+        requests.where((r) => r.toJson()["organization"] == "AMBT").length;
+    int totalDeeni = requests.where((r) {
       String org = r.toJson()["organization"] ?? ""; // Ensure null safety
       return org.isNotEmpty && org != "AIUT" && org != "STSMF" && org != "AMBT";
     }).length;
 
     return Container(
       padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: requests.isEmpty
-          ? const Center(child: Text("No Request Data"))
-          : Column(
+      child: Column(
         spacing: 10,
         children: [
-          _buildStatsRow(
-            totalRequests: totalRequests,
-            totalAIUT: totalAIUT,
-            totalSTSMF: totalSTSMF,
-            totalAMBT: totalAMBT,
-            totalDeeni: totalDeeni,
-          ),
-          _buildTableHeader(),
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withValues(alpha: 0.2),
-                    blurRadius: 0,
-                    spreadRadius: 1,
-                    //offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: ListView.builder(
-                controller: scrollController,
-                itemCount: requests.length,
-                itemBuilder: (context, index) {
-                  return _buildTableRow(context, requests[index], index);
-                },
-              ),
+          if (admin == true)
+            _buildStatsRow(
+              totalRequests: totalRequests,
+              totalAIUT: totalAIUT,
+              totalSTSMF: totalSTSMF,
+              totalAMBT: totalAMBT,
+              totalDeeni: totalDeeni,
             ),
-          ),
+          _buildTableHeader(),
+          requests.isEmpty
+              ? const Center(child: Text("No Request Data"))
+              : Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withValues(alpha: 0.2),
+                          blurRadius: 0,
+                          spreadRadius: 1,
+                          //offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: ListView.builder(
+                      controller: scrollController,
+                      itemCount: requests.length,
+                      itemBuilder: (context, index) {
+                        return _buildTableRow(context, requests[index], index);
+                      },
+                    ),
+                  ),
+                ),
         ],
       ),
     );
@@ -133,15 +134,15 @@ class ReqFormTableUI extends StatelessWidget {
       ),
       child: Row(
         children: const [
-          _TableHeaderCell(text: "S.#",flex: 1),
-          _TableHeaderCell(text: "View",flex: 2),
-          _TableHeaderCell(text: "Status",flex: 4),
-          _TableHeaderCell(text: "ITS",flex:3 ),
-          _TableHeaderCell(text: "Name",flex:5 ),
-          _TableHeaderCell(text: "Contact",flex:3 ),
-          _TableHeaderCell(text: "Organization",flex:3),
-          _TableHeaderCell(text: "Funds",flex:3),
-          _TableHeaderCell(text: "Mohalla",flex:5  ),
+          _TableHeaderCell(text: "S.#", flex: 1),
+          _TableHeaderCell(text: "View", flex: 2),
+          _TableHeaderCell(text: "Status", flex: 4),
+          _TableHeaderCell(text: "ITS", flex: 3),
+          _TableHeaderCell(text: "Name", flex: 5),
+          _TableHeaderCell(text: "Contact", flex: 3),
+          _TableHeaderCell(text: "Organization", flex: 3),
+          _TableHeaderCell(text: "Funds", flex: 3),
+          _TableHeaderCell(text: "Mohalla", flex: 5),
         ],
       ),
     );
@@ -166,13 +167,13 @@ class ReqFormTableUI extends StatelessWidget {
               color: hovered ? Colors.white : Color(0xfffff7ec),
               boxShadow: hovered
                   ? [
-                BoxShadow(
-                  color: Colors.grey.withValues(alpha: 0.4),
-                  spreadRadius: 2,
-                  blurRadius: 6,
-                  offset: const Offset(0, 3),
-                ),
-              ]
+                      BoxShadow(
+                        color: Colors.grey.withValues(alpha: 0.4),
+                        spreadRadius: 2,
+                        blurRadius: 6,
+                        offset: const Offset(0, 3),
+                      ),
+                    ]
                   : [],
               border: Border(
                 bottom: BorderSide(color: Colors.grey.shade300, width: 1),
@@ -184,7 +185,7 @@ class ReqFormTableUI extends StatelessWidget {
                 _TableCell(text: (index + 1).toString(), flex: 1),
                 _TableIconCell(
                   icon: Icons.remove_red_eye,
-                  color: Colors.brown,
+                  color: const Color(0xFF795548),
                   onTap: () => onViewDetails(req),
                   flex: 2,
                 ),
@@ -196,7 +197,8 @@ class ReqFormTableUI extends StatelessWidget {
                 _TableCell(text: req.toJson()["reqByName"] ?? "", flex: 5),
                 _TableCell(text: req.toJson()["contactNo"] ?? "", flex: 3),
                 _TableCell(text: req.toJson()["organization"] ?? "", flex: 3),
-                _TableCell(text: req.toJson()["fundAsking"].toString(), flex: 3),
+                _TableCell(
+                    text: req.toJson()["fundAsking"].toString(), flex: 3),
                 _TableCell(text: req.toJson()["mohalla"] ?? "", flex: 5),
               ],
             ),
@@ -236,7 +238,7 @@ class _TableHeaderCell extends StatelessWidget {
   final String text;
   final int flex;
 
-  const _TableHeaderCell({required this.text,required this.flex});
+  const _TableHeaderCell({required this.text, required this.flex});
 
   @override
   Widget build(BuildContext context) {
@@ -296,7 +298,8 @@ class _TableIconCell extends StatelessWidget {
 
   const _TableIconCell({
     required this.icon,
-    required this.color, required this.onTap,
+    required this.color,
+    required this.onTap,
     required this.flex,
   });
 
@@ -361,7 +364,10 @@ class _StatBox extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               title,
-              style: const TextStyle(fontSize: 16, color: Colors.black,fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
           ],

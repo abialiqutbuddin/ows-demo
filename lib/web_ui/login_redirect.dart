@@ -5,8 +5,10 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:ows/api/api.dart';
+import 'package:ows/constants/app_routes.dart';
 import 'package:ows/controller/module_controller.dart';
 import 'package:ows/controller/state_management/state_manager.dart';
+import 'package:ows/model/family_data2.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class LoginController2 extends StatefulWidget {
@@ -17,8 +19,7 @@ class LoginController2 extends StatefulWidget {
 }
 
 class LoginController2State extends State<LoginController2> {
-  GlobalStateController stateController =
-      Get.find<GlobalStateController>();
+  GlobalStateController stateController = Get.find<GlobalStateController>();
 
   @override
   void initState() {
@@ -65,8 +66,17 @@ class LoginController2State extends State<LoginController2> {
         ),
         child: Stack(
           children: [
-            Positioned(right: screenWidth*0.03,top: screenHeight*0.05,child: Text("Web: V1.1+2",style: TextStyle(fontSize: 16)),),
-            Positioned(right: screenWidth*0.03,top: screenHeight*0.07,child: Text('Backend: ${stateController.version.value}',style: TextStyle(fontSize: 16)),),
+            Positioned(
+              right: screenWidth * 0.03,
+              top: screenHeight * 0.05,
+              child: Text("Web: V1.1+2", style: TextStyle(fontSize: 16)),
+            ),
+            Positioned(
+              right: screenWidth * 0.03,
+              top: screenHeight * 0.07,
+              child: Text('Backend: ${stateController.version.value}',
+                  style: TextStyle(fontSize: 16)),
+            ),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(
@@ -96,15 +106,15 @@ class LoginController2State extends State<LoginController2> {
                             'assets/anwar.jpg',
                             fit: BoxFit.cover,
                             color: Colors.black.withValues(alpha: 0.1),
-                            colorBlendMode:
-                                BlendMode.darken, // Blend mode to apply the color
+                            colorBlendMode: BlendMode
+                                .darken, // Blend mode to apply the color
                           ),
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(width: 16.0), // Spacing between columns
-      
+
                   // Right Column: Text and Button
                   Flexible(
                     flex: 1,
@@ -125,7 +135,7 @@ class LoginController2State extends State<LoginController2> {
                               color: Colors.black,
                             ),
                           ),
-      
+
                           // Paragraph Text with Special Color Text
                           RichText(
                             text: TextSpan(
@@ -179,10 +189,12 @@ class LoginController2State extends State<LoginController2> {
                               onPressed: () async {
                                 final url = Uri.parse('https://www.its52.com');
                                 if (await canLaunchUrl(url)) {
-                                await launchUrl(
-                                url,mode: LaunchMode.externalApplication,);
+                                  await launchUrl(
+                                    url,
+                                    mode: LaunchMode.externalApplication,
+                                  );
                                 } else {
-                                throw 'Could not launch $url';
+                                  throw 'Could not launch $url';
                                 }
                               },
                               child: Row(
@@ -241,20 +253,16 @@ class LoginController2State extends State<LoginController2> {
     stateController.toggleLoading(true);
     try {
       var response = await Api.getToken(itsId);
-
       if (response.containsKey('token')) {
         String token = response['token'];
-        stateController.userRole.value = response["user"]["role"];
-        stateController.userMohalla.value = response["user"]["mohalla"];
-        stateController.userUmoor.value = response["user"]["umoor"] ?? "";
-        stateController.userIts.value = itsId;
-
-        // Store token
         GetStorage().write("token", token);
-
-        Get.to(() => ModuleScreenController());
+      }
+      List<FamilyMember>? familyMembers = await Api.fetchFamilyData2(itsId);
+      if (familyMembers != null && familyMembers.isNotEmpty) {
+        stateController.setUser(itsId, familyMembers);
+        Get.toNamed(AppRoutes.family_screen);
       } else {
-        throw Exception("Invalid ITS ID");
+        Get.snackbar("Error", "No family members found.");
       }
     } catch (e) {
       Get.snackbar("Login Failed", "Error: $e");

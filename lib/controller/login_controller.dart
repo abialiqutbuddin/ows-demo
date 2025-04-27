@@ -7,7 +7,7 @@ import 'package:ows/controller/state_management/state_manager.dart';
 import 'package:get/get.dart';
 import 'package:ows/mobile_ui/module_screen.dart';
 import '../mobile_ui/login_screen.dart';
-import '../web_ui/login_screen.dart';
+import '../web_ui/admin/admin_login.dart';
 
 class LoginController extends StatelessWidget {
   LoginController({super.key});
@@ -27,7 +27,8 @@ class LoginController extends StatelessWidget {
     );
   }
 
-  final GlobalStateController stateController = Get.find<GlobalStateController>();
+  final GlobalStateController stateController =
+      Get.find<GlobalStateController>();
 
   // 🔹 Login Function
   Future<void> performLogin(String itsId) async {
@@ -42,11 +43,14 @@ class LoginController extends StatelessWidget {
 
         String token = response['token'];
 
-        String role = response["user"]["role"] ?? "user"; // Default to 'user' if null
+        String role =
+            response["user"]["role"] ?? "user"; // Default to 'user' if null
 
-        String mohalla = response["user"]["mohalla"] ?? ""; // Ensure it's always a string
+        String mohalla =
+            response["user"]["mohalla"] ?? ""; // Ensure it's always a string
 
-        String umoor = response["user"]["umoor"] ?? ""; // Ensure it's always a string
+        String umoor =
+            response["user"]["umoor"] ?? ""; // Ensure it's always a string
 
         stateController.userRole.value = role;
         stateController.userMohalla.value = mohalla;
@@ -79,7 +83,7 @@ class LoginController extends StatelessWidget {
   }
 
   // 🔹 Fetch User Permissions & Navigate
-  Future<void> fetchAndNavigate(String itsId,String role) async {
+  Future<void> fetchAndNavigate(String itsId, String role) async {
     stateController.toggleLoading(true);
     try {
       //Get.to(() => ModuleScreenController();
@@ -90,5 +94,4 @@ class LoginController extends StatelessWidget {
       stateController.toggleLoading(false);
     }
   }
-
 }
