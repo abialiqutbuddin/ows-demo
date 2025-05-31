@@ -72,7 +72,6 @@ class CustomDropdownSearch<T> extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14,
                         letterSpacing: 0,// Adjust size
-                        fontWeight: FontWeight.w600, // Bold text
                         color: isSelected
                             ? Colors.blue
                             : Colors.black, // Change color when selected
@@ -88,9 +87,8 @@ class CustomDropdownSearch<T> extends StatelessWidget {
               ),
               decoratorProps: DropDownDecoratorProps(
                 baseStyle: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    letterSpacing: 0),
+                    fontSize: 14,fontWeight: FontWeight.w600
+                    ),
                 decoration: InputDecoration(
                   labelText: label,
                   labelStyle: TextStyle(
@@ -98,9 +96,11 @@ class CustomDropdownSearch<T> extends StatelessWidget {
                   floatingLabelBehavior: FloatingLabelBehavior.always,
                   hintText: isEnabled ? '' : "Select City First",
                   hintStyle: TextStyle(
-                      color: Colors.grey, fontSize: 14, letterSpacing: 0,fontWeight: FontWeight.w600),
+                      color: Colors.grey, fontSize: 14,fontWeight: FontWeight.w400),
                   filled: true,
-                  fillColor: const Color(0xfffffcf6),
+                  fillColor: isEnabled
+                      ? const Color(0xfffffcf6)
+                      : Colors.grey[300],
                   suffixIcon: Icon(Icons.arrow_drop_down,
                       color: isEnabled ? Colors.black : Colors.grey),
                   contentPadding:

@@ -1,16 +1,19 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:ows/constants/dummy_data.dart';
 import 'package:ows/controller/state_management/state_manager.dart';
+import 'package:ows/web_ui/application_forms/application_form_web.dart';
 import '../api/api.dart';
+import '../constants/app_routes.dart';
 import '../mobile_ui/request_form_screen.dart';
+import '../model/family_data2.dart';
 import '../model/institutes_model.dart';
 import '../model/member_model.dart';
+import '../model/request_form_model.dart';
 import '../web_ui/modules/imdad_talimi/request_form.dart';
+import '../web_ui/widgets/alert.dart';
 
 class RequestFormController extends GetxController {
   RxString selectedEducationType = "".obs;
@@ -24,6 +27,8 @@ class RequestFormController extends GetxController {
   RxBool isSubmitEnabled = false.obs;
 
   RxString organization = ''.obs;
+
+  RxBool autoFill = true.obs;
 
   RxBool isMarhalaSelected = false.obs;
   RxBool isDunyawiSelected = false.obs;
@@ -52,6 +57,21 @@ class RequestFormController extends GetxController {
   Rxn<int> hifzProgramIndex = Rxn<int>(null);
   Rxn<int> darajaIndex = Rxn<int>(null);
 
+  Rxn<int> selectedMotherITS = Rxn<int>(null);
+  Rxn<int> selectedFatherITS = Rxn<int>(null);
+
+  RxList<Map<String, dynamic>> familyOptions = <Map<String, dynamic>>[].obs;
+
+  void populateDropdownOptions(List<FamilyMember> familyList) {
+    familyOptions.value = familyList.map((member) {
+      return {
+        "id": member.itsNumber,
+        "name": member.fullName,
+        "gender":member.gender
+      };
+    }).toList();
+  }
+
   RxList<Map<String, dynamic>> degreePrograms = [
     {"id": 1, "name": "Associated Degree Programs"},
     {"id": 2, "name": "Bachelors Degree Programs"},
@@ -63,6 +83,50 @@ class RequestFormController extends GetxController {
     {"id": 2, "name": "10th Grade"},
     {"id": 3, "name": "Not Applicable"},
   ].obs;
+
+  int? getClassIdByNameContains(String query, int marhala) {
+    print('Searching for query: "$query" in marhala4Class');
+
+    final Map<String, dynamic>? match;
+    if (marhala == 4) {
+      match = marhala4Class.firstWhereOrNull(
+        (item) {
+          final name = item['name']?.toString().toLowerCase();
+          final contains = name?.contains(query.toLowerCase()) ?? false;
+          print('Checking item: ${item["name"]}, contains query? $contains');
+          return contains;
+        },
+      );
+    } else if (marhala == 5) {
+      match = marhala5Class.firstWhereOrNull(
+        (item) {
+          final name = item['name']?.toString().toLowerCase();
+          final contains = name?.contains(query.toLowerCase()) ?? false;
+          print('Checking item: ${item["name"]}, contains query? $contains');
+          return contains;
+        },
+      );
+    } else {
+      match = degreePrograms.firstWhereOrNull(
+        (item) {
+          final name = item['name']?.toString().toLowerCase();
+          final contains = name?.contains(query.toLowerCase()) ?? false;
+          print('Checking item: ${item["name"]}, contains query? $contains');
+          return contains;
+        },
+      );
+    }
+
+    if (match == null) {
+      print('No match found for query: "$query"');
+      return null;
+    }
+
+    final id = match['id'] as int;
+    print('Match found: $match');
+    print('Returning id: $id');
+    return id;
+  }
 
   RxList<Map<String, dynamic>> marhala5Class = [
     {"id": 1, "name": "11th Grade"},
@@ -156,7 +220,7 @@ class RequestFormController extends GetxController {
     selectedInstitute.value = null;
     selectedCity.value = 'Select City';
     selectedInstituteName.value = '';
-    year.value = '';
+    //year.value = '';
     selectedCityId.value = null;
     standardIndex.value = null;
     selectedCategory.value = '';
@@ -205,6 +269,7 @@ class RequestFormController extends GetxController {
   RxString selectedSubject2 = "".obs;
   Rxn<String> selectedInstituteName = Rxn<String>();
   var allData = [].obs;
+  var classList = [].obs;
 
   // Define Marhalas
   final List<Map<String, dynamic>> predefinedMarhalas = [
@@ -241,38 +306,115 @@ class RequestFormController extends GetxController {
     final data = json.decode(response);
     allData.assignAll(data);
 
-    //reqId.value = await Api.fetchNextReqMasId();
-    // Set default university list
+    final String response2 = await rootBundle.loadString('assets/classes.json');
+    final data2 = json.decode(response2);
+    classList.assignAll(data2);
+  }
+
+  int? getIdByMarhalaStudyName(int marhalaId, int studyId, String name) {
+    print(
+        'Searching for item with marhala_id=$marhalaId, study_id=$studyId, name="$name"');
+
+    final match = allData.firstWhere(
+      (item) {
+        final itemMarhala = item['marhala_id'];
+        final itemStudy = item['study_id'];
+        final itemName = (item['name'] as String).toLowerCase();
+        final nameMatch = itemName == name.toLowerCase();
+
+        print(
+            'Checking item: marhala_id=$itemMarhala, study_id=$itemStudy, name="${item['name']}", nameMatch=$nameMatch');
+
+        return itemMarhala == marhalaId && itemStudy == studyId && nameMatch;
+      },
+      orElse: () {
+        print('No matching item found.');
+        return <String, Object>{};
+      },
+    );
+
+    if (match.isEmpty) {
+      print('Match is empty, returning null');
+      return null;
+    }
+
+    final id = match['id'] as int?;
+    print('Found match with id: $id');
+    return id;
+  }
+
+  String? getSubjectNameById(int studyId) {
+    try {
+      final study = allData.firstWhere(
+        (item) => item['study_id'] == studyId,
+        orElse: () => null,
+      );
+      return study != null ? study['study'] as String? : null;
+    } catch (e) {
+      print('Error fetching study name: $e');
+      return null;
+    }
   }
 
   void updateFilteredInstitutes() {
+    print(
+        'updateFilteredInstitutes called. selectedCity: ${selectedCity.value}');
+
     if (selectedCity.value == "Select City") {
+      print(
+          'Selected city is default "Select City". Clearing filtered institutes.');
       filteredInstitutes.clear();
       selectedInstitute.value = null;
       selectedInstituteName.value = null;
+      print(
+          'Cleared filteredInstitutes, reset selectedInstitute and selectedInstituteName to null.');
     } else {
       filteredInstitutes.value = institutes
           .where((u) => u.cityName == selectedCity.value)
           .map((u) => {"id": u.id, "name": u.name})
           .toList();
 
+      print('Filtered institutes count: ${filteredInstitutes.length}');
+      print(
+          'Filtered institutes: ${filteredInstitutes.map((i) => i['name']).toList()}');
+
       if (!filteredInstitutes.any((i) => i['id'] == selectedInstitute.value)) {
+        print(
+            'Selected institute id (${selectedInstitute.value}) not in filtered list, resetting.');
         selectedInstitute.value = null;
         selectedInstituteName.value = null;
+      } else {
+        print(
+            'Selected institute id (${selectedInstitute.value}) is in filtered list.');
       }
     }
+
     update();
+    print('update() called.');
   }
 
   void selectCity(int? cityId) {
+    print('selectCity called with cityId: $cityId');
+
     if (cityId == null || cityId == -1) {
+      print('No valid city selected, resetting to default.');
       selectedCity.value = "Select City";
       filteredInstitutes.clear();
-      //selectInstitute(-1);
+      print('Cleared filtered institutes.');
+      //selectInstitute(-1); // uncomment if needed
     } else {
-      selectedCity.value = cities.firstWhere((c) => c['id'] == cityId)['name'];
-      selectedCityId.value = cities.firstWhere((c) => c['id'] == cityId)['id'];
-      updateFilteredInstitutes();
+      try {
+        final city = cities.firstWhere((c) => c['id'] == cityId);
+        print('Found city: $city');
+        selectedCity.value = city['name'];
+        selectedCityId.value = city['id'];
+        print('Updated selectedCity to: ${selectedCity.value}');
+        print('Updated selectedCityId to: ${selectedCityId.value}');
+        updateFilteredInstitutes();
+        print('Called updateFilteredInstitutes()');
+      } catch (e) {
+        print(e);
+      }
     }
   }
 
@@ -288,22 +430,6 @@ class RequestFormController extends GetxController {
       selectedInstituteName.value = "";
     }
     update();
-  }
-
-  void filterStudies(int marhalaId) {
-    if (marhalaId > 3) {
-      studyOptions.assignAll(
-        _extractUniqueValues(
-          allData.where((item) => item['marhala_id'] == marhalaId).toList(),
-          'study_id',
-          (item) => {'id': item['study_id'], 'name': item['study']},
-        ),
-      );
-    }
-    //selectedStudy.value = null;
-    //filteredFields.clear();
-    //selectedField.value = null;
-    //updateDropdownState();
   }
 
   void filterFields(int studyId) {
@@ -338,6 +464,8 @@ class RequestFormController extends GetxController {
   RxString whatsapp = ''.obs;
   RxString funds = ''.obs;
   RxString description = ''.obs;
+  RxString motherCnic = ''.obs;
+  RxString fatherCnic = ''.obs;
 
   // Function to Validate Form Based on Selections
   void validateForm() {
@@ -365,18 +493,6 @@ class RequestFormController extends GetxController {
           .firstWhere((e) => e["id"] == courseIndexPoint.value)["name"];
     }
 
-    // 🔹 **Dynamically determine subjectCourse**
-    // if (courseIndexPoint.value != null) {
-    //   subjectCourse = courseOptions.firstWhere((e) =>
-    //   e["id"] == courseIndexPoint.value)["name"];
-    // }
-
-    print(subject);
-    print(fieldOfStudy);
-    print(classDegree);
-    print("1 $isDeeniSelected");
-    print(isDeeniiSelected);
-
     if (isMarhalaSelected.value && isDunyawiSelected.value) {
       if (isStandardBetween1_3.value) {
         requiredFields = [
@@ -386,6 +502,11 @@ class RequestFormController extends GetxController {
           "city",
           "institute",
           "year",
+          "fatherCnic",
+          "motherCnic",
+          "cnic",
+          "mother",
+          "father",
           "funds",
           "description"
         ];
@@ -400,6 +521,11 @@ class RequestFormController extends GetxController {
           "institute",
           "year",
           "funds",
+          "fatherCnic",
+          "motherCnic",
+          "cnic",
+          "mother",
+          "father",
           "description"
         ];
       } else if (isStandardBetween6_7.value) {
@@ -413,6 +539,11 @@ class RequestFormController extends GetxController {
           "institute",
           "year",
           "funds",
+          "fatherCnic",
+          "motherCnic",
+          "cnic",
+          "mother",
+          "father",
           "description"
         ];
       }
@@ -425,6 +556,11 @@ class RequestFormController extends GetxController {
           "darajaName",
           "year",
           "funds",
+          "fatherCnic",
+          "motherCnic",
+          "cnic",
+          "mother",
+          "father",
           "description"
         ];
       } else if (isHifzSelected.value) {
@@ -434,6 +570,11 @@ class RequestFormController extends GetxController {
           "hifzProgramName",
           "year",
           "funds",
+          "fatherCnic",
+          "motherCnic",
+          "cnic",
+          "mother",
+          "father",
           "description"
         ];
       }
@@ -453,6 +594,30 @@ class RequestFormController extends GetxController {
     print("❌ Missing Fields: $missingFields");
 
     isSubmitEnabled.value = missingFields.isEmpty;
+  }
+
+  int? getNextMarhalaByRank(String className) {
+    final currentIndex = classList.indexWhere((c) => c['class'] == className);
+    if (currentIndex == -1) {
+      print('Class not found');
+      return null;
+    }
+
+    final currentRank = classList[currentIndex]['rank'] as int;
+    final currentMarhala = classList[currentIndex]['marhala'] as int;
+
+    // Find first class with rank strictly greater than currentRank
+    final nextClass = classList.firstWhere(
+      (c) => (c['rank'] as int) > currentRank,
+      orElse: () => null,
+    );
+
+    if (nextClass == null) {
+      // No higher rank found, return current marhala
+      return currentMarhala;
+    }
+
+    return nextClass['marhala'] as int;
   }
 
   RxString degreeProgram = ''.obs;
@@ -496,6 +661,16 @@ class RequestFormController extends GetxController {
         return darajaName.value;
       case "hifzProgramName":
         return hifzProgramName.value;
+      case "fatherCnic":
+        return fatherCnic.value;
+      case "motherCnic":
+        return motherCnic.value;
+      case "cnic":
+        return cnicNo.value;
+      case "father":
+        return selectedFatherITS.value.toString();
+      case "mother":
+        return selectedMotherITS.value.toString();
       default:
         return "";
     }
@@ -529,8 +704,13 @@ class RequestFormController extends GetxController {
       isMadrasaSelected,
       isHifzSelected,
       standard,
-      selectedCity,
-      institution,
+      fatherCnic,
+      motherCnic,
+      cnicNo,
+      selectedFatherITS,
+      selectedMotherITS,
+      //selectedCity,
+      //institution,
       year,
       funds,
       description,
@@ -594,7 +774,9 @@ class RequestFormController extends GetxController {
     switch (label.toLowerCase()) {
       case "year":
         return _validateYear(value);
-      case "cnic no.":
+      case "student cnic":
+      case "father cnic":
+      case "mother cnic":
         return _validateCNIC(value);
       case "class / degree program":
         return _validateDegree(value);
@@ -790,6 +972,213 @@ class RequestFormController extends GetxController {
     return age;
   }
 
+  String determineOrganization() {
+    if (selectedCategory.value == "Deeni") {
+      return stateController.user.value.tanzeem?.toString() ?? "";
+    }
+
+    List<String> fiveMohalla = [
+      "KHI (AL-MAHALAT-TUL-BURHANIYAH)",
+      "KHI (AL-MAHALAT-TUL-MOHAMMEDIYAH)",
+      "KHI (AL-MAHALLATUL-FAKHRIYAH)",
+      "KHI (BURHANI BAUGH)",
+      "KHI (JAMALI MOHALLA - MAHALAT BURHANIYAH)",
+      "KHI (EZZY MOHALLA)",
+    ];
+
+    // Marhala 1 to 4 -> AIUT
+    if (selectedMarhala.value! >= 1 && selectedMarhala.value! <= 4) {
+      return "AIUT";
+    }
+
+    // Marhala 5 (class 11th & 12th) - AMBT for specific Mohallas
+    if (selectedMarhala.value == 5 &&
+        fiveMohalla.contains(stateController.user.value.tanzeem?.toString())) {
+      return "AMBT";
+    }
+
+    // Marhala 5 (class 11th & 12th) - STSMF for other Mohallas
+    if (selectedMarhala.value == 5 &&
+        !fiveMohalla.contains(stateController.user.value.tanzeem?.toString())) {
+      return "STSMF";
+    }
+
+    // Marhala 6-7 -> STSMF
+    if (selectedMarhala.value == 6 || selectedMarhala.value == 7) {
+      return "STSMF";
+    }
+
+    return "";
+  }
+
+  onSubmitPress(
+      RxInt sectionIndex, RxBool? completion, RxDouble? progress) async {
+    {
+      if (!isSubmitEnabled.value) {
+        Get.snackbar("Error", "Missing Fields", backgroundColor: Colors.red);
+        return;
+      }
+      stateController.app_form_loading.value = true;
+
+      String? classDegree;
+      if (marhala4Index.value != null) {
+        classDegree = marhala4Class
+            .firstWhere((e) => e["id"] == marhala4Index.value)["name"];
+      } else if (marhala5Index.value != null) {
+        classDegree = marhala5Class
+            .firstWhere((e) => e["id"] == marhala5Index.value)["name"];
+      } else if (degreeProgramIndex.value != null) {
+        classDegree = degreePrograms
+            .firstWhere((e) => e["id"] == degreeProgramIndex.value)["name"];
+      }
+
+      // 🔹 **Dynamically determine fieldOfStudy**
+      String? fieldOfStudy;
+      if (fieldOfStudyIndex.value != null) {
+        fieldOfStudy = studyOptions
+            .firstWhere((e) => e["id"] == fieldOfStudyIndex.value)["name"];
+      }
+
+      // 🔹 **Dynamically determine subjectCourse**
+      String? subjectCourse;
+      if (courseIndexPoint.value != null) {
+        subjectCourse = courseOptions
+            .firstWhere((e) => e["id"] == courseIndexPoint.value)["name"];
+      }
+
+      String org = determineOrganization();
+
+      if (org.isEmpty) {
+        Get.snackbar("Error", "Failed to determine organziation",
+            colorText: Colors.white, backgroundColor: Colors.red);
+      }
+
+      RequestFormModel requestData;
+
+      if (fieldOfStudyIndex.value != -1 &&
+          fieldOfStudyIndex.value != -2 &&
+          grade.value != "Madrasa" &&
+          grade.value != "Hifz" &&
+          degreeProgramIndex.value != -1) {
+        requestData = RequestFormModel(
+          ITS: stateController.user.value.itsId.toString(),
+          studentFirstName: stateController.user.value.firstName.toString(),
+          studentFullName: stateController.user.value.fullName.toString(),
+          reqByITS: stateController.appliedByITS.value,
+          reqByName: stateController.appliedByName.value,
+          mohalla: stateController.user.value.tanzeem?.toString() ?? "",
+          address: stateController.user.value.address?.toString() ?? "",
+          dob: stateController.user.value.dob?.toString() ?? "",
+          city: selectedCity.value,
+          institution: selectedInstituteName.value!,
+          classDegree: classDegree ?? "",
+          fieldOfStudy: fieldOfStudy ?? "",
+          subjectCourse: subjectCourse ?? "",
+          yearOfStart: year.value,
+          email: email.value,
+          contactNo: phone.value,
+          whatsappNo: whatsapp.value,
+          fundAsking: funds.value,
+          description: description.value,
+          applyDate: DateTime.now().toString(),
+          grade: grade.value,
+          purpose: purpose.value,
+          cnic: cnicNo.value,
+          classification: "",
+          organization: org,
+          currentStatus: "",
+          createdBy: "",
+          updatedBy: "",
+          fatherCnic: fatherCnic.value,
+          motherCnic: motherCnic.value,
+          hasGuardian: false,
+          gender: stateController.user.value.gender.toString(),
+        );
+      } else {
+        if (org.isEmpty) {
+          Get.snackbar("Error", "Failed to determine organziation",
+              colorText: Colors.white, backgroundColor: Colors.red);
+        }
+
+        requestData = RequestFormModel(
+          ITS: stateController.user.value.itsId.toString(),
+          studentFirstName: stateController.user.value.firstName.toString(),
+          studentFullName: stateController.user.value.fullName.toString(),
+          reqByITS: stateController.appliedByITS.value,
+          reqByName: stateController.appliedByName.value,
+          mohalla: stateController.user.value.tanzeem?.toString() ?? "",
+          address: stateController.user.value.address?.toString() ?? "",
+          dob: stateController.user.value.dob?.toString() ?? "",
+          city: "",
+          institution: madrasaName.value,
+          classDegree: darajaName.value,
+          fieldOfStudy: hifzProgramName.value,
+          subjectCourse: "",
+          yearOfStart: year.value,
+          email: email.value,
+          contactNo: phone.value,
+          whatsappNo: whatsapp.value,
+          fundAsking: funds.value,
+          description: description.value,
+          applyDate: DateTime.now().toString(),
+          grade: "",
+          purpose: purpose.value,
+          classification: "",
+          organization: org,
+          currentStatus: "",
+          createdBy: "",
+          updatedBy: "",
+          cnic: cnicNo.value,
+          fatherCnic: fatherCnic.value,
+          motherCnic: motherCnic.value,
+          hasGuardian: false,
+          gender: stateController.user.value.gender.toString(),
+        );
+      }
+      int returnCode = await Api.addRequestForm(requestData);
+      //await Future.delayed(Duration(seconds: 1));
+      //toggleLoading(false);
+      if (returnCode == 201) {
+        stateController.app_form_loading.value = false;
+        completion?.value = true;
+        progress?.value = 100;
+        selectedMarhala.value = null;
+        resetFields();
+        resetSelections();
+        studyOptions.clear();
+        filteredStudies.clear();
+        courseOptions.clear();
+        selectedInstitute.value = null;
+        selectedCity.value = 'Select City';
+        selectedInstituteName.value = '';
+        year.value = '';
+        selectedCityId.value = null;
+        resetSelections();
+        funds.value = '';
+        description.value = '';
+        selectedMarhala.value == null;
+        sectionIndex.value++;
+        // Get.snackbar("Success!", "Your request was successfully submitted!",
+        //     colorText: Colors.white, backgroundColor: Colors.green);
+      } else if (returnCode == 202) {
+        Alert.show(
+            onOk: () {
+              Get.toNamed(AppRoutes.select_module);
+            },
+            okText: "Go to Dashboard",
+            onCancel: () {},
+            cancelText: "Close",
+            title: "Error, cannot submit form.",
+            subtitle:
+                "A request with similar details already exist, please check status on dashboard.");
+      } else if (returnCode == 500) {
+        stateController.app_form_loading.value = false;
+        Get.snackbar("Error", "Failed to submit request. Please try again!",
+            colorText: Colors.white, backgroundColor: Colors.red);
+      }
+    }
+  }
+
   // **Fetch Next Request ID**
   Future<void> fetchReqId() async {
     reqId.value = await Api.fetchNextReqMasId();
@@ -812,8 +1201,6 @@ class RequestFormState extends State<RequestForm> {
 
   @override
   void initState() {
-    //stateController.user.value = userProfile11;
-
     fetchDefaultValues(stateController.user.value);
     super.initState();
   }
@@ -822,32 +1209,6 @@ class RequestFormState extends State<RequestForm> {
     controller.email.value = member.email ?? '';
     controller.phone.value = member.mobileNo ?? '';
     controller.whatsapp.value = member.whatsappNo ?? '';
-
-    if (member.future != null && member.future!.isNotEmpty) {
-      controller.classDegree.value =
-          member.future!.first.subject ?? ''; // ✅ Use RxString
-      controller.institution.value = member.future!.first.institute ?? '';
-
-      controller.selectedSubject.value = member.future!.first.study ?? '';
-
-      // Check if `selectedCity.value` already has a value
-      String? currentCity = controller.selectedCity.value.isNotEmpty &&
-              controller.selectedCity.value != 'Select City'
-          ? controller.selectedCity.value
-          : member.future!.first.city;
-
-      // Find matching city ID
-      int cityId = controller.cities.firstWhere(
-        (city) => city['name'] == currentCity,
-        orElse: () => {"id": -1}, // Default to -1 if not found
-      )['id'];
-
-      if (controller.selectedCity.value !=
-          (cityId == -1 ? "Select City" : currentCity!)) {
-        controller.selectCity(cityId); // ✅
-      }
-      controller.update();
-    }
   }
 
   @override

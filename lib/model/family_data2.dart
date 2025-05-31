@@ -1,24 +1,24 @@
 class FamilyMember {
   final int itsNumber;
-  final int hofItsNumber;
+  final int? hofItsNumber;  // Nullable
   final int sfNo;
   final String fullName;
-  final String emailAddress;
+  final String? emailAddress;  // Nullable
   final String mobile;
   final String gender;
-  final int age;
-  final String profileImage;
+  final String age;
+  final String? profileImage;
 
   FamilyMember({
     required this.itsNumber,
-    required this.hofItsNumber,
+    this.hofItsNumber,
     required this.sfNo,
     required this.fullName,
-    required this.emailAddress,
+    this.emailAddress,
     required this.mobile,
     required this.gender,
     required this.age,
-    required this.profileImage,
+    this.profileImage,
   });
 
   // Factory constructor to create a FamilyMember from JSON

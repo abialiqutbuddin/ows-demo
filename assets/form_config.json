@@ -1,0 +1,936 @@
+[
+  {
+    "title": "Intend",
+    "key": "intendInfo",
+    "type": "static"
+  },
+  {
+    "title": "Work Information",
+    "key": "workInfo",
+    "type": "dynamic",
+    "subSections": [
+      {
+        "title": "Occupation",
+        "key": "occupationInfo",
+        "type": "standard",
+        "fields": [
+          {
+            "type": "text",
+            "label": "Mode of Work",
+            "key": "work",
+            "validator": "name",
+            "enable": false
+          },
+          {
+            "type": "text",
+            "label": "Name of Organization",
+            "key": "work",
+            "validator": "name",
+            "enable": false
+          },
+          {
+            "type": "text",
+            "label": "Work Phone",
+            "key": "work",
+            "validator": "name",
+            "enable": false
+          },
+          {
+            "type": "text",
+            "label": "Website Address",
+            "key": "work",
+            "validator": "name",
+            "enable": false
+          },
+          {
+            "type": "text",
+            "label": "Current Form of Business",
+            "key": "work",
+            "validator": "name",
+            "enable": false
+          },
+          {
+            "type": "text",
+            "label": "Address of Organization",
+            "key": "work",
+            "validator": "name",
+            "enable": false
+          },
+          {
+            "type": "text",
+            "label": "Work Email",
+            "key": "work",
+            "validator": "name",
+            "enable": false
+          },
+          {
+            "type": "text",
+            "label": "Business Description",
+            "key": "work",
+            "validator": "name",
+            "enable": false
+          }
+        ]
+      },
+      {
+        "title": "Khidmat Details",
+        "key": "khidmatInfo",
+        "type": "standard",
+        "fields": [
+          {
+            "type": "dropdown",
+            "label": "Are you currently a part of any of the following khidmat avenues?",
+            "key": "khidmat_current",
+            "enable": true,
+            "itemsKey": "khidmatOptions",
+            "dropdownLabel": "Are you intending to be a part of any of the following khidmat avenues?",
+            "dropdownKey": "khidmat_intent",
+            "itemsKey2": "khidmatOptions",
+            "showDropdownIf": 5
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Deeni",
+    "key": "deenInfo",
+    "type": "dynamic",
+    "subSections": [
+      {
+        "title": "Deeni Info",
+        "key": "deeniInfo",
+        "type": "standard",
+        "fields": [
+          {
+            "type": "radio",
+            "label": "Have you studied Kalemat-ul-shahadah and 7 Daim ul Islam in school/madrasa?",
+            "key": "studied_kalemat_daim",
+            "enable": true,
+            "options": [
+              "Yes",
+              "No"
+            ]
+          },
+          {
+            "type": "radio",
+            "label": "Have you memorized names of Dai-al-Zaman TUS / Mazoon Saheb / Mukasir Saheb?",
+            "key": "memorized_names",
+            "enable": true,
+            "options": [
+              "Yes",
+              "No"
+            ]
+          },
+          {
+            "type": "radio",
+            "label": "Does he/she offer in Sila Fitra / Vajebaat? (Only HOF)",
+            "key": "offers_sila_vajebaat",
+            "enable": true,
+            "options": [
+              "Yes",
+              "No"
+            ]
+          },
+          {
+            "type": "radio",
+            "label": "Have you latest attended misaq majlis to Dai-al-Zamaan TUS?",
+            "key": "attended_misaq_majlis",
+            "enable": true,
+            "options": [
+              "Yes",
+              "No"
+            ]
+          },
+          {
+            "type": "radio",
+            "label": "Have you come to contact with any moharramaat – (prohibited activities) - Alcoholic substances/drugs/cigarette/Riba/ in your life?",
+            "key": "moharramaat_survey",
+            "enable": true,
+            "conditional_value": "Is He/She still involved?",
+            "on_condition": "Yes",
+            "condition_options": [
+              "Yes",
+              "No"
+            ],
+            "options": [
+              "Yes",
+              "No"
+            ]
+          },
+          {
+            "type": "dropdown",
+            "label": "Shaadi?",
+            "key": "shaadi_status",
+            "enable": true,
+            "itemsKey": "shaadiOptions",
+            "dropdownLabel": "Select Spouse",
+            "dropdownKey": "spouse_name",
+            "itemsKey2": "familyMembers",
+            "showDropdownIf": 0,
+            "itsFieldKey": "spouse_name_its"
+          },
+          {
+            "type": "dropdown",
+            "label": "Does he/she attend all 9 days of Ashara Mubarakah punctually?",
+            "key": "ashara_attendance",
+            "enable": true,
+            "itemsKey": "asharaAttendanceOptions"
+          },
+          {
+            "type": "radio",
+            "label": "Has he/she done ziyarat of Raudat Tahera?",
+            "key": "ziarat_raudat_tahera",
+            "enable": true,
+            "conditional_value": "Both Moula?",
+            "on_condition": "Yes",
+            "condition_options": [
+              "Yes",
+              "No"
+            ],
+            "options": [
+              "Yes",
+              "No"
+            ]
+          },
+          {
+            "type": "dropdown",
+            "label": "Does he/she pray Namaz daily?",
+            "key": "namaz_daily",
+            "enable": true,
+            "itemsKey": "namazDailyOptions"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Housing",
+    "key": "houseInfo",
+    "type": "dynamic",
+    "subSections": [
+      {
+        "title": "House Details",
+        "key": "housingInfo",
+        "type": "standard",
+        "fields": [
+          {
+            "type": "multiselect",
+            "label": "Assets Owned",
+            "key": "assets",
+            "enable": true,
+            "itemsKey": "assetsOptions"
+          },
+          {
+            "type": "dropdown",
+            "label": "House Title",
+            "key": "house_title",
+            "enable": true,
+            "itemsKey": "houseTitleOptions"
+          },
+          {
+            "type": "dropdown",
+            "label": "Area of House",
+            "key": "area",
+            "enable": true,
+            "itemsKey": "houseAreaOptions"
+          },
+          {
+            "type": "dropdown",
+            "label": "Neighborhood",
+            "key": "neighborhood",
+            "enable": true,
+            "itemsKey": "neighborhoodOptions"
+          },
+          {
+            "type": "dropdown",
+            "label": "Drinking Water Source",
+            "key": "drinking_water",
+            "enable": true,
+            "itemsKey": "drinkingWaterOptions"
+          },
+          {
+            "type": "dropdown",
+            "label": "Sanitation / Bathroom Type",
+            "key": "sanitation_bathroom",
+            "enable": true,
+            "itemsKey": "sanitationBathroomOptions"
+          },
+          {
+            "type": "radio",
+            "label": "Are all walls/roof/flooring structure made of natural or light materials? (i.e mud,clay sand,cane, tree trunks, grass, bamboo, plastic, raw wood, stones, cardboard, tent etc.)",
+            "key": "wallFlooring",
+            "enable": true,
+            "options": [
+              "Yes",
+              "No"
+            ]
+          },
+          {
+            "type": "radio",
+            "label": "Is there any leakage in the house?",
+            "key": "leakage",
+            "enable": true,
+            "options": [
+              "Yes",
+              "No"
+            ]
+          },
+          {
+            "type": "radio",
+            "label": "Has a personal Bank Account?",
+            "key": "personalBank",
+            "enable": true,
+            "options": [
+              "Yes",
+              "No"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "FMB",
+    "key": "fmbSection",
+    "type": "dynamic",
+    "subSections": [
+      {
+        "title": "FMB Details",
+        "key": "fmbInfo",
+        "type": "standard",
+        "fields": [
+          {
+            "type": "dropdown",
+            "label": "Are you taking FMB Thali? (HOF)",
+            "key": "taking_fmb",
+            "enable": true,
+            "itemsKey": "fmbThaliOptions",
+            "dropdownLabel": "Does the quantity sufficient for the whole family?",
+            "dropdownKey": "fmb_quantity_sufficient",
+            "itemsKey2": "fmbQuantityOptions",
+            "showDropdownIf": 0
+          }
+        ]
+      },
+      {
+        "title": "BMI",
+        "key": "bmiInfo",
+        "type": "standard",
+        "fields": [
+          {
+            "type": "text",
+            "label": "Height",
+            "key": "height",
+            "validator": "amount",
+            "enable": true
+          },
+          {
+            "type": "text",
+            "label": "Weight (in KG)",
+            "key": "weight",
+            "validator": "number",
+            "enable": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Medical",
+    "key": "medicalSection",
+    "type": "dynamic",
+    "subSections": [
+      {
+        "title": "Medical Info",
+        "key": "medicalInfo",
+        "type": "standard",
+        "fields": [
+          {
+            "type": "radio",
+            "label": "Is there anyone who is physically or mentally challenged in the house? (HOF)",
+            "key": "physically_mentally_challenged",
+            "enable": true,
+            "options": [
+              "Yes",
+              "No"
+            ]
+          },
+          {
+            "type": "radio",
+            "label": "Has any child died in the past 5 years??",
+            "key": "child_death_past_5yrs",
+            "enable": true,
+            "itemsKey": "causeOptions",
+            "dropdownLabel": "Cause of Death",
+            "dropdownKey": "child_death_cause",
+            "options": [
+              "Yes",
+              "No"
+            ],
+            "showDropdownIf": "Yes"
+          },
+          {
+            "type": "radio",
+            "label": "Are all children in the household taking/taken the required vaccinations? (HOF)",
+            "key": "vaccination_status",
+            "enable": true,
+            "options": [
+              "Yes",
+              "No"
+            ]
+          },
+          {
+            "type": "radio",
+            "label": "Any Chronic (long term, incurable) illness(e.g Diabetes, Hypertension)?",
+            "key": "chronic_illness",
+            "enable": true,
+            "textFieldLabel": "Give Details",
+            "textFieldKey": "disease_details",
+            "options": [
+              "Yes",
+              "No"
+            ],
+            "showTextFieldIf": "Yes"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Financials",
+    "key": "financialInfo",
+    "type": "dynamic",
+    "subSections": [
+      {
+        "title": "Sources of Income",
+        "key": "sourcesofIncome",
+        "type": "standard",
+        "fields": [
+          {
+            "type": "repeatable",
+            "label": "Types of Income",
+            "key": "incomeTypes",
+            "enable": true,
+            "fields": [
+              {
+                "type": "dropdown",
+                "label": "Family Member",
+                "key": "taking_fmb",
+                "enable": true,
+                "itemsKey": "familyMembers",
+                "itsFieldKey": "spouse_name_its"
+              },
+              {
+                "type": "dropdown",
+                "label": "Income Type",
+                "key": "incomeType",
+                "enable": true,
+                "itemsKey": "incomeTypeOptions"
+              },
+              {
+                "type": "text",
+                "label": "Amount",
+                "key": "incomeTypeAmount",
+                "validator": "amount",
+                "enable": true
+              }
+            ]
+          },
+          {
+            "type": "radio",
+            "label": "Is any member of the household unemployed but capable of working?",
+            "key": "family_member_working",
+            "enable": true,
+            "textFieldLabel": "Give Details",
+            "textFieldKey": "working_details",
+            "options": [
+              "Yes",
+              "No"
+            ],
+            "showTextFieldIf": "Yes"
+          },
+          {
+            "type": "radio",
+            "label": "Does any family member have a disability or chronic illness affecting earning capacity?",
+            "key": "family_member_disability",
+            "enable": true,
+            "textFieldLabel": "Give Details",
+            "textFieldKey": "disability_details",
+            "options": [
+              "Yes",
+              "No"
+            ],
+            "showTextFieldIf": "Yes"
+          }
+        ]
+      },
+      {
+        "title": "Expenses Breakdown (Enter Amount)",
+        "key": "expenseBreakdown",
+        "type": "totaling",
+        "fields": [
+          {
+            "type": "text",
+            "label": "Wajebaat / Khumus",
+            "key": "wajebaat_expenses",
+            "validator": "amount",
+            "enable": true,
+            "hint": "Enter 0 if not applicable"
+          },
+          {
+            "type": "text",
+            "label": "FMB Thaali / Niyaaz",
+            "key": "niyaz_expenses",
+            "validator": "amount",
+            "enable": true,
+            "hint": "Enter 0 if not applicable"
+          },
+          {
+            "type": "text",
+            "label": "Jamaat Expenses / Sabeel",
+            "key": "sabeel_expenses",
+            "validator": "amount",
+            "enable": true,
+            "hint": "Enter 0 if not applicable"
+          },
+          {
+            "type": "text",
+            "label": "Ziyarat",
+            "key": "zyarat_expenses",
+            "validator": "amount",
+            "enable": true,
+            "hint": "Enter 0 if not applicable"
+          },
+          {
+            "type": "text",
+            "label": "Ashara Mubarakah",
+            "key": "ashara_expenses",
+            "validator": "amount",
+            "enable": true,
+            "hint": "Enter 0 if not applicable"
+          },
+          {
+            "type": "text",
+            "label": "Qardan Hasana",
+            "key": "qardanhasana",
+            "validator": "amount",
+            "enable": true,
+            "hint": "Enter 0 if not applicable"
+          },
+          {
+            "type": "text",
+            "label": "Others Expenses",
+            "key": "other_deeni_expenses",
+            "validator": "amount",
+            "enable": true,
+            "hint": "Enter 0 if not applicable"
+          }
+        ]
+      },
+      {
+        "title": "Education",
+        "key": "education_expenses",
+        "type": "repeatable",
+        "radioLabel": "No Education Expense",
+        "fields": [
+          {
+            "type": "dropdown",
+            "label": "Family Member Name",
+            "key": "taking_fmb",
+            "enable": true,
+            "itemsKey": "familyMembers",
+            "itsFieldKey": "spouse_name_its"
+
+          },
+          {
+            "type": "text",
+            "label": "Age",
+            "key": "eduAge",
+            "validator": "age",
+            "enable": true
+          },
+          {
+            "type": "text",
+            "label": "Institute Name",
+            "key": "eduInsName",
+            "validator": "name",
+            "enable": true
+          },
+          {
+            "type": "dropdown",
+            "label": "Class/Semester",
+            "key": "eduSemClass",
+            "enable": true,
+            "itemsKey": "semesterOptions"
+          },
+          {
+            "type": "text",
+            "label": "Fee",
+            "key": "eduFee",
+            "validator": "amount",
+            "enable": true
+          }
+        ]
+      },
+      {
+        "title": "Food Expense (Enter Amount)",
+        "key": "foodExpense",
+        "type": "totaling",
+        "fields": [
+          {
+            "type": "text",
+            "label": "Groceries & Household supplies",
+            "key": "groceries_supplies",
+            "validator": "amount",
+            "enable": true,
+            "hint": "Enter 0 if not applicable"
+          },
+          {
+            "type": "text",
+            "label": "Retaurants / Dine Out",
+            "key": "dineout_expense",
+            "validator": "amount",
+            "enable": true,
+            "hint": "Enter 0 if not applicable"
+          },
+          {
+            "type": "text",
+            "label": "Essentials",
+            "key": "essential_expense",
+            "validator": "amount",
+            "enable": true,
+            "hint": "Enter 0 if not applicable"
+          }
+        ]
+      },
+      {
+        "title": "Health Expenses (Enter Amount)",
+        "key": "health_expense",
+        "type": "totaling",
+        "fields": [
+          {
+            "type": "text",
+            "label": "Doctor",
+            "key": "doctor_expenses",
+            "validator": "amount",
+            "enable": true,
+            "hint": "Enter 0 if not applicable"
+          },
+          {
+            "type": "text",
+            "label": "Dental",
+            "key": "dental_expenses",
+            "validator": "amount",
+            "enable": true,
+            "hint": "Enter 0 if not applicable"
+          },
+          {
+            "type": "text",
+            "label": "Glasses & Eye Care",
+            "key": "glass_expenses",
+            "validator": "amount",
+            "enable": true,
+            "hint": "Enter 0 if not applicable"
+          },
+          {
+            "type": "text",
+            "label": "Medicines",
+            "key": "meds_expenses",
+            "validator": "amount",
+            "enable": true,
+            "hint": "Enter 0 if not applicable"
+          },
+          {
+            "type": "text",
+            "label": "Vacation",
+            "key": "vacation_expenses",
+            "validator": "amount",
+            "enable": true,
+            "hint": "Enter 0 if not applicable"
+          }
+        ]
+      },
+      {
+        "title": "Standard of Living Expenses (Enter Amount)",
+        "key": "sosExpense",
+        "type": "totaling",
+        "fields": [
+          {
+            "type": "text",
+            "label": "Rent",
+            "key": "rent_expense",
+            "validator": "amount",
+            "enable": true,
+            "hint": "Enter 0 if not applicable"
+          },
+          {
+            "type": "text",
+            "label": "Maintenance",
+            "key": "maintenance_expense",
+            "validator": "amount",
+            "enable": true,
+            "hint": "Enter 0 if not applicable"
+          },
+          {
+            "type": "text",
+            "label": "Gas",
+            "key": "gas_expense",
+            "validator": "amount",
+            "enable": true,
+            "hint": "Enter 0 if not applicable"
+          },
+          {
+            "type": "text",
+            "label": "Electricity",
+            "key": "electricity_expense",
+            "validator": "amount",
+            "enable": true,
+            "hint": "Enter 0 if not applicable"
+          },
+          {
+            "type": "text",
+            "label": "Mobile",
+            "key": "mobile_expense",
+            "validator": "amount",
+            "enable": true,
+            "hint": "Enter 0 if not applicable"
+          },
+          {
+            "type": "text",
+            "label": "Water",
+            "key": "water_expense",
+            "validator": "amount",
+            "enable": true,
+            "hint": "Enter 0 if not applicable"
+          },
+          {
+            "type": "text",
+            "label": "Cable",
+            "key": "cable_expense",
+            "validator": "amount",
+            "enable": true,
+            "hint": "Enter 0 if not applicable"
+          },
+          {
+            "type": "text",
+            "label": "Internet",
+            "key": "internet_expense",
+            "validator": "amount",
+            "enable": true,
+            "hint": "Enter 0 if not applicable"
+          },
+          {
+            "type": "text",
+            "label": "Clothing & Accessories",
+            "key": "clothing_expense",
+            "validator": "amount",
+            "enable": true,
+            "hint": "Enter 0 if not applicable"
+          },
+          {
+            "type": "text",
+            "label": "Appliances (Maintenance)",
+            "key": "appliances_expense",
+            "validator": "amount",
+            "enable": true,
+            "hint": "Enter 0 if not applicable"
+          },
+          {
+            "type": "text",
+            "label": "Other Expenses",
+            "key": "other_expenses",
+            "validator": "amount",
+            "enable": true,
+            "hint": "Enter 0 if not applicable"
+          }
+        ]
+      },
+      {
+        "title": "Dependents",
+        "key": "dependents",
+        "type": "repeatable",
+        "radioLabel": "No Dependents",
+        "fields": [
+          {
+            "type": "dropdown",
+            "label": "Dependent",
+            "key": "taking_fmb",
+            "enable": true,
+            "itemsKey": "familyMembers",
+            "itsFieldKey": "spouse_name_its"
+
+          },
+          {
+            "type": "text",
+            "label": "Dependent Age",
+            "key": "dependentAge",
+            "validator": "age",
+            "enable": true
+          }
+        ]
+      },
+      {
+        "title": "Travelling (Last 5 Years)",
+        "key": "travelling_expense",
+        "type": "repeatable",
+        "radioLabel": "Not travelled",
+        "fields": [
+          {
+            "type": "text",
+            "label": "Place",
+            "key": "travelPlace",
+            "validator": "name",
+            "enable": true
+          },
+          {
+            "type": "text",
+            "label": "Year",
+            "key": "travelYear",
+            "validator": "year",
+            "enable": true
+          },
+          {
+            "type": "text",
+            "label": "Purpose",
+            "key": "travelPurpose",
+            "validator": "text",
+            "enable": true
+          }
+        ]
+      },
+      {
+        "title": "Assets (Personal) (Enter Amount)",
+        "key": "personalAssets",
+        "type": "totaling",
+        "fields": [
+          {
+            "type": "text",
+            "label": "Property",
+            "key": "property_assets",
+            "validator": "amount",
+            "enable": true,
+            "hint": "Enter 0 if not applicable"
+          },
+          {
+            "type": "text",
+            "label": "Jewelry",
+            "key": "jewelry_Assets",
+            "validator": "amount",
+            "enable": true,
+            "hint": "Enter 0 if not applicable"
+          },
+          {
+            "type": "text",
+            "label": "Transport",
+            "key": "transport_assets",
+            "validator": "amount",
+            "enable": true,
+            "hint": "Enter 0 if not applicable"
+          },
+          {
+            "type": "text",
+            "label": "Others",
+            "key": "other_assets",
+            "validator": "amount",
+            "enable": true,
+            "hint": "Enter 0 if not applicable"
+          }
+        ]
+      },
+      {
+        "title": "Business (Personal)",
+        "key": "business_assets",
+        "type": "repeatable",
+        "radioLabel": "No Business Assets",
+        "fields": [
+          {
+            "type": "text",
+            "label": "Amount",
+            "key": "businessAssetAmount",
+            "validator": "amount",
+            "enable": true
+          },
+          {
+            "type": "text",
+            "label": "Description",
+            "key": "businessAssetDesc",
+            "validator": "text",
+            "enable": true
+          }
+        ]
+      },
+      {
+        "title": "Liabilities (Qarzan Hasana Type/From)",
+        "key": "qh_liability",
+        "type": "repeatable",
+        "radioLabel": "No Previous Qarzan Taken",
+        "fields": [
+          {
+            "type": "dropdown",
+            "label": "Family Member",
+            "key": "family_member_name",
+            "enable": true,
+            "itemsKey": "familyMembers",
+            "itsFieldKey": "family_member_its"
+          },
+          {
+            "type": "text",
+            "label": "Purpose",
+            "key": "qhLiabilityPurpose",
+            "validator": "text",
+            "enable": true
+          },
+          {
+            "type": "text",
+            "label": "Amount",
+            "key": "qhLiabilityAmount",
+            "validator": "amount",
+            "enable": true
+          }
+        ]
+      },
+      {
+        "title": "Enayat",
+        "key": "enayat_liability",
+        "type": "repeatable",
+        "radioLabel": "No Previous Enayat",
+        "fields": [
+          {
+            "type": "dropdown",
+            "label": "Family Member",
+            "key": "taking_fmb",
+            "enable": true,
+            "itemsKey": "familyMembers"
+          },
+          {
+            "type": "text",
+            "label": "Purpose",
+            "key": "enayatLiabilityPurpose",
+            "validator": "text",
+            "enable": true
+          },
+          {
+            "type": "text",
+            "label": "Amount",
+            "key": "enayatLiabilityAmount",
+            "validator": "amount",
+            "enable": true
+          },
+          {
+            "type": "text",
+            "label": "Date",
+            "key": "enayatLiabilityDate",
+            "validator": "date",
+            "enable": true
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Documents Upload",
+    "key": "documents",
+    "type": "static"
+  }
+]

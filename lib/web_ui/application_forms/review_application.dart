@@ -1,9 +1,14 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ows/constants/constants.dart';
-
+import 'package:http/http.dart' as http;
+import 'package:ows/web_ui/application_forms/application_form_web.dart';
+import 'package:ows/web_ui/application_forms/application_pdf.dart';
 import '../../api/api.dart';
+import '../../constants/multi_select_dropdown.dart';
 import '../../controller/state_management/state_manager.dart';
+import '../../data/dropdown_options.dart';
 
 class ReviewScreen extends StatelessWidget {
   final List<Map<String, dynamic>> formSections;
@@ -11,7 +16,10 @@ class ReviewScreen extends StatelessWidget {
   final RxMap<String, Rxn<int>> dropdownFields;
   final Map<String, RxList<Map<String, dynamic>>> repeatableEntries;
   final Map<String, List<Map<String, dynamic>>> dropdownOptions;
+  final RxMap<String, MultiSelectDropdownController> multiSelectControllers;
   final void Function(String sectionKey)? onBackToEdit;
+  final Map<String, dynamic>? initiallyCompletedWorkInfo;
+
 
   ReviewScreen({
     super.key,
@@ -21,10 +29,233 @@ class ReviewScreen extends StatelessWidget {
     required this.repeatableEntries,
     required this.dropdownOptions,
     this.onBackToEdit,
+    required this.multiSelectControllers, this.initiallyCompletedWorkInfo,
   });
 
   final RxBool isSubmitting = false.obs;
   final RxnInt submittedApplicationId = RxnInt();
+
+  Future<Map<String, dynamic>> collectFormDataForBackend({
+    required List<Map<String, dynamic>> formSections,
+    required RxMap<String, RxString> textFields,
+    required RxMap<String, Rxn<int>> dropdownFields,
+    Map<String, dynamic>? initiallyCompletedWorkInfo, // 👈 Add this
+    required Map<String, RxList<Map<String, dynamic>>> repeatableEntries,
+    required Map<String, List<Map<String, dynamic>>> dropdownOptions,
+    required RxMap<String, MultiSelectDropdownController>
+        multiSelectControllers,
+  }) async {
+    final Map<String, dynamic> finalData = {
+      "application": <String, dynamic>{},
+      "repeatables": <String, dynamic>{},
+    };
+
+    List<Map<String, dynamic>> allSections = [...formSections];
+
+    // ✅ Inject workInfo manually if missing
+    if (!formSections.any((s) => s['key'] == 'workInfo') &&
+        initiallyCompletedWorkInfo != null) {
+      allSections.add(initiallyCompletedWorkInfo);
+    }
+
+    for (final section in allSections) {
+      final subSections = section['subSections'] ?? [];
+
+      for (final sub in subSections) {
+        final type = sub['type'];
+        final subKey = sub['key'];
+
+        if (type == 'repeatable') {
+          // Grab your entries for this subsection
+          final List<Map<String, dynamic>>? rawEntries = repeatableEntries[subKey];
+          final int count = rawEntries?.length ?? 0;
+          debugPrint('🔄 Processing repeatable section "$subKey": $count entries');
+
+          if (rawEntries != null && rawEntries.isNotEmpty) {
+            // “Main table” special case flattens into application
+            if ([
+              'fatherOccupationInfo',
+              'motherOccupationInfo',
+              'guardianOccupationInfo'
+            ].contains(subKey)) {
+              debugPrint('  ⚙️ Flattening main table fields for "$subKey"');
+              final firstEntry = rawEntries.first;
+              firstEntry.forEach((fieldKey, reactiveVal) {
+                // unwrap Rx or call if it's a Function
+                final dynamic raw = reactiveVal is Rx
+                    ? reactiveVal.value
+                    : reactiveVal is Function
+                    ? reactiveVal()
+                    : reactiveVal;
+                debugPrint('    • Field "$fieldKey": raw="$raw"');
+                finalData["application"][fieldKey] = raw;
+              });
+              debugPrint('  ✅ Flattened fields: ${firstEntry.keys.toList()}');
+            } else {
+              // Regular repeatable rows
+              final List<Map<String, dynamic>> rows = [];
+              for (var entry in rawEntries) {
+                debugPrint('  ▶️ New repeatable entry: $entry');
+                final Map<String, dynamic> row = {};
+
+                entry.forEach((k, v) {
+                  final dynamic raw = v is Rx
+                      ? v.value
+                      : v is Function
+                      ? v()
+                      : v;
+                  debugPrint('    • Field "$k": raw="$raw"');
+
+                  if (k == 'member_name') {
+                    // force your dropdown options into the right type
+                    final List<Map<String, dynamic>> opts =
+                    List<Map<String, dynamic>>.from(
+                        dropdownOptions['familyMembers'] ?? []);
+                    debugPrint('      – Looking up member_name in ${opts.length} options');
+                    final sel = opts.firstWhere(
+                          (opt) => opt['id'].toString() == raw.toString(),
+                      orElse: () {
+                        debugPrint('      ⚠️ No match for member_name="$raw", using fallback');
+                        return <String, dynamic>{'id': raw, 'name': 'Unknown'};
+                      },
+                    );
+                    debugPrint('      ✅ Matched option: $sel');
+                    row['member_name'] = sel['name'];
+                    row['member_its']  = sel['id'];
+                  } else {
+                    row[k] = raw;
+                  }
+                });
+
+                debugPrint('    ✔️ Built row: $row');
+                rows.add(row);
+              }
+
+              finalData["repeatables"][subKey] = rows;
+              debugPrint('  ✅ Added ${rows.length} rows to repeatables["$subKey"]\n');
+            }
+          } else {
+            debugPrint('  ℹ️ No entries for "$subKey", skipping');
+          }
+
+          continue;
+        }
+
+        for (final field in sub['fields'] ?? []) {
+          final key = field['key'];
+          final fieldType = field['type'];
+
+          // 1) Nested repeatable
+          if (fieldType == 'repeatable') {
+            final List<Map<String, dynamic>> entries =
+                repeatableEntries[key] ?? <Map<String, dynamic>>[];
+            debugPrint('🔄 Processing repeatable section "$key": ${entries.length} entries');
+
+            if (entries.isEmpty) {
+              debugPrint('  ℹ️ No entries for "$key", skipping');
+              continue;
+            }
+
+            final List<Map<String, dynamic>> rows = entries.map((entry) {
+              debugPrint('  ▶️ New raw entry: $entry');
+              final Map<String, dynamic> row = {};
+
+              entry.forEach((k, v) {
+                // unwrap Rx, call if Function, otherwise take it as-is:
+                final dynamic raw = v is Rx
+                    ? v.value
+                    : v is Function
+                    ? v()
+                    : v;
+                debugPrint('    • Field "$k": raw="$v" ➔ unwrapped="$raw"');
+
+                if (k == 'member_name') {
+                  // itemsKey might itself be a String or a Function returning String
+                  final dynamic ik = field['itemsKey'];
+                  final String itemsKey = ik is String
+                      ? ik
+                      : ik is Function
+                      ? ik() as String
+                      : 'familyMembers';
+
+                  // force the dropdown options into the right type
+                  final List<Map<String, dynamic>> opts =
+                  List<Map<String, dynamic>>.from(
+                    DropdownValues.dropdownOptions2[itemsKey] ?? <Map<String, dynamic>>[],
+                  );
+                  debugPrint('      – Looking up in ${opts.length} options');
+
+                  final Map<String, dynamic> selected = opts.firstWhere(
+                        (opt) => opt['id'] == raw,
+                    orElse: () {
+                      debugPrint('      ⚠️ No match for member_name="$raw", using fallback');
+                      return <String, dynamic>{'id': raw, 'name': 'Unknown'};
+                    },
+                  );
+
+                  debugPrint('      ✅ Matched option: $selected');
+                  row['member_name'] = selected['name'];
+                  row['member_its']  = selected['id'];
+                } else {
+                  row[k] = raw;
+                }
+              });
+
+              debugPrint('    ✔️ Built row: $row');
+              return row;
+            }).toList();
+
+            finalData["repeatables"][key] = rows;
+            debugPrint('✅ Finished "$key", wrote ${rows.length} rows\n');
+            continue;
+          }
+
+          // ✅ Text / Radio
+          if (fieldType == 'text' || fieldType == 'radio') {
+            String value = textFields[key]?.value ?? '';
+
+            // If unit attached
+            if (field.containsKey('unitKey')) {
+              final unitKey = field['unitKey'];
+              final unitIndex = dropdownFields[unitKey]?.value;
+              final unitOptions = field['unitOptions'] ?? [];
+
+              if (unitIndex != null &&
+                  unitIndex >= 0 &&
+                  unitIndex < unitOptions.length) {
+                value = "$value ${unitOptions[unitIndex]}";
+                finalData["application"][unitKey] = unitOptions[unitIndex];
+              }
+            }
+
+            finalData["application"][key] = value;
+          }
+
+          // ✅ Dropdown
+          else if (fieldType == 'dropdown') {
+            final selectedId = dropdownFields[key]?.value;
+            final options = dropdownOptions[field['itemsKey']] ?? [];
+
+            final selectedOption = options.firstWhere(
+              (opt) => opt['id'] == selectedId,
+              orElse: () => {'id': null, 'name': null},
+            );
+
+              finalData["application"][key] = selectedOption['name'];
+          }
+
+          // ✅ Multiselect
+          else if (fieldType == 'multiselect') {
+            final selectedValues =
+                multiSelectControllers[key]?.selectedValues ?? [];
+            finalData["application"][key] = selectedValues.join(',');
+          }
+        }
+      }
+    }
+
+    return finalData;
+  }
 
   String getDropdownLabel(String key, int? id) {
     final options = dropdownOptions[key] ?? [];
@@ -62,6 +293,53 @@ class ReviewScreen extends StatelessWidget {
     );
   }
 
+  Future<int> submitApplication({
+    required String endpointUrl,
+  }) async {
+    try {
+      final formData = await collectFormDataForBackend(
+        formSections: formSections,
+        textFields: textFields,
+        dropdownFields: dropdownFields,
+        repeatableEntries: repeatableEntries,
+        dropdownOptions: dropdownOptions,
+        initiallyCompletedWorkInfo: initiallyCompletedWorkInfo,
+        multiSelectControllers: multiSelectControllers,
+      );
+
+      formData['reqId'] = statecontroller.reqId.value;
+
+      print(JsonEncoder.withIndent('  ').convert(formData));
+
+      final response = await http.post(
+        Uri.parse(endpointUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(formData),
+      );
+
+      print(response.body);
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body);
+
+        if (result['success'] == true && result.containsKey('id')) {
+          final int appId = result['id'];
+          submittedApplicationId.value = appId;
+          print('✅ Application submitted. ID: $appId');
+          return appId;
+        } else {
+          throw Exception(result['message'] ?? 'Submission failed');
+        }
+      } else {
+        throw Exception('❌ Failed with status: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('❌ Submission error: $e');
+      Get.snackbar("Submission Failed", e.toString());
+      return 0;
+    }
+  }
+
   Widget buildSection(Map<String, dynamic> section) {
     final title = section['title'] ?? 'Untitled';
     final List<dynamic> subSections = section['subSections'] ?? [];
@@ -77,6 +355,7 @@ class ReviewScreen extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // ── Header ───────────────────────────────────────────────────
           Row(
             children: [
               Expanded(
@@ -90,102 +369,234 @@ class ReviewScreen extends StatelessWidget {
                 ),
               ),
               if (onBackToEdit != null && submittedApplicationId.value == null)
-                Padding(
-                  padding: EdgeInsets.only(bottom: 10, right: 8),
-                  child: ElevatedButton.icon(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red, // full red
-                      foregroundColor:
-                      Colors.white, // text and icon will be white
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 10),
-                      elevation: 0,
-                    ),
-                    onPressed: ()=> onBackToEdit!(section['key']),
-                    icon: const Icon(
-                      Icons.edit,
-                      color: Colors.white,
-                      size: 16,
-                    ),
-                    label: const Text(
-                      "Edit",
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 10),
+                    elevation: 0,
                   ),
+                  onPressed: () => onBackToEdit!(section['key']),
+                  icon: const Icon(Icons.edit, size: 16),
+                  label: const Text("Edit",
+                      style:
+                          TextStyle(fontSize: 14, fontWeight: FontWeight.w400)),
                 ),
-                // TextButton(
-                //   onPressed: () => onBackToEdit!(section['key']),
-                //   child: const Text(
-                //     "Edit",
-                //     style: TextStyle(
-                //         fontWeight: FontWeight.bold, color: Colors.brown),
-                //   ),
-                // )
             ],
           ),
           const Divider(thickness: 1.5, color: Colors.white),
+
+          // ── Sub‐sections ───────────────────────────────────────────────
           ...subSections.map<Widget>((sub) {
             final subTitle = sub['title'] ?? '';
             final subKey = sub['key'];
             final fields = sub['fields'] ?? [];
 
+            // ── Repeatable ───────────────────────────────────────────
             if (sub['type'] == 'repeatable') {
               final entries = repeatableEntries[subKey] ?? [];
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (subTitle.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      child: Text(
-                        subTitle,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.brown,
+              if (entries.isEmpty) return const SizedBox.shrink();
+
+              // 1) Section heading
+              final widgets = <Widget>[];
+              if (subTitle.isNotEmpty) {
+                widgets.add(Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(
+                    subTitle,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.brown,
+                    ),
+                  ),
+                ));
+              }
+
+              // 2) Occupation sections: 4 fields in a row
+              const specialKeys = {
+                'motherOccupationInfo',
+                'fatherOccupationInfo',
+                'guardianOccupationInfo',
+              };
+              if (specialKeys.contains(subKey)) {
+                for (final entry in entries) {
+                  widgets.add(Row(
+                    children: [
+                      Expanded(
+                        child: buildFieldBlock(
+                          'Mode of Work',
+                          entry['${subKey.startsWith('mother') ? 'mother' : subKey.startsWith('father') ? 'father' : 'guardian'}_mode_work']
+                                  ?.value ??
+                              '',
                         ),
                       ),
+                      Expanded(
+                        child: buildFieldBlock(
+                          'Organisation',
+                          entry['${subKey.startsWith('mother') ? 'mother' : subKey.startsWith('father') ? 'father' : 'guardian'}_name_org']
+                                  ?.value ??
+                              '',
+                        ),
+                      ),
+                      Expanded(
+                        child: buildFieldBlock(
+                          'Work Phone',
+                          entry['${subKey.startsWith('mother') ? 'mother' : subKey.startsWith('father') ? 'father' : 'guardian'}_work_phone']
+                                  ?.value ??
+                              '',
+                        ),
+                      ),
+                      Expanded(
+                        child: buildFieldBlock(
+                          'Website',
+                          entry['${subKey.startsWith('mother') ? 'mother' : subKey.startsWith('father') ? 'father' : 'guardian'}_work_web']
+                                  ?.value ??
+                              '',
+                        ),
+                      ),
+                    ],
+                  ));
+                  widgets.add(const SizedBox(height: 12));
+                }
+              } else {
+                // 3) Generic repeatable → render as a table
+                widgets.add(
+                  Container(
+                    decoration:
+                        BoxDecoration(borderRadius: BorderRadius.circular(10)),
+                    constraints: BoxConstraints(minWidth: double.infinity),
+                    child: DataTable(
+                      columnSpacing: 24,
+                      headingRowColor:
+                          WidgetStateProperty.all(const Color(0xfff0e6d8)),
+                      dataRowColor: WidgetStateProperty.resolveWith<Color?>(
+                        (Set<WidgetState> states) {
+                          // even rows white, odd rows light grey
+                          return states.contains(WidgetState.selected)
+                              ? Colors.brown[100]
+                              : null;
+                        },
+                      ),
+                      columns: [
+                        for (final f in fields)
+                          DataColumn(
+                            label: Padding(
+                              padding: const EdgeInsets.all(8),
+                              child: Text(
+                                f['label'] as String,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ),
+                      ],
+                      rows: [
+                        for (int rowIndex = 0;
+                            rowIndex < entries.length;
+                            rowIndex++)
+                          DataRow(
+                            color: WidgetStateProperty.resolveWith((states) {
+                              // stripe: even-index rows
+                              return rowIndex.isEven
+                                  ? Colors.white
+                                  : Colors.grey[50];
+                            }),
+                            cells: [
+                              for (final f in fields)
+                                DataCell(
+                                  Padding(
+                                    padding: const EdgeInsets.all(8),
+                                    child: Text(
+                                      () {
+                                        final raw = entries[rowIndex][f['key']];
+                                        if (f['type'] == 'dropdown') {
+                                          return getDropdownLabel(
+                                            f['itemsKey'],
+                                            (raw as Rxn<int>?)?.value,
+                                          );
+                                        }
+                                        return (raw as RxString).value;
+                                      }(),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                      ],
                     ),
-                  ...entries.map((entry) {
-                    return Container(
-                      margin: const EdgeInsets.symmetric(vertical: 6),
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: Colors.brown.shade100),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: fields.map<Widget>((f) {
-                          final key = f['key'];
-                          final label = f['label'];
-                          final type = f['type'];
+                  ),
+                );
+              }
 
-                          if (type == 'dropdown') {
-                            return buildFieldBlock(
-                              label,
-                              getDropdownLabel(
-                                  f['itemsKey'], entry[key]?.value),
-                            );
-                          }
-
-                          return buildFieldBlock(
-                              label, entry[key]?.value ?? '');
-                        }).toList(),
-                      ),
-                    );
-                  }),
-                ],
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: widgets,
               );
             }
 
+            // ── Regular (non-repeatable) ──────────────────────────────
+
+            // split out nested repeatables
+            final simpleFields =
+                fields.where((f) => f['type'] != 'repeatable').toList();
+            final nestedRepeatables =
+                fields.where((f) => f['type'] == 'repeatable').toList();
+
+            // 1) First render any nested-repeatable tables:
+            final nestedWidgets = <Widget>[];
+            for (final mini in nestedRepeatables) {
+              nestedWidgets.add(_buildMiniRepeatableTable(mini, subKey));
+              nestedWidgets.add(const SizedBox(height: 16));
+            }
+
+// 2) Now build your two-column grid from the simple fields:
+            final fieldWidgets = simpleFields.map<Widget>((field) {
+              final key = field['key'];
+              final label = field['label'] as String? ?? '';
+              final type = field['type'] as String;
+
+              if (type == 'multiselect') {
+                final values =
+                    multiSelectControllers[key]?.selectedValues.toList() ?? [];
+                final disp =
+                    values.isNotEmpty ? values.join(', ') : 'None Selected';
+                return buildFieldBlock(label, disp);
+              }
+              if (type == 'dropdown') {
+                final val = dropdownFields[key]?.value;
+                return buildFieldBlock(
+                    label, getDropdownLabel(field['itemsKey'], val));
+              }
+              if (type == 'radio') {
+                final val = textFields[key]?.value ?? '';
+                return buildFieldBlock(label, val);
+              }
+              // text / fetch-its
+              return buildFieldBlock(label, textFields[key]?.value ?? '');
+            }).toList();
+
+// chunk into rows of two
+            final rows = <Widget>[];
+            for (var i = 0; i < fieldWidgets.length; i += 2) {
+              rows.add(Row(
+                children: [
+                  Expanded(child: fieldWidgets[i]),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: i + 1 < fieldWidgets.length
+                        ? fieldWidgets[i + 1]
+                        : const SizedBox.shrink(),
+                  ),
+                ],
+              ));
+              rows.add(const SizedBox(height: 12));
+            }
+
+// 3) Combine nested-repeatable tables + two-col grid
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -201,149 +612,12 @@ class ReviewScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                ...fields.map<Widget>((field) {
-                  final key = field['key'];
-                  final label = field['label'] ?? '';
-                  final type = field['type'];
 
-                  if (type == 'multiselect') {
-                    final selectedItems = textFields[key]?.value ?? '';
-                    final List<String> items =
-                        selectedItems.split(',').map((e) => e.trim()).toList();
+                // nested repeatables first
+                ...nestedWidgets,
 
-                    return buildFieldBlock(
-                      label,
-                      items.isNotEmpty ? items.join(', ') : 'None Selected',
-                    );
-                  }
-
-                  if (type == 'repeatable') {
-                    // 🛠 MINI REPEATABLE FIELD (NEW)
-                    final miniEntries = repeatableEntries[key] ?? [];
-
-                    if (miniEntries.isEmpty) {
-                      return buildFieldBlock(label, "No entries added.");
-                    }
-
-                    return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          label,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.brown,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        ...miniEntries.map((entry) {
-                          return Container(
-                            margin: const EdgeInsets.symmetric(vertical: 6),
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              border: Border.all(color: Colors.brown.shade100),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: (field['fields'] ?? [])
-                                  .map<Widget>((miniField) {
-                                final miniKey = miniField['key'];
-                                final miniLabel = miniField['label'];
-                                final miniType = miniField['type'];
-
-                                if (miniType == 'dropdown') {
-                                  return buildFieldBlock(
-                                    miniLabel,
-                                    getDropdownLabel(miniField['itemsKey'],
-                                        entry[miniKey]?.value),
-                                  );
-                                }
-                                return buildFieldBlock(
-                                  miniLabel,
-                                  entry[miniKey]?.value ?? '',
-                                );
-                              }).toList(),
-                            ),
-                          );
-                        }),
-                      ],
-                    );
-                  }
-
-                  if (type == 'dropdown') {
-                    final selectedVal = dropdownFields[key]?.value;
-                    final baseLabel =
-                        getDropdownLabel(field['itemsKey'], selectedVal);
-
-                    List<Widget> widgets = [
-                      buildFieldBlock(label, baseLabel),
-                    ];
-
-                    if (field.containsKey('showTextFieldIf') &&
-                        selectedVal == field['showTextFieldIf']) {
-                      final textKey = field['textFieldKey'];
-                      final linkedLabel = field['textFieldLabel'];
-                      final linkedVal = textFields[textKey]?.value ?? '';
-                      widgets.add(buildFieldBlock(linkedLabel, linkedVal));
-                    }
-
-                    if (field.containsKey('showDropdownIf') &&
-                        selectedVal == field['showDropdownIf']) {
-                      final dropdownKey = field['dropdownKey'];
-                      final linkedLabel = field['dropdownLabel'];
-                      final linkedVal = dropdownFields[dropdownKey]?.value;
-                      final itemsKey = field['itemsKey2'];
-                      widgets.add(buildFieldBlock(
-                          linkedLabel, getDropdownLabel(itemsKey, linkedVal)));
-                    }
-
-                    return Column(children: widgets);
-                  }
-
-                  if (type == 'radio') {
-                    final val = textFields[key]?.value ?? '';
-                    List<Widget> widgets = [buildFieldBlock(label, val)];
-
-                    if (field.containsKey('showTextFieldIf') &&
-                        val == field['showTextFieldIf']) {
-                      final textKey = field['textFieldKey'];
-                      final linkedLabel = field['textFieldLabel'];
-                      final linkedVal = textFields[textKey]?.value ?? '';
-                      widgets.add(buildFieldBlock(linkedLabel, linkedVal));
-                    }
-
-                    if (field.containsKey('showDropdownIf') &&
-                        val == field['showDropdownIf']) {
-                      final dropdownKey = field['dropdownKey'];
-                      final linkedLabel = field['dropdownLabel'];
-                      final linkedVal = dropdownFields[dropdownKey]?.value;
-                      final itemsKey = field['itemsKey'];
-                      widgets.add(buildFieldBlock(
-                          linkedLabel, getDropdownLabel(itemsKey, linkedVal)));
-                    }
-
-                    if (field.containsKey('conditional_value') &&
-                        field.containsKey('condition_options') &&
-                        field.containsKey('on_condition') &&
-                        val == field['on_condition']) {
-                      final nestedRadioKey = "${key}_conditional";
-                      final nestedVal = textFields[nestedRadioKey]?.value ?? '';
-                      widgets.add(buildFieldBlock(
-                          field['conditional_value'], nestedVal));
-                    }
-
-                    return Column(children: widgets);
-                  }
-
-                  if (type == 'text') {
-                    return buildFieldBlock(label, textFields[key]?.value ?? '');
-                  }
-
-                  return const SizedBox.shrink();
-                }),
+                // then the two-column regular fields
+                ...rows,
               ],
             );
           }),
@@ -352,23 +626,75 @@ class ReviewScreen extends StatelessWidget {
     );
   }
 
+  Widget _buildMiniRepeatableTable(
+    Map<String, dynamic> field,
+    String parentSubKey,
+  ) {
+    final key = field['key'] as String;
+    final label = field['label'] as String;
+    final miniDefs =
+        (field['fields'] as List<dynamic>).cast<Map<String, dynamic>>();
+    final entries = repeatableEntries[key] ?? [];
+
+    if (entries.isEmpty) {
+      return Text('No $label added.',
+          style: const TextStyle(fontStyle: FontStyle.italic));
+    }
+
+    // build columns
+    final columns = miniDefs.map((f) {
+      return DataColumn(
+          label: Text(f['label'],
+              style: const TextStyle(fontWeight: FontWeight.bold)));
+    }).toList();
+
+    // build rows
+    final rows = entries.map((entry) {
+      return DataRow(
+          cells: miniDefs.map((f) {
+        final raw = entry[f['key']];
+        final text = f['type'] == 'dropdown'
+            ? getDropdownLabel(f['itemsKey'], (raw as Rxn<int>?)?.value)
+            : (raw as RxString).value;
+        return DataCell(Text(text.isNotEmpty ? text : '—'));
+      }).toList());
+    }).toList();
+
+    return Container(
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
+      constraints: BoxConstraints(minWidth: double.infinity),
+      child: DataTable(
+        columnSpacing: 24,
+        headingRowColor: WidgetStateProperty.all(Colors.brown[50]),
+        dataRowColor: WidgetStateProperty.resolveWith((states) =>
+            states.contains(WidgetState.selected)
+                ? Colors.brown[100]
+                : Colors.white),
+        columns: columns,
+        rows: rows,
+      ),
+    );
+  }
+
   Future<void> handleSubmit(BuildContext context) async {
     isSubmitting.value = true;
 
     try {
-      // Simulate API
-      await Future.delayed(const Duration(seconds: 2));
-      final mockApplicationId = 123;
+      const endpointUrl =
+          'https://one-login.attalimiyah.com.pk/ows/api/submit-application';
 
-      submittedApplicationId.value = mockApplicationId;
+      int appid = await submitApplication(
+        endpointUrl: endpointUrl,
+      );
 
-      // ✅ Show success dialog
-      showSubmissionSuccessDialog(context, mockApplicationId, () {
-        Get.back(); // close dialog
-        Get.offAllNamed('/home'); // 👈 navigate to your target route
-      });
+      if(appid!=0) {
+        submittedApplicationId.value = appid;
+        Get.to(() => ApplicationPdf(id: appid));
+      }else{
+        throw Exception();
+      }
     } catch (e) {
-      Get.snackbar("Error", "Failed to submit application");
+      Get.snackbar("Error", "Failed to submit application please try again later of contact support team");
     } finally {
       isSubmitting.value = false;
     }
@@ -378,100 +704,109 @@ class ReviewScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xfffffcf6),
-      // appBar: AppBar(
-      //   title: const Text("Review Your Application"),
-      //   backgroundColor: Colors.brown.shade100,
-      //   leading: IconButton(
-      //     icon: const Icon(Icons.arrow_back),
-      //     onPressed: () {
-      //       Get.offAllNamed("/profile_preview_pdf");
-      //     },
-      //   ),
-      //   centerTitle: true,
-      // ),
-      body: Obx(
-        () => Stack(
-          children: [
-            SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      body: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Obx(
+              () => Stack(
                 children: [
-                  Container(
-                  margin:
-                  const EdgeInsets.only(top: 20.0, left: 15, bottom: 10),
-                  child: Text(
-                    "Imdaad Talimi Application Form",
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 24,
-                        color: Colors.black87),
-                  )),
-                  //headerProfile(context),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 200, vertical: 10),
-
+                  SingleChildScrollView(
                     child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        ...formSections
-                            .where((section) => section['key'] != 'intendInfo')
-                            .map(buildSection),
-                        const SizedBox(height: 24),
-                        if (submittedApplicationId.value == null)
-                          Center(
-                            child: ElevatedButton.icon(
-                              onPressed: isSubmitting.value
-                                  ? null
-                                  : () => handleSubmit(context),
-                              icon: const Icon(Icons.send, color: Colors.white),
-                              label: const Text("Submit Application",style: TextStyle(color: Colors.white),),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Constants().green,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      8), // Set your desired radius
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 24, vertical: 20),
-                                textStyle:
-                                const TextStyle(fontSize: 16, color: Colors.white),
-                              ),
-                            ),
-                          ),
-                        if (submittedApplicationId.value != null)
-                          Center(
-                            child: Column(
-                              children: [
-                                const SizedBox(height: 20),
-                                const Icon(Icons.check_circle,
-                                    color: Colors.green, size: 40),
-                                const SizedBox(height: 8),
-                                Text(
-                                  "Application Submitted!",
-                                  style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.green.shade800),
-                                ),
-                                const SizedBox(height: 4),
-                                Text("Application ID: ${submittedApplicationId.value}"),
+                        Container(
+                            margin: const EdgeInsets.only(
+                                top: 20.0, left: 15, bottom: 10),
+                            child: Text(
+                              "Imdaad Talimi Application Form",
+                              style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 24,
+                                  color: Colors.black87),
+                            )),
+                        //headerProfile(context),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 200, vertical: 10),
+                          child: Column(
+                            children: [
+                              ...[
+                                ...formSections
+                                    .where((section) => section['key'] != 'intendInfo')
+                                    .map(buildSection),
+
+                                if (!formSections.any((s) => s['key'] == 'workInfo') &&
+                                    initiallyCompletedWorkInfo != null &&
+                                    repeatableEntries['motherOccupationInfo']?.isNotEmpty == true &&
+                                    repeatableEntries['fatherOccupationInfo']?.isNotEmpty == true)
+                                  buildSection(initiallyCompletedWorkInfo!),
                               ],
-                            ),
+                              const SizedBox(height: 24),
+                              if (submittedApplicationId.value == null)
+                                Center(
+                                  child: ElevatedButton.icon(
+                                    onPressed: isSubmitting.value
+                                        ? null
+                                        : () => handleSubmit(context),
+                                    icon: const Icon(Icons.send, color: Colors.white),
+                                    label: const Text(
+                                      "Submit Application",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: Constants().green,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(
+                                            8), // Set your desired radius
+                                      ),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 24, vertical: 20),
+                                      textStyle: const TextStyle(
+                                          fontSize: 16, color: Colors.white),
+                                    ),
+                                  ),
+                                ),
+                              if (submittedApplicationId.value != null)
+                                Center(
+                                  child: Column(
+                                    children: [
+                                      const SizedBox(height: 20),
+                                      const Icon(Icons.check_circle,
+                                          color: Colors.green, size: 40),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        "Application Submitted!",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.green.shade800),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                          "Application ID: ${submittedApplicationId.value}"),
+                                    ],
+                                  ),
+                                ),
+                              const SizedBox(height: 60),
+                            ],
                           ),
-                        const SizedBox(height: 60),
+                        ),
                       ],
                     ),
                   ),
+                  if (isSubmitting.value)
+                    Container(
+                      color: Colors.black.withValues(alpha: 0.2),
+                      child: const Center(
+                        child: CircularProgressIndicator(color: Colors.brown),
+                      ),
+                    )
                 ],
               ),
             ),
-            if (isSubmitting.value)
-              Container(
-                color: Colors.black.withOpacity(0.2),
-                child: const Center(
-                  child: CircularProgressIndicator(color: Colors.brown),
-                ),
-              )
-          ],
-        ),
+          ),
+          InstructionsWidget(instructionsKey: 'review')
+        ],
       ),
     );
   }
@@ -524,9 +859,8 @@ class ReviewScreen extends StatelessWidget {
   }
 
   final GlobalStateController statecontroller =
-  Get.find<GlobalStateController>();
+      Get.find<GlobalStateController>();
   final double defSpacing = 8;
-
 
   Widget headerProfile(BuildContext context) {
     return Container(
@@ -754,7 +1088,7 @@ class ReviewScreen extends StatelessWidget {
         children: [
           Text(title,
               style:
-              TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+                  TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
           Text(value,
               style: TextStyle(
                   color: Constants().green, fontWeight: FontWeight.bold))
@@ -775,5 +1109,4 @@ class ReviewScreen extends StatelessWidget {
     }
     return age;
   }
-
 }

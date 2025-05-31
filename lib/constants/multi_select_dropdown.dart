@@ -18,7 +18,7 @@ class MultiSelectDropdown extends StatefulWidget {
     required this.options,
     required this.controller,
     this.hintText = 'Select Values',
-    this.maxSelection = 5,
+    this.maxSelection = 13,
   });
 
   @override
@@ -107,56 +107,61 @@ class _MultiSelectDropdownState extends State<MultiSelectDropdown> {
                 }),
               ),
             ),
-            const SizedBox(height: 8),
-            Obx(() {
-              if (!isDropdownVisible.value) return const SizedBox.shrink();
-
-              return Material(
-                elevation: 8,
-                borderRadius: BorderRadius.circular(10),
-                child: Container(
-                  constraints: BoxConstraints(
-                    maxHeight: MediaQuery.of(context).size.height * 0.35,
-                  ),
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF9F7E6),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Scrollbar(
-                    controller: _scrollController,
-                    thumbVisibility: true,
-                    child: ListView(
+           //const SizedBox(height: 8),
+            Padding(
+              padding: const EdgeInsets.only(bottom: 10.0),
+              child: Obx(() {
+                if (!isDropdownVisible.value) return const SizedBox.shrink();
+                return Material(
+                  elevation: 8,
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery.of(context).size.height * 0.35,
+                    ),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF9F7E6),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Scrollbar(
                       controller: _scrollController,
-                      padding: const EdgeInsets.all(8),
-                      children: widget.options.map((option) {
-                        return Obx(() {
-                          final selectedList = widget.controller.selectedValues;
-                          final isSelected = selectedList.contains(option.displayName);
-                          final isMax = selectedList.length >= widget.maxSelection;
-
-                          return CheckboxListTile(
-                            title: Text(option.displayName),
-                            value: isSelected,
-                            onChanged: (bool? value) {
-                              if (value == true && !isSelected && !isMax) {
-                                selectedList.add(option.displayName);
-                              } else if (value == false) {
-                                selectedList.remove(option.displayName);
-                              }
-                            },
-                            controlAffinity: ListTileControlAffinity.leading,
-                            activeColor: Colors.green,
-                            checkColor: Colors.white,
-                            enabled: isSelected || !isMax,
-                          );
-                        });
-                      }).toList(),
+                      thumbVisibility: true,
+                      child: ListView(
+                        controller: _scrollController,
+                        padding: const EdgeInsets.all(8),
+                        children: widget.options.map((option) {
+                          return Obx(() {
+                            final selectedList = widget.controller.selectedValues;
+                            final isSelected = selectedList.contains(option.displayName);
+                            final isMax = selectedList.length >= widget.maxSelection;
+                            return Container(
+                              height: 35,
+                              child: CheckboxListTile(
+                                contentPadding: EdgeInsets.zero, // <-- remove internal padding
+                                title: Text(option.displayName),
+                                value: isSelected,
+                                onChanged: (bool? value) {
+                                  if (value == true && !isSelected && !isMax) {
+                                    selectedList.add(option.displayName);
+                                  } else if (value == false) {
+                                    selectedList.remove(option.displayName);
+                                  }
+                                },
+                                controlAffinity: ListTileControlAffinity.leading,
+                                activeColor: Colors.green,
+                                checkColor: Colors.white,
+                                enabled: isSelected || !isMax,
+                              ),
+                            );
+                          });
+                        }).toList(),
+                      ),
                     ),
                   ),
-                ),
-              );
-            }),
+                );
+              }),
+            ),
           ],
         ),
       ],

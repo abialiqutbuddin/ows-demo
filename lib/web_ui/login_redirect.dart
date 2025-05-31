@@ -49,7 +49,8 @@ class LoginController2State extends State<LoginController2> {
         Get.snackbar("Error", e.toString());
       }
     } else {
-      stateController.toggleLoading(false);
+      await performLogin('20377228');
+      //stateController.toggleLoading(false);
       Get.snackbar("Error", "ITS Not Found");
     }
   }
@@ -259,11 +260,15 @@ class LoginController2State extends State<LoginController2> {
       }
       List<FamilyMember>? familyMembers = await Api.fetchFamilyData2(itsId);
       if (familyMembers != null && familyMembers.isNotEmpty) {
+        stateController.loggedinBy.value = familyMembers
+            .firstWhere((member) => member.itsNumber == int.parse(itsId))
+            .fullName;
         stateController.setUser(itsId, familyMembers);
         Get.toNamed(AppRoutes.family_screen);
       } else {
         Get.snackbar("Error", "No family members found.");
       }
+      //Get.toNamed(AppRoutes.select_module);
     } catch (e) {
       Get.snackbar("Login Failed", "Error: $e");
     } finally {

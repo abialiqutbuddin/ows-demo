@@ -18,11 +18,34 @@ class GlobalStateController extends GetxController {
   var userUmoor = ''.obs;
   var appliedByITS = ''.obs;
   var appliedByName = ''.obs;
+  var profileComplete = true.obs;
+  var familyProfileComplete = true.obs;
   var familyMembers = <FamilyMember>[].obs;
   final box = GetStorage();
   var token = ''.obs;
   var version = ''.obs;
+  RxString loggedinBy = ''.obs;
   RxBool updateProfile = false.obs;
+  RxBool devMode = false.obs;
+
+  RxBool intentCompleted = false.obs;
+  RxBool updateProfileLoading = false.obs;
+
+  final RxBool app_form_loading = false.obs;
+
+
+  Map<String, List<String>>? appInstructions;
+
+  RxString currentSection = ''.obs;
+
+
+  RxInt draftId = 0.obs;
+  RxInt reqId = 0.obs;
+
+  final Rx<Family> paktalimFamily = Family().obs;
+
+  RxString motherITS = ''.obs;
+  RxString fatherITS = ''.obs;
 
   final RxMap<String, Document?> documents = <String, Document?>{}.obs;
 
@@ -55,6 +78,8 @@ class GlobalStateController extends GetxController {
 
   //final Rx<FamilyMember> family = FamilyMember().obs;
   final Rx<UserProfile> user = UserProfile().obs;
+
+  final RxInt lastMarhala = 0.obs;
 
   // Store unique module IDs
   var moduleIds = <int>[].obs;

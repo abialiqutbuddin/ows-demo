@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:ows/controller/state_management/state_manager.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../api/api.dart';
 import '../../controller/login_controller.dart';
 import 'package:get/get.dart';
 
@@ -10,12 +11,19 @@ class LoginPageW extends StatelessWidget {
   LoginPageW({super.key});
 
   final GlobalStateController statecontroller =
-      Get.find<GlobalStateController>();
+  Get.find<GlobalStateController>();
+
 
   @override
   Widget build(BuildContext context) {
-    final double screenHeight = MediaQuery.of(context).size.height;
-    final double screenWidth = MediaQuery.of(context).size.width;
+    final double screenHeight = MediaQuery
+        .of(context)
+        .size
+        .height;
+    final double screenWidth = MediaQuery
+        .of(context)
+        .size
+        .width;
     final TextEditingController itsIdController = TextEditingController();
     final LoginController loginLogic = LoginController();
 
@@ -43,7 +51,7 @@ class LoginPageW extends StatelessWidget {
                         fit: BoxFit.cover,
                         color: Colors.black.withValues(alpha: 0.1),
                         colorBlendMode:
-                            BlendMode.darken, // Blend mode to apply the color
+                        BlendMode.darken, // Blend mode to apply the color
                       ),
                     ),
                   ),
@@ -87,7 +95,7 @@ class LoginPageW extends StatelessWidget {
                                 recognizer: TapGestureRecognizer()
                                   ..onTap = () async {
                                     final url =
-                                        Uri.parse('https://www.its52.com');
+                                    Uri.parse('https://www.its52.com');
                                     if (await canLaunchUrl(url)) {
                                       await launchUrl(
                                         url,
@@ -100,7 +108,7 @@ class LoginPageW extends StatelessWidget {
                               ),
                               const TextSpan(
                                   text:
-                                      'and then you will be able to login to OWS Website.'),
+                                  'and then you will be able to login to OWS Website.'),
                             ],
                           ),
                         ),
@@ -142,8 +150,8 @@ class LoginPageW extends StatelessWidget {
                                       filled: true,
                                       fillColor: const Color(0xfffffcf6),
                                       contentPadding:
-                                          const EdgeInsets.symmetric(
-                                              horizontal: 10, vertical: 10),
+                                      const EdgeInsets.symmetric(
+                                          horizontal: 10, vertical: 10),
                                     ),
                                   ),
                                 ),
@@ -164,11 +172,11 @@ class LoginPageW extends StatelessWidget {
                                 child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor:
-                                        const Color(0xFF008759), // Button color
+                                    const Color(0xFF008759), // Button color
                                     shadowColor:
-                                        Colors.greenAccent, // Button shadow
+                                    Colors.greenAccent, // Button shadow
                                     elevation:
-                                        8.0, // Elevation for shadow effect
+                                    8.0, // Elevation for shadow effect
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(
                                           10.0), // Rounded corners
@@ -200,12 +208,13 @@ class LoginPageW extends StatelessWidget {
                                       ),
                                       const SizedBox(
                                           width:
-                                              10), // Add spacing between icon and text
+                                          10),
+                                      // Add spacing between icon and text
                                       const Text(
                                         'ITS Authentication',
                                         style: TextStyle(
                                           color:
-                                              Colors.white, // Button text color
+                                          Colors.white, // Button text color
                                           fontSize: 18.0,
                                         ),
                                       ),
@@ -243,4 +252,5 @@ class LoginPageW extends StatelessWidget {
       ),
     );
   }
+
 }

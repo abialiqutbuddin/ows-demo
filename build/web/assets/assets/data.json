@@ -4,21 +4,21 @@
     "name": "Pre-medical",
     "marhala_id": 5,
     "study_id": 17,
-    "study": "A-Level\/ Pearson Edexcel\/ GED\/ International Baccalaureate Diploma"
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
   },
   {
     "id": 17,
     "name": "Pre-Engineering",
     "marhala_id": 5,
     "study_id": 17,
-    "study": "A-Level\/ Pearson Edexcel\/ GED\/ International Baccalaureate Diploma"
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
   },
   {
     "id": 19,
-    "name": "Arts\/Humanities",
+    "name": "Arts/Humanities",
     "marhala_id": 5,
     "study_id": 17,
-    "study": "A-Level\/ Pearson Edexcel\/ GED\/ International Baccalaureate Diploma"
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
   },
   {
     "id": 148,
@@ -190,21 +190,21 @@
   },
   {
     "id": 186,
-    "name": "BS\/ BSc Hons- Biochemistry- 4yrs",
+    "name": "BS/ BSc Hons- Biochemistry- 4yrs",
     "marhala_id": 6,
     "study_id": 116,
     "study": "Biological & Life Sciences"
   },
   {
     "id": 188,
-    "name": "BS\/BSc Hons Botany- 4yrs",
+    "name": "BS/BSc Hons Botany- 4yrs",
     "marhala_id": 6,
     "study_id": 116,
     "study": "Biological & Life Sciences"
   },
   {
     "id": 190,
-    "name": "BS\/ BSc Hons Zoology- 4yrs",
+    "name": "BS/ BSc Hons Zoology- 4yrs",
     "marhala_id": 6,
     "study_id": 116,
     "study": "Biological & Life Sciences"
@@ -253,14 +253,14 @@
   },
   {
     "id": 213,
-    "name": "BS\/ BSc Hons Physics- 4yrs",
+    "name": "BS/ BSc Hons Physics- 4yrs",
     "marhala_id": 6,
     "study_id": 119,
     "study": "Physics & Numerical Sciences"
   },
   {
     "id": 216,
-    "name": "BS\/ BSc Hons Applied Physics- 4yrs",
+    "name": "BS/ BSc Hons Applied Physics- 4yrs",
     "marhala_id": 6,
     "study_id": 119,
     "study": "Physics & Numerical Sciences"
@@ -435,14 +435,14 @@
   },
   {
     "id": 261,
-    "name": "BE\/BS\/BSc Industrial Engineering- 4yrs",
+    "name": "BE/BS/BSc Industrial Engineering- 4yrs",
     "marhala_id": 6,
     "study_id": 121,
     "study": "Engineering"
   },
   {
     "id": 264,
-    "name": "BE\/BSc\/B.TECH Textile Engineering- 4yrs",
+    "name": "BE/BSc/B.TECH Textile Engineering- 4yrs",
     "marhala_id": 6,
     "study_id": 121,
     "study": "Engineering"
@@ -463,7 +463,7 @@
   },
   {
     "id": 273,
-    "name": "BE\/BS Aerospace Engineering- 4yrs",
+    "name": "BE/BS Aerospace Engineering- 4yrs",
     "marhala_id": 6,
     "study_id": 121,
     "study": "Engineering"
@@ -484,7 +484,7 @@
   },
   {
     "id": 279,
-    "name": "BE\/BS Software Engineering-4yrs",
+    "name": "BE/BS Software Engineering-4yrs",
     "marhala_id": 6,
     "study_id": 122,
     "study": "Computer Science"
@@ -547,14 +547,14 @@
   },
   {
     "id": 291,
-    "name": "MS Data Sciences - 2\/ 2.5 yrs",
+    "name": "MS Data Sciences - 2/ 2.5 yrs",
     "marhala_id": 6,
     "study_id": 122,
     "study": "Computer Science"
   },
   {
     "id": 327,
-    "name": "BS\/BED\/ADE\/BED(Hons) Education-1.5\/2.5yrs",
+    "name": "BS/BED/ADE/BED(Hons) Education-1.5/2.5yrs",
     "marhala_id": 6,
     "study_id": 124,
     "study": "Education"
@@ -575,14 +575,14 @@
   },
   {
     "id": 335,
-    "name": "BS\/BED\/ADE\/BED(Hons) Education- 4yrs",
+    "name": "BS/BED/ADE/BED(Hons) Education- 4yrs",
     "marhala_id": 6,
     "study_id": 124,
     "study": "Education"
   },
   {
     "id": 337,
-    "name": "BS\/ B.ED English Language Teaching - 4yrs",
+    "name": "BS/ B.ED English Language Teaching - 4yrs",
     "marhala_id": 6,
     "study_id": 124,
     "study": "Education"
@@ -624,7 +624,7 @@
   },
   {
     "id": 357,
-    "name": "BS\/ BA HONS -International Relations- 4yrs",
+    "name": "BS/ BA HONS -International Relations- 4yrs",
     "marhala_id": 6,
     "study_id": 164,
     "study": "Social Sciences"
@@ -638,14 +638,14 @@
   },
   {
     "id": 361,
-    "name": "BS\/BA Hons- Political Science- 4yrs",
+    "name": "BS/BA Hons- Political Science- 4yrs",
     "marhala_id": 6,
     "study_id": 164,
     "study": "Social Sciences"
   },
   {
     "id": 363,
-    "name": "BS\/CERT Sociology- 4yrs",
+    "name": "BS/CERT Sociology- 4yrs",
     "marhala_id": 6,
     "study_id": 164,
     "study": "Social Sciences"
@@ -729,14 +729,14 @@
   },
   {
     "id": 396,
-    "name": "BS\/BA (Hons) Mass Communication-4yrs",
+    "name": "BS/BA (Hons) Mass Communication-4yrs",
     "marhala_id": 6,
     "study_id": 125,
     "study": "Media Sciences"
   },
   {
     "id": 397,
-    "name": "BS Film\/TV- 4yrs",
+    "name": "BS Film/TV- 4yrs",
     "marhala_id": 6,
     "study_id": 125,
     "study": "Media Sciences"
@@ -771,7 +771,7 @@
   },
   {
     "id": 403,
-    "name": "BS\/BEMS Media Studies -",
+    "name": "BS/BEMS Media Studies -",
     "marhala_id": 6,
     "study_id": 125,
     "study": "Media Sciences"
@@ -785,21 +785,21 @@
   },
   {
     "id": 412,
-    "name": "B.Arch\/ BS Architecture - 5yrs",
+    "name": "B.Arch/ BS Architecture - 5yrs",
     "marhala_id": 6,
     "study_id": 126,
     "study": "Art & Design"
   },
   {
     "id": 414,
-    "name": "BE\/B.ARCH Architecture & Planning- 4yrs",
+    "name": "BE/B.ARCH Architecture & Planning- 4yrs",
     "marhala_id": 6,
     "study_id": 126,
     "study": "Art & Design"
   },
   {
     "id": 415,
-    "name": "BE\/B ARCH Architecture & Planning- 5yrs",
+    "name": "BE/B ARCH Architecture & Planning- 5yrs",
     "marhala_id": 6,
     "study_id": 126,
     "study": "Art & Design"
@@ -813,7 +813,7 @@
   },
   {
     "id": 418,
-    "name": "BS\/BSc Hons\/BFD\/B.DES\/BBA Fashion Design- 4yrs",
+    "name": "BS/BSc Hons/BFD/B.DES/BBA Fashion Design- 4yrs",
     "marhala_id": 6,
     "study_id": 126,
     "study": "Art & Design"
@@ -844,217 +844,217 @@
     "name": "DIP Automobile",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 426,
     "name": "DIP General Electric",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 427,
     "name": "DIP Mechanical",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 429,
     "name": "Fabrication, Welding & Pipe work",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 438,
     "name": "Auto Mechanic",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 439,
-    "name": "Computer Hardware\/ Operator",
+    "name": "Computer Hardware/ Operator",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 440,
     "name": "Electrician",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 441,
     "name": "Industrial Electronics",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 442,
     "name": "Interior Designing",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 443,
     "name": "Mechanical Drafting",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 445,
     "name": "Electronics",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 446,
     "name": "Leather Garments",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 447,
-    "name": "CERT\/ DIP in IT",
+    "name": "CERT/ DIP in IT",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 448,
-    "name": "CERT\/ DIP Civil",
+    "name": "CERT/ DIP Civil",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 449,
-    "name": "CERT\/ DIP Electrical",
+    "name": "CERT/ DIP Electrical",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 452,
     "name": "Mechanical Fitting & Plant Maintenance- 1 yr",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 457,
     "name": "Steel Fabrication",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 469,
     "name": "Computer Application- 12 months",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 470,
     "name": "Information Technology- 12 months",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 471,
     "name": "3D Animation- 6 months",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 472,
     "name": "Graphic Designing-6 months",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 474,
     "name": "Web Technology- 12 months",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 476,
     "name": "Multimedia",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 479,
-    "name": "C\/C++\/C#\/Java- 2 months",
+    "name": "C/C++/C#/Java- 2 months",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 481,
     "name": "Web Designing- 2 months",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 482,
     "name": "Web Programming- 2 months",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 483,
     "name": "Mobile Applications- 2 months",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 484,
     "name": "ACCP PRO",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 485,
     "name": "Engineering Diplomas- 3yrs",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 488,
     "name": "Electrical Technology- 3yrs",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 489,
     "name": "Civil Technology- 3yrs",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 493,
@@ -1072,7 +1072,7 @@
   },
   {
     "id": 495,
-    "name": "Arts\/Humanities",
+    "name": "Arts/Humanities",
     "marhala_id": 4,
     "study_id": 129,
     "study": "SSC-(AKU-EB)"
@@ -1086,7 +1086,7 @@
   },
   {
     "id": 499,
-    "name": "Arts\/Humanities",
+    "name": "Arts/Humanities",
     "marhala_id": 4,
     "study_id": 130,
     "study": "SSC-(Provincial Board)"
@@ -1100,7 +1100,7 @@
   },
   {
     "id": 503,
-    "name": "Arts\/Humanities",
+    "name": "Arts/Humanities",
     "marhala_id": 4,
     "study_id": 131,
     "study": "GCSE (O Levels)"
@@ -1128,7 +1128,7 @@
   },
   {
     "id": 507,
-    "name": "Arts\/Humanities",
+    "name": "Arts/Humanities",
     "marhala_id": 4,
     "study_id": 132,
     "study": "IGCSE"
@@ -1163,7 +1163,7 @@
   },
   {
     "id": 512,
-    "name": "Arts\/Humanities",
+    "name": "Arts/Humanities",
     "marhala_id": 5,
     "study_id": 133,
     "study": "HSSC-(AKU-EB)"
@@ -1198,7 +1198,7 @@
   },
   {
     "id": 518,
-    "name": "Arts\/Humanities",
+    "name": "Arts/Humanities",
     "marhala_id": 5,
     "study_id": 134,
     "study": "HSSC-(Ziauddin Board)"
@@ -1229,56 +1229,56 @@
     "name": "Auto & Diesel",
     "marhala_id": 5,
     "study_id": 137,
-    "study": "Diploma of Associate Engineer"
+    "study": "Diploma of Associate Engineer (DAE)"
   },
   {
     "id": 528,
     "name": "Architecture Technology",
     "marhala_id": 5,
     "study_id": 137,
-    "study": "Diploma of Associate Engineer"
+    "study": "Diploma of Associate Engineer (DAE)"
   },
   {
     "id": 529,
     "name": "Bio-Medical",
     "marhala_id": 5,
     "study_id": 137,
-    "study": "Diploma of Associate Engineer"
+    "study": "Diploma of Associate Engineer (DAE)"
   },
   {
     "id": 531,
     "name": "Chemical Engineering",
     "marhala_id": 5,
     "study_id": 137,
-    "study": "Diploma of Associate Engineer"
+    "study": "Diploma of Associate Engineer (DAE)"
   },
   {
     "id": 533,
     "name": "Computer Information Technology- 3yrs",
     "marhala_id": 5,
     "study_id": 137,
-    "study": "Diploma of Associate Engineer"
+    "study": "Diploma of Associate Engineer (DAE)"
   },
   {
     "id": 548,
     "name": "Refrigeration & Air Conditioning",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 550,
     "name": "Software Engineering",
     "marhala_id": 5,
     "study_id": 137,
-    "study": "Diploma of Associate Engineer"
+    "study": "Diploma of Associate Engineer (DAE)"
   },
   {
     "id": 555,
     "name": "Textile Dyeing & Printing",
     "marhala_id": 5,
     "study_id": 137,
-    "study": "Diploma of Associate Engineer"
+    "study": "Diploma of Associate Engineer (DAE)"
   },
   {
     "id": 685,
@@ -2237,7 +2237,7 @@
     "name": "Diploma in Family Medicine",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 4820,
@@ -2248,7 +2248,7 @@
   },
   {
     "id": 4824,
-    "name": "BS\/BA Hons- Political Science- 4yrs",
+    "name": "BS/BA Hons- Political Science- 4yrs",
     "marhala_id": 6,
     "study_id": 124,
     "study": "Education"
@@ -2496,7 +2496,7 @@
     "name": "Textile design",
     "marhala_id": 6,
     "study_id": 138,
-    "study": "Vocational Training\/Diploma"
+    "study": "Vocational Training/Diploma"
   },
   {
     "id": 4915,
@@ -2507,7 +2507,7 @@
   },
   {
     "id": 4929,
-    "name": "BS\/ BSc Geology- 4yrs",
+    "name": "BS/ BSc Geology- 4yrs",
     "marhala_id": 6,
     "study_id": 118,
     "study": "Earth & Environmental Sciences"
@@ -2556,14 +2556,14 @@
   },
   {
     "id": 4948,
-    "name": "BS\/BSc Mathematics- 4yrs",
+    "name": "BS/BSc Mathematics- 4yrs",
     "marhala_id": 6,
     "study_id": 119,
     "study": "Physics & Numerical Sciences"
   },
   {
     "id": 4950,
-    "name": "Arts\/Humanities",
+    "name": "Arts/Humanities",
     "marhala_id": 5,
     "study_id": 135,
     "study": "HSSC-(Provincial Board)"
@@ -2573,7 +2573,7 @@
     "name": "Fight Officer",
     "marhala_id": 6,
     "study_id": 138,
-    "study": "Vocational Training\/Diploma"
+    "study": "Vocational Training/Diploma"
   },
   {
     "id": 4959,
@@ -2584,7 +2584,7 @@
   },
   {
     "id": 4960,
-    "name": "BS\/BED\/ADE\/BED(Hons) Education- 2 yrs",
+    "name": "BS/BED/ADE/BED(Hons) Education- 2 yrs",
     "marhala_id": 6,
     "study_id": 124,
     "study": "Education"
@@ -2783,7 +2783,7 @@
     "name": "Culinary Arts and Baking",
     "marhala_id": 6,
     "study_id": 138,
-    "study": "Vocational Training\/Diploma"
+    "study": "Vocational Training/Diploma"
   },
   {
     "id": 5039,
@@ -2864,17 +2864,17 @@
   },
   {
     "id": 5065,
-    "name": "CERT\/ DIP Montessori Teacher Training",
+    "name": "CERT/ DIP Montessori Teacher Training",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 5068,
     "name": "Business",
     "marhala_id": 5,
     "study_id": 17,
-    "study": "A-Level\/ Pearson Edexcel\/ GED\/ International Baccalaureate Diploma"
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
   },
   {
     "id": 5070,
@@ -2885,7 +2885,7 @@
   },
   {
     "id": 5071,
-    "name": "S\/ BSc Hons Physics- 4yrs",
+    "name": "S/ BSc Hons Physics- 4yrs",
     "marhala_id": 6,
     "study_id": 119,
     "study": "Physics & Numerical Sciences"
@@ -3004,7 +3004,7 @@
   },
   {
     "id": 5139,
-    "name": "BS\/ BSc Hons Textile Science- 4yrs",
+    "name": "BS/ BSc Hons Textile Science- 4yrs",
     "marhala_id": 6,
     "study_id": 117,
     "study": "Chemical & Material Sciences"
@@ -3063,7 +3063,7 @@
     "name": "Advanced Diploma in Accounting",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 5162,
@@ -3098,7 +3098,7 @@
     "name": "Engineering",
     "marhala_id": 5,
     "study_id": 17,
-    "study": "A-Level\/ Pearson Edexcel\/ GED\/ International Baccalaureate Diploma"
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
   },
   {
     "id": 5177,
@@ -3109,7 +3109,7 @@
   },
   {
     "id": 5180,
-    "name": "BSc\/BTD\/B.Des\/ Textile Design- 4yrs",
+    "name": "BSc/BTD/B.Des/ Textile Design- 4yrs",
     "marhala_id": 6,
     "study_id": 126,
     "study": "Art & Design"
@@ -3137,14 +3137,14 @@
   },
   {
     "id": 5204,
-    "name": "BS\/ BSc Hons Chemistry- 4yrs",
+    "name": "BS/ BSc Hons Chemistry- 4yrs",
     "marhala_id": 6,
     "study_id": 117,
     "study": "Chemical & Material Sciences"
   },
   {
     "id": 5206,
-    "name": "BE\/BS Software Engineering-",
+    "name": "BE/BS Software Engineering-",
     "marhala_id": 6,
     "study_id": 121,
     "study": "Engineering"
@@ -3224,7 +3224,7 @@
     "name": "General",
     "marhala_id": 5,
     "study_id": 17,
-    "study": "A-Level\/ Pearson Edexcel\/ GED\/ International Baccalaureate Diploma"
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
   },
   {
     "id": 5250,
@@ -3259,7 +3259,7 @@
     "name": "Computer Operator",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 5269,
@@ -3322,7 +3322,7 @@
     "name": "Diploma in Textile Processing Technology",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 5318,
@@ -3392,14 +3392,14 @@
     "name": "CERT Electronics- 6months",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 5363,
     "name": "Commerce",
     "marhala_id": 5,
     "study_id": 17,
-    "study": "A-Level\/ Pearson Edexcel\/ GED\/ International Baccalaureate Diploma"
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
   },
   {
     "id": 5366,
@@ -3413,7 +3413,7 @@
     "name": "Diploma in Sonography ",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 5373,
@@ -3441,7 +3441,7 @@
     "name": "Higher National Diploma (HND)",
     "marhala_id": 6,
     "study_id": 138,
-    "study": "Vocational Training\/Diploma"
+    "study": "Vocational Training/Diploma"
   },
   {
     "id": 5393,
@@ -3504,7 +3504,7 @@
     "name": "HOME SCIENCE",
     "marhala_id": 5,
     "study_id": 17,
-    "study": "A-Level\/ Pearson Edexcel\/ GED\/ International Baccalaureate Diploma"
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
   },
   {
     "id": 5422,
@@ -3525,7 +3525,7 @@
     "name": "Baking & Patisserie",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 5441,
@@ -3539,14 +3539,14 @@
     "name": "Ticketing Course",
     "marhala_id": 6,
     "study_id": 138,
-    "study": "Vocational Training\/Diploma"
+    "study": "Vocational Training/Diploma"
   },
   {
     "id": 5471,
     "name": "Diploma in Business Administration (D.B.A)",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 5477,
@@ -3557,7 +3557,7 @@
   },
   {
     "id": 5478,
-    "name": "BS\/BEMS Media Studies - 4yrs",
+    "name": "BS/BEMS Media Studies - 4yrs",
     "marhala_id": 6,
     "study_id": 125,
     "study": "Media Sciences"
@@ -3567,7 +3567,7 @@
     "name": "Big Data Analytics ",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 5481,
@@ -3609,14 +3609,14 @@
     "name": "Social Sciences",
     "marhala_id": 5,
     "study_id": 17,
-    "study": "A-Level\/ Pearson Edexcel\/ GED\/ International Baccalaureate Diploma"
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
   },
   {
     "id": 5508,
     "name": "Orton-Gillingham Practitioner",
     "marhala_id": 6,
     "study_id": 138,
-    "study": "Vocational Training\/Diploma"
+    "study": "Vocational Training/Diploma"
   },
   {
     "id": 5510,
@@ -3637,14 +3637,14 @@
     "name": "Advanced Diploma In Software Engineering (ADSE)",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 5532,
     "name": "ADMS - Advanced Diploma in Media Studies",
     "marhala_id": 6,
     "study_id": 138,
-    "study": "Vocational Training\/Diploma"
+    "study": "Vocational Training/Diploma"
   },
   {
     "id": 5534,
@@ -3679,7 +3679,7 @@
     "name": "Communication & Design",
     "marhala_id": 5,
     "study_id": 17,
-    "study": "A-Level\/ Pearson Edexcel\/ GED\/ International Baccalaureate Diploma"
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
   },
   {
     "id": 5574,
@@ -3707,21 +3707,21 @@
     "name": "Diploma of Associate Engineer",
     "marhala_id": 5,
     "study_id": 137,
-    "study": "Diploma of Associate Engineer"
+    "study": "Diploma of Associate Engineer (DAE)"
   },
   {
     "id": 5599,
     "name": "Computer Science",
     "marhala_id": 5,
     "study_id": 17,
-    "study": "A-Level\/ Pearson Edexcel\/ GED\/ International Baccalaureate Diploma"
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
   },
   {
     "id": 5611,
     "name": "Polymer Science and Rubber Technology",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 5613,
@@ -3752,13 +3752,6 @@
     "study": "HSSC-(Ziauddin Board)"
   },
   {
-    "id": 5641,
-    "name": "Computer Science, Biology",
-    "marhala_id": 4,
-    "study_id": 131,
-    "study": "GCSE (O Levels)"
-  },
-  {
     "id": 5642,
     "name": "Other",
     "marhala_id": 4,
@@ -3773,15 +3766,8 @@
     "study": "Master of Business Admininstration"
   },
   {
-    "id": 5649,
-    "name": "Psychology",
-    "marhala_id": 5,
-    "study_id": 17,
-    "study": "A-Level\/ Pearson Edexcel\/ GED\/ International Baccalaureate Diploma"
-  },
-  {
     "id": 5651,
-    "name": "Arts\/Humanities",
+    "name": "Arts/Humanities",
     "marhala_id": 5,
     "study_id": 161,
     "study": "Other"
@@ -3798,7 +3784,7 @@
     "name": "Technical Diploma in Physiotherapy (TDPT)",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 5654,
@@ -3914,7 +3900,7 @@
   },
   {
     "id": 5795,
-    "name": "BS\/BSc Hons Microbiology-",
+    "name": "BS/BSc Hons Microbiology-",
     "marhala_id": 6,
     "study_id": 115,
     "study": "Medical & Related"
@@ -3956,7 +3942,7 @@
   },
   {
     "id": 5847,
-    "name": "BS\/BA Hons\/B.DES Communication Design- 4yrs",
+    "name": "BS/BA Hons/B.DES Communication Design- 4yrs",
     "marhala_id": 6,
     "study_id": 126,
     "study": "Art & Design"
@@ -3966,7 +3952,7 @@
     "name": "Diploma in Culinary Arts",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 5856,
@@ -4033,7 +4019,7 @@
   },
   {
     "id": 5879,
-    "name": "BS\/ BA Hons Mass Communication- 4yrs",
+    "name": "BS/ BA Hons Mass Communication- 4yrs",
     "marhala_id": 6,
     "study_id": 123,
     "study": "Commerce & Management Sciences"
@@ -4043,7 +4029,7 @@
     "name": "Diploma in Travel & Tourism Consultant",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 5888,
@@ -4106,25 +4092,25 @@
     "name": "MS Office",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 5944,
     "name": "Advanced Excel",
     "marhala_id": 6,
     "study_id": 138,
-    "study": "Vocational Training\/Diploma"
+    "study": "Vocational Training/Diploma"
   },
   {
     "id": 5945,
     "name": "Watch Repairing",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 5946,
-    "name": "BS\/BA Hons- Psychology- 4yrs",
+    "name": "BS/BA Hons- Psychology- 4yrs",
     "marhala_id": 6,
     "study_id": 164,
     "study": "Social Sciences"
@@ -4589,7 +4575,7 @@
     "name": "Graphics Designing",
     "marhala_id": 6,
     "study_id": 138,
-    "study": "Vocational Training\/Diploma"
+    "study": "Vocational Training/Diploma"
   },
   {
     "id": 6048,
@@ -4778,7 +4764,7 @@
     "name": "Nutrition and Dietics Courses",
     "marhala_id": 6,
     "study_id": 138,
-    "study": "Vocational Training\/Diploma"
+    "study": "Vocational Training/Diploma"
   },
   {
     "id": 6075,
@@ -4810,10 +4796,10 @@
   },
   {
     "id": 6079,
-    "name": "SEAL Course \u2013 Systematically Enhanced Ability to Lead",
+    "name": "SEAL Course – Systematically Enhanced Ability to Lead",
     "marhala_id": 5,
     "study_id": 136,
-    "study": "Vocational Training\/Diploma"
+    "study": "Diploma/ Vocational Training"
   },
   {
     "id": 6112,
@@ -4838,7 +4824,7 @@
   },
   {
     "id": 6115,
-    "name": "BS\/BA Hons\/B.DES Communication Design- 4yrs",
+    "name": "BS/BA Hons/B.DES Communication Design- 4yrs",
     "marhala_id": 6,
     "study_id": 126,
     "study": "Art & Design"
@@ -4877,5 +4863,929 @@
     "marhala_id": 6,
     "study_id": 123,
     "study": "Commerce & Management Sciences"
+  },
+  {
+    "id": 6144,
+    "name": "CA - 5.5 yrs",
+    "marhala_id": 6,
+    "study_id": 123,
+    "study": "Commerce & Management Sciences"
+  },
+  {
+    "id": 6283,
+    "name": "Accounting ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6284,
+    "name": "Afrikaans ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6285,
+    "name": "Arabic ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6286,
+    "name": "Art & Design ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6287,
+    "name": "Biblical Studies",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6288,
+    "name": "Biology ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6289,
+    "name": "Chemistry ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6290,
+    "name": "Chinese Language",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6291,
+    "name": "Classical Studies ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6292,
+    "name": "Design & Technology ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6293,
+    "name": "Digital Media & Design ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6294,
+    "name": "Drama ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6295,
+    "name": "Economics ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6296,
+    "name": "English ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6297,
+    "name": "Environmental Management",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6298,
+    "name": "French ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6299,
+    "name": "Geography ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6300,
+    "name": "German ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6301,
+    "name": "Global Perspectives & Research ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6302,
+    "name": "Hinduism ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6303,
+    "name": "History ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6304,
+    "name": "Information Technology ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6305,
+    "name": "Islamic Studies ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6306,
+    "name": "Law ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6307,
+    "name": "Marine Science ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6308,
+    "name": "Mathematics ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6309,
+    "name": "Media Studies ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6310,
+    "name": "Music ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6311,
+    "name": "Physics ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6312,
+    "name": "Portuguese ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6313,
+    "name": "Sociology ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6314,
+    "name": "Spanish Language",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6315,
+    "name": "Sport & Physical Education",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6316,
+    "name": "Tamil ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6317,
+    "name": "Thinking Skills ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6318,
+    "name": "Travel & Tourism ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6319,
+    "name": "Urdu ",
+    "marhala_id": 5,
+    "study_id": 17,
+    "study": "A-Level/ Pearson Edexcel/ GED/ International Baccalaureate Diploma"
+  },
+  {
+    "id": 6409,
+    "name": "Accounting ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6410,
+    "name": "Agriculture ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6411,
+    "name": "Arabic ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6412,
+    "name": "Art & Design ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6413,
+    "name": "Bangladesh Studies ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6414,
+    "name": "Bengali ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6415,
+    "name": "Biblical Studies ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6416,
+    "name": "Business Studies ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6417,
+    "name": "Chemistry ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6418,
+    "name": "Design & Technology ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6419,
+    "name": "Economics ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6420,
+    "name": "English Language ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6421,
+    "name": "Environmental Management ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6422,
+    "name": "Fashion & Textiles ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6423,
+    "name": "Food & Nutrition ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6424,
+    "name": "French ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6425,
+    "name": "Geography ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6426,
+    "name": "Global Perspectives ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6427,
+    "name": "Hinduism ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6428,
+    "name": "History ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6429,
+    "name": "Islamic Studies ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6430,
+    "name": "Islamiyat ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6431,
+    "name": "Literature in English ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6432,
+    "name": "Marine Science ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6433,
+    "name": "Mathematics ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6434,
+    "name": "Mathematics (Syllabus D) ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6435,
+    "name": "Pakistan Studies ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6436,
+    "name": "Physics ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6437,
+    "name": "Religious Studies ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6438,
+    "name": "Science ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6439,
+    "name": "Setswana ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6440,
+    "name": "Sinhala ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6441,
+    "name": "Sociology ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6442,
+    "name": "Statistics ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6443,
+    "name": "Tamil ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6444,
+    "name": "Travel & Tourism ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6445,
+    "name": "Urdu ",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6446,
+    "name": "Computer Science/ Biology",
+    "marhala_id": 4,
+    "study_id": 131,
+    "study": "GCSE (O Levels)"
+  },
+  {
+    "id": 6472,
+    "name": "Accounting ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6473,
+    "name": "Afrikaans ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6474,
+    "name": "Agriculture ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6475,
+    "name": "Arabic ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6476,
+    "name": "Art & Design ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6477,
+    "name": "Bahasa Indonesia ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6478,
+    "name": "Biology",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6479,
+    "name": "Business Studies ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6480,
+    "name": "Chemistry ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6481,
+    "name": "Chinese ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6482,
+    "name": "Chinese (Mandarin) ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6483,
+    "name": "Computer Science ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6484,
+    "name": "Design & Technology ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6485,
+    "name": "Drama ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6486,
+    "name": "Economics ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6487,
+    "name": "English ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6488,
+    "name": "Enterprise ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6489,
+    "name": "Environmental Management ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6490,
+    "name": "Food & Nutrition ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6491,
+    "name": "French ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6492,
+    "name": "Geography ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6493,
+    "name": "German ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6494,
+    "name": "Global Perspectives ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6495,
+    "name": "Hindi as a Second Language ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6496,
+    "name": "History ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6497,
+    "name": "Information and Communication Technology ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6498,
+    "name": "IsiZulu as a Second Language ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6499,
+    "name": "Islamiyat ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6500,
+    "name": "Italian ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6501,
+    "name": "Latin ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6502,
+    "name": "Malay ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6503,
+    "name": "Marine Science ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6504,
+    "name": "Mathematics ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6505,
+    "name": "Mathematics (US) ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6506,
+    "name": "Music ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6507,
+    "name": "Pakistan Studies ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6508,
+    "name": "Physical Education ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6509,
+    "name": "Physical Science ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6510,
+    "name": "Physics ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6511,
+    "name": "Portuguese ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6512,
+    "name": "Religious Studies ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6513,
+    "name": "Sanskrit ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6514,
+    "name": "Science ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6515,
+    "name": "Sciences ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6516,
+    "name": "Setswana ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6517,
+    "name": "Sociology ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6518,
+    "name": "Spanish ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6519,
+    "name": "Swahili ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6520,
+    "name": "Thai ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6521,
+    "name": "Travel & Tourism ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6522,
+    "name": "Turkish ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6523,
+    "name": "Urdu as a Second Language ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6524,
+    "name": "Vietnamese ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6525,
+    "name": "World Literature ",
+    "marhala_id": 4,
+    "study_id": 132,
+    "study": "IGCSE"
+  },
+  {
+    "id": 6564,
+    "name": "Certified Accounting Technician (CAT)",
+    "marhala_id": 6,
+    "study_id": 123,
+    "study": "Commerce & Management Sciences"
+  },
+  {
+    "id": 6575,
+    "name": "Library and Information Sciences",
+    "marhala_id": 6,
+    "study_id": 124,
+    "study": "Education"
   }
 ]

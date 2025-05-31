@@ -2,9 +2,11 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:ows/controller/state_management/state_manager.dart';
 import '../api/api.dart';
 import '../model/institutes_model.dart';
+import '../model/member_model.dart';
 import '../model/update_paktalim_model.dart';
 import 'package:intl/intl.dart';
 
@@ -40,12 +42,10 @@ class UpdatePaktalimController extends GetxController {
       List<dynamic> jsonData = jsonDecode(jsonString);
       countryCityData.assignAll(jsonData.cast<Map<String, dynamic>>()); // Assign parsed data
     } catch (e) {
-      print("Error loading JSON: $e");
     }
   }
 
-  Future<void> submitForm() async {
-    UpdateProfileRequest profileData = await getProfileData();
+  Future<void> submitForm(UpdateProfileRequest profileData) async {
     //printProfileData(profileData);
     Map<String,dynamic> response = await Api.postProxiedData(
         pId: int.parse(profileData.pId),
@@ -66,12 +66,38 @@ class UpdatePaktalimController extends GetxController {
         duration: profileData.duration,
         sdate: profileData.sdate);
     if(response.containsKey('success')) {
+      statecontroller.updateProfileLoading.value = true;
       Get.back();
       Get.snackbar("result",response['success'],backgroundColor: Colors.brown);
+      final userProfile = await Api.fetchUserProfile(statecontroller.user.value.itsId.toString());
+      if (userProfile != null) {
+        GetStorage().write('user', userProfile);
+        statecontroller.user.value = userProfile;
+        statecontroller.lastMarhala.value = fetchHighestMarhalaId(userProfile)!;
+        //await reqFormController.fetchRequests('', '', stateController.user.value.itsId.toString(), '');
+        statecontroller.updateProfileLoading.value = false;
+      } else {
+        statecontroller.updateProfileLoading.value = false;
+        Get.snackbar("Error", "Profile not found for ITS ID: ${statecontroller.user.value.itsId.toString()}");
+      }
     }else{
       Get.snackbar("result",response.toString(),backgroundColor: Colors.redAccent);
     }
   }
+
+  int? fetchHighestMarhalaId(UserProfile profile) {
+    final edus = profile.education;
+    if (edus == null || edus.isEmpty) return 0;
+
+    int? maxId;
+    for (final e in edus) {
+      if (maxId == null || e.marhalaId! > maxId) {
+        maxId = e.marhalaId;
+      }
+    }
+    return maxId;
+  }
+
 
   /// Load JSON data from assets
   Future<void> loadJamaatData() async {
@@ -80,7 +106,6 @@ class UpdatePaktalimController extends GetxController {
       List<dynamic> jsonData = jsonDecode(jsonString);
       jamaatData.assignAll(jsonData.cast<Map<String, dynamic>>()); // Assign parsed data
     } catch (e) {
-      print("Error loading JSON: $e");
     }
   }
 
@@ -113,35 +138,152 @@ class UpdatePaktalimController extends GetxController {
   }
 
   /// **Create UpdateProfileRequest object from Rx values**
-  Future<UpdateProfileRequest> getProfileData() async {
+  Future<void> getProfileData() async {
     await updateJamaatId();
-    String className = allClasses.firstWhere(
-          (element) => element["id"] == classId.value,
-      orElse: () => {},
-    )["name"] ?? "";
 
-    await calculateDuration(sdate, edate);
+    String className = selectedClass.value!['name'];
 
-    return UpdateProfileRequest(
+    await calculateStartDate(selectedCourseDuration.value!['id'], edate.value.toString());
+
+    print('pId: ${statecontroller.user.value.id.toString()}');
+    print('itsId: ${statecontroller.user.value.itsId.toString()}');
+    print('mId: ${selectedMarhala.value.toString()}');
+    print('jId: ${jId.value}');
+    print('cId: ${cId.value}');
+    print('cityId: ${cityId.value}');
+    print('imani: ${imani.value}');
+    print('iId: ${iId.value}');
+    print('subId: ${subId.isNotEmpty ? subId.toList() : null}');
+    print('scholarshipTaken: ${scholarshipTaken.value == 'Yes' ? 1.toString() : 0.toString()}');
+    print('qardan: ${selectedQardan2.value != null ? selectedQardan2.value!['name'] ?? '' : 'None'}');
+    print('cert: ${cert.value}');
+    print('scholar: ${selectedScholarship2.value?['name'] ?? 'None'}');
+    print('classId: $className');
+    print('sId: ${sId.value}');
+    print('edate: ${edate.value}');
+    print('sdate: ${sdate.value}');
+    print('duration: ${selectedCourseDuration.value!['id']}');
+
+    var profileData =  UpdateProfileRequest(
       pId: statecontroller.user.value.id.toString(),
       itsId: statecontroller.user.value.itsId.toString(),
       mId: selectedMarhala.value.toString(),
-      jId: jId.value,
+      jId: statecontroller.user.value.jamaatId.toString(),
       cId: cId.value,
       cityId: cityId.value,
       imani: imani.value,
       iId: iId.value,
       subId: subId.isNotEmpty ? subId.toList() : null,
       scholarshipTaken: scholarshipTaken.value=='Yes' ? 1.toString() : 0.toString(),
-      qardan: qardan.value,
+      qardan: selectedQardan2.value != null ? selectedQardan2.value!['name'] ?? '' : 'None',
       cert: cert.value,
-      scholar: scholar.value,
+      scholar: selectedScholarship2.value?['name'] ?? 'None',
       classId: className,
       sId: sId.value,
       edate: edate.value,
       sdate: sdate.value,
-      duration: duration.value,
+      duration: selectedCourseDuration.value!['id'].toString(),
     );
+    await submitForm(profileData);
+  }
+
+  int getStandardIdByClassName(String className) {
+    for (var classItem in allClasses) {
+      if (classItem['name'].toString().toLowerCase() == className.toLowerCase()) {
+        return classItem['standard_id'];
+      }
+    }
+    return 0; // Return null if class not found or standard_id not available
+  }
+
+  int getMarhalaIdbyClassName(String className) {
+    for (var classItem in allClasses) {
+      if (classItem['name'].toString().toLowerCase() == className.toLowerCase()) {
+        return classItem['marhala'];
+      }
+    }
+    return 0;
+  }
+
+  void sortSelectedStudiedByRank() {
+    selectedStudied.sort((a, b) {
+      final classA = allClasses.firstWhere((element) => element['name'] == a);
+      final classB = allClasses.firstWhere((element) => element['name'] == b);
+      return classA['rank'].compareTo(classB['rank']);
+    });
+  }
+
+  void sortSelectedNotStudiedByRank() {
+    selectedNotStudied.sort((a, b) {
+      final classA = allClasses.firstWhere((element) => element['name'] == a);
+      final classB = allClasses.firstWhere((element) => element['name'] == b);
+      return classA['rank'].compareTo(classB['rank']);
+    });
+  }
+
+
+  Future<void> getProfileDataforMarhala1() async {
+    await updateJamaatId();
+    sortSelectedStudiedByRank();
+    var qardanName;
+    var scholarName;
+    if(selectedScholarship2.value!=null){
+      scholarName = selectedScholarship2.value!['name'];
+    }else{
+      scholarName = 'None';
+    }
+    if(selectedQardan2.value!=null){
+      qardanName = selectedQardan2.value!['name'];
+    }else{
+      qardanName = 'None';
+    }
+    // Shared profile fields
+    String pId = statecontroller.user.value.id.toString();
+    String itsId = statecontroller.user.value.itsId.toString();
+    String jIdValue = statecontroller.user.value.jamaatId.toString();
+    String cIdValue = cId.value;
+    String cityIdValue = cityId.value;
+    String imaniValue = imani.value;
+    String iIdValue = iId.value;
+    String qardanValue = qardanName;
+    String certValue = cert.value;
+    String scholarValue = scholarName;
+    String scholarshipTakenValue = scholarshipTaken.value == 'Yes' ? "1" : "0";
+
+    // Initial end date
+    DateTime endDate = DateFormat("yyyy-MM-dd").parse(edate.value);
+
+    // Generate and print a profile for each selected class
+    for (int i = selectedStudied.length - 1; i >= 0; i--) {
+      String className = selectedStudied[i];
+      DateTime startDate = DateTime(endDate.year - 1, endDate.month, endDate.day);
+      int sId = getStandardIdByClassName(className);
+      int mId = getMarhalaIdbyClassName(className);
+
+      final profile = UpdateProfileRequest(
+        pId: pId,
+        itsId: itsId,
+        mId: mId.toString(),
+        jId: jIdValue,
+        cId: cIdValue,
+        cityId: cityIdValue,
+        imani: imaniValue,
+        iId: iIdValue,
+        subId: null,
+        scholarshipTaken: scholarshipTakenValue,
+        qardan: qardanValue,
+        cert: certValue,
+        scholar: scholarValue,
+        classId: className,
+        sId: sId.toString(),
+        edate: DateFormat("yyyy-MM-dd").format(endDate),
+        sdate: DateFormat("yyyy-MM-dd").format(startDate),
+        duration: "12",
+      );
+
+      await submitForm(profile);
+      endDate = startDate.subtract(Duration(days: 1));
+    }
   }
 
   int getMonthDifference(DateTime startDate, DateTime endDate) {
@@ -151,21 +293,53 @@ class UpdatePaktalimController extends GetxController {
     return (yearsDiff * 12) + monthsDiff; // Convert years to months and add remaining months
   }
 
-  Future<void> calculateDuration(RxString sdate, RxString edate) async {
-    if (sdate.value.isNotEmpty && edate.value.isNotEmpty) {
+  Future<void> calculateStartDate(int courseDuration, String edate) async {
+    if (edate.isNotEmpty) {
       try {
-        DateTime startDate = DateFormat("yyyy-MM-dd").parse(sdate.value);
-        DateTime endDate = DateFormat("yyyy-MM-dd").parse(edate.value);
-
-        int diffDays = getMonthDifference(startDate, endDate);
-
-        duration.value = diffDays.toString(); // Update the RxInt variable
+        int durationMonths = courseDuration;
+        DateTime endDate = DateFormat("yyyy-MM-dd").parse(edate);
+        DateTime startDate = DateTime(endDate.year, endDate.month - durationMonths, endDate.day);
+        sdate.value = DateFormat("yyyy-MM-dd").format(startDate);
       } catch (e) {
-        print("Error parsing dates: $e");
-        duration.value = 0.toString(); // Default value in case of an error
+        sdate.value = ""; // Default value in case of error
       }
     } else {
-      duration.value = 0.toString(); // Default if dates are empty
+      sdate.value = ""; // Default if inputs are empty
+    }
+  }
+
+  final List<Map<String, dynamic>> qardanOptions = [
+    {"id": 1, "name": "Self Arranged"},
+    {"id": 2, "name": "Qardan through Dawat Institution"},
+    {"id": 3, "name": "None"},
+  ];
+
+  final List<Map<String, dynamic>> courseDurationOptions = List.generate(
+    20, // because (60 - 3)/3 + 1 = 20
+        (index) {
+      int duration = (index + 1) * 3;
+      return {
+        "id": duration,
+        "name": "$duration months",
+      };
+    },
+  );
+
+  final List<Map<String, dynamic>> scholarshipOptions = [
+    {"id": 1, "name": "Self-Arranged"},
+    {"id": 2, "name": "AIUT"},
+    {"id": 3, "name": "STSMF"},
+    {"id": 4, "name": "Local Jamaat"},
+    {"id": 5, "name": "None"},
+  ];
+
+  Map<String, dynamic>? getClassByName(List<Map<String, dynamic>> classes, String name) {
+    try {
+      return classes.firstWhere(
+            (element) => element['name']?.toString().toLowerCase() == name.toLowerCase(),
+      );
+    } catch (e) {
+      return null; // Not found
     }
   }
 
@@ -201,6 +375,41 @@ class UpdatePaktalimController extends GetxController {
     {"id": 29, "name": "Post Doctorate", "rank": 19, "marhala": 7},
   ];
 
+  // var selectedClasses = <String>[].obs;
+  //
+  //
+  // List<Map<String, dynamic>> get selectedClassList =>
+  //     allClasses.where((cls) => selectedClasses.contains(cls["name"])).toList();
+  //
+  // List<Map<String, dynamic>> get unselectedClassList =>
+  //     allClasses
+  //         .where((cls) =>
+  //     cls["rank"] != null &&
+  //         cls["rank"] <= 12 &&
+  //         !selectedClasses.contains(cls["name"]))
+  //         .toList();
+
+  final RxList<String> selectedStudied = <String>[].obs;
+  final RxList<String> selectedNotStudied = <String>[].obs;
+
+  void toggleStudied(String name) {
+    if (selectedStudied.contains(name)) {
+      selectedStudied.remove(name);
+    } else {
+      selectedStudied.add(name);
+      selectedNotStudied.remove(name); // remove from other
+    }
+  }
+
+  void toggleNotStudied(String name) {
+    if (selectedNotStudied.contains(name)) {
+      selectedNotStudied.remove(name);
+    } else {
+      selectedNotStudied.add(name);
+      selectedStudied.remove(name); // remove from other
+    }
+  }
+
   List<Map<String, dynamic>> getClassesByMarhala(int? selectedMarhala) {
 
     return allClasses
@@ -227,6 +436,8 @@ class UpdatePaktalimController extends GetxController {
   Rxn<int> standardIndex = Rxn<int>(null);
   Rxn<int> fieldOfStudyIndex = Rxn<int>(null);
   Rxn<int> courseIndexPoint = Rxn<int>(null);
+  Rxn<int> selectedQardan = Rxn<int>(null);
+  Rxn<int> selectedScholarship = Rxn<int>(null);
   Rxn<int> degreeProgramIndex = Rxn<int>(null);
   Rxn<int> marhala4Index = Rxn<int>(null);
   Rxn<int> marhala5Index = Rxn<int>(null);
@@ -285,21 +496,37 @@ class UpdatePaktalimController extends GetxController {
 
   // Define Marhalas
   final List<Map<String, dynamic>> predefinedMarhalas = [
-    {'id': 1, 'marhala': 'Marhala 1','name': 'Pre Primary'},
-    {'id': 2, 'marhala': 'Marhala 2 ','name': '1st - 4th'},
-    {'id': 3, 'marhala': 'Marhala 3 ','name': '5th - 8th'},
-    {'id': 4, 'marhala': 'Marhala 4 ','name': '9th - 10th'},
-    {'id': 5, 'marhala': 'Marhala 5 ','name': '11th - 12th'},
-    {'id': 6, 'marhala': 'Marhala 6 ','name': 'Undergraduate'},
-    {'id': 7, 'marhala': 'Marhala 7 ','name': 'Postgraduate'},
+    { 'id': 1, 'name': 'Pre-Primary to 8th (Marhala 1–3)' },
+    { 'id': 4, 'name': '9th – 10th (Marhala 4)' },
+    { 'id': 5, 'name': '11th – 12th (Marhala 5)' },
+    { 'id': 6, 'name': 'Undergraduate (Marhala 6)' },
+    { 'id': 7, 'name': 'Postgraduate (Marhala 7)' },
   ];
+
+  Map<String, dynamic>? getMarhalaById(List<Map<String, dynamic>> marhalas, int id) {
+    try {
+      return marhalas.firstWhere((m) => m['id'] == id);
+    } catch (e) {
+      return null; // Not found
+    }
+  }
+
+  final RxList<Map<String, dynamic>> filteredClasses = <Map<String, dynamic>>[].obs;
+
+
+  Rxn<Map<String, dynamic>> selectedMarhala2 = Rxn<Map<String, dynamic>>();
+  Rxn<Map<String, dynamic>> selectedClass = Rxn<Map<String, dynamic>>();
+  Rxn<Map<String, dynamic>> fieldOfStudy2 = Rxn<Map<String, dynamic>>();
+  Rxn<Map<String, dynamic>> selectedSubject1 = Rxn<Map<String, dynamic>>();
+  Rxn<Map<String, dynamic>> selectedQardan2 = Rxn<Map<String,dynamic>>();
+  Rxn<Map<String, dynamic>> selectedScholarship2 = Rxn<Map<String, dynamic>>();
+  Rxn<Map<String, dynamic>> selectedCourseDuration = Rxn<Map<String, dynamic>>();
 
 
   void resetSelections() {
   }
 
 
-  var isDeeniSelected = false.obs;
   var filteredStudies = <Map<String, dynamic>>[].obs;
   var filteredFields = <Map<String, dynamic>>[].obs;
 
@@ -400,14 +627,27 @@ class UpdatePaktalimController extends GetxController {
     update(); // ✅ Ensure UI updates
   }
 
-  List<Map<String, dynamic>> _extractUniqueValues(List<dynamic> data,
-      String key, Map<String, dynamic> Function(dynamic) mapFunction) {
+  List<Map<String, dynamic>> _extractUniqueValues(
+      List<dynamic> data,
+      String key,
+      Map<String, dynamic> Function(dynamic) mapFunction) {
     final seenKeys = <dynamic>{};
-    return data
-        .where((item) =>
-    item[key] != null && seenKeys.add(item[key])) // Ignore nulls
-        .map(mapFunction)
-        .toList();
+    final result = <Map<String, dynamic>>[];
+
+    for (var item in data) {
+      final value = item[key];
+
+      if (value != null) {
+        if (seenKeys.add(value)) {
+          final mapped = mapFunction(item);
+          result.add(mapped);
+        } else {
+        }
+      } else {
+      }
+    }
+
+    return result;
   }
 
 
@@ -435,6 +675,25 @@ class UpdatePaktalimController extends GetxController {
     }
 
     isSubmitEnabled.value = missingFields.isEmpty;
+  }
+
+  void filterCourseOptions(int studyId) {
+
+    final filtered = allData
+        .where((item) {
+      final match = item['study_id'] == studyId;
+      return match;
+    })
+        .map((item) {
+      final mapped = {'id': item['id'], 'name': item['name']};
+      return mapped;
+    })
+        .toList();
+
+
+    courseOptions.assignAll(filtered);
+    selectedField.value = null;
+    update(); // ✅ Ensure UI updates
   }
 
   RxString degreeProgram = ''.obs;

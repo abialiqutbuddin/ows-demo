@@ -1,305 +1,259 @@
+import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:path/path.dart';
 import 'package:get/get.dart';
-import 'package:ows/constants/constants.dart';
-import 'package:super_tooltip/super_tooltip.dart';
-import '../../api/api.dart';
-import '../../controller/forms/form_screen_controller.dart';
-import '../../controller/state_management/state_manager.dart';
-import '../../model/document.dart';
+import 'package:path/path.dart';
+import 'package:ows/api/api.dart';
+import 'package:ows/controller/state_management/state_manager.dart';
+import 'package:ows/model/document.dart';
 
 class DocumentsFormScreenW extends StatefulWidget {
-  const DocumentsFormScreenW({super.key});
+  const DocumentsFormScreenW({Key? key}) : super(key: key);
 
   @override
-  State<DocumentsFormScreenW> createState() => _FormScreenState();
+  State<DocumentsFormScreenW> createState() => _DocumentsFormScreenWState();
 }
 
-class _FormScreenState extends State<DocumentsFormScreenW> {
-  final FormController controller = Get.find<FormController>();
-  late SuperTooltipController tooltipControllers;
-  static final GlobalStateController globalController =
-  Get.find<GlobalStateController>();
-  String reqId = '81';
+class _DocumentsFormScreenWState extends State<DocumentsFormScreenW> {
+  static final GlobalStateController _global = Get.find();
+  final String _its = _global.user.value.itsId.toString();
+  final String _reqId = _global.reqId.toString();
 
+  // your mock requirements JSON
+  static const _mockJson = '''[
+  {"name":"Raza Letter","type":"pdf,png,jpg","required":true,"docType":"raza_letter"},
+  {"name":"Safai chitti","type":"pdf,png,jpg","required":true,"docType":"safai_chitti"},
+  {"name":"CNIC Front","type":"pdf,png,jpg","required":true,"docType":"cnic_front"},
+  {"name":"CNIC Back","type":"pdf,png,jpg","required":true,"docType":"cnic_back"},
+  {"name":"ITS Card","type":"pdf","required":false,"docType":"its_card"},
+  {"name":"Course Prospectus","type":"pdf,png,jpg","required":true,"docType":"course_prospectus"},
+  {"name":"Financial Proof","type":"any","required":false,"docType":"financial_proof_documents"},
+  {"name":"Others","type":"any","required":false,"docType":"others"}
+]''';
 
-  // RxBool to track expanded state
-  final RxBool isCourseExpanded = false.obs;
-  final RxBool isFinancialExpanded = false.obs;
-  final RxBool isSafaiChittiExpanded = false.obs;
-  final RxBool isRazaExpanded = false.obs;
-  final RxBool isCNICExpanded = false.obs;
-  final RxBool isITSExpanded = false.obs;
-  final RxBool isOthersExpanded = false.obs;
+  bool areRequiredDocsUploaded(Map<String, Document?> documents) {
+    const requiredDocTypes = [
+      'raza_letter',
+      'safai_chitti',
+      'cnic_front',
+      'cnic_back',
+      'its_card',
+    ];
+
+    bool allUploaded = true;
+
+    for (var docType in requiredDocTypes) {
+      final hasDoc = documents.containsKey(docType) && documents[docType] != null;
+      print('Checking $docType: ${hasDoc ? "Found" : "Missing"}');
+      if (!hasDoc) allUploaded = false;
+    }
+
+    print('All required docs uploaded: $allUploaded');
+    return allUploaded;
+  }
+
+  late final List<DocumentRequirement> _requirements =
+      (jsonDecode(_mockJson) as List)
+          .map((e) => DocumentRequirement.fromJson(e))
+          .toList();
+
+  Future<void> _pickAndUpload(DocumentRequirement req) async {
+    final result = await FilePicker.platform.pickFiles(
+      type: req.type == 'any' ? FileType.any : FileType.custom,
+      allowedExtensions: req.type == 'any' ? null : req.type.split(','),
+      withData: true,
+    );
+    if (result == null) return;
+
+    final name = result.files.single.name;
+    final bytes = result.files.single.bytes;
+    final path = result.files.single.path;
+
+    try {
+      if (kIsWeb && bytes != null) {
+        await Api.uploadDocument(
+          docType: req.docType,
+          ITS: _its,
+          reqId: _reqId,
+          bytes: bytes,
+          fileName: name,
+        );
+        _global.documents[req.docType] =
+            Document(bytes: bytes, fileName: name, filePath: null, file: null);
+      } else if (!kIsWeb && path != null) {
+        final file = File(path);
+        await Api.uploadDocument(
+          docType: req.docType,
+          ITS: _its,
+          reqId: _reqId,
+          file: file,
+          fileName: name,
+        );
+        _global.documents[req.docType] =
+            Document(file: file, fileName: name, filePath: path, bytes: null);
+      }
+      setState(() {});
+    } catch (e) {
+      Get.snackbar('Upload Failed', 'Could not upload ${req.name}');
+    }
+  }
+
+  Future<void> _remove(DocumentRequirement req) async {
+    await Api.removeDocument(req.docType);
+    _global.documents.remove(req.docType);
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        surfaceTintColor: Colors.transparent,
-        centerTitle: false,
-        title: Text(
-          "Documents Upload",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Color(0xfffffcf6),
-      ),
-      backgroundColor: Color(0xfffffcf6),
-      body: ListView(
-        children: [
-          _buildCollapsibleSection("Course Prospectus", isCourseExpanded,
-              uploadSection('course_prospectus', globalController.user.value.itsId.toString(), reqId),
-              docType: 'course_prospectus'),
-          _buildCollapsibleSection(
-              "Financial Proof Documents",
-              isFinancialExpanded,
-              uploadSection('financial_proof_documents', globalController.user.value.itsId.toString(), reqId),
-              docType: 'financial_proof_documents'),
-          _buildCollapsibleSection(
-              "Safai Chitti for the Purpose Taalim",
-              isSafaiChittiExpanded,
-              uploadSection('safai_chitti', '30445124', '81'),
-              docType: 'safai_chitti'),
-          _buildCollapsibleSection("Raza Letter", isRazaExpanded,
-              uploadSection('raza_letter', globalController.user.value.itsId.toString(), reqId),
-              docType: 'raza_letter'),
-          _buildCollapsibleSection("CNIC (Front & Back)", isCNICExpanded,
-              uploadSection('cNIC', globalController.user.value.itsId.toString(), reqId, numItems: 2),
-              docType: 'cNIC'),
-          _buildCollapsibleSection(
-              "ITS Card", isITSExpanded, uploadSection('its_card', globalController.user.value.itsId.toString(), reqId),
-              docType: 'its_card'),
-          _buildCollapsibleSection(
-              "Other Supporting Course Documents",
-              isOthersExpanded,
-              uploadSection('other_documents', globalController.user.value.itsId.toString(), reqId, numItems: 3),
-              docType: 'other_documents'),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 10),
-            margin: EdgeInsets.only(bottom: 25,top: 10,right: MediaQuery.of(context).size.width*0.25,left: MediaQuery.of(context).size.width*0.25),
-            height: 40,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF008759),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(5.0), // Rounded corners
-                ),
-              ),
-              onPressed: () async {
-                controller.submitForm();
-                //updatePakTalimForm().showRequestDetailsPopup(context);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Container(
+            padding: EdgeInsets.all(2),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.2),
+                    blurRadius: 4,
+                    spreadRadius: 2,
+                    offset: const Offset(0, 1),
+                  ),
+                ]),
+            constraints: BoxConstraints(minWidth: constraints.maxWidth),
+            child: Table(
+              // Give each column a flex: 3:1:4:3 ratio for Doc / Req / Status / Actions
+              columnWidths: const {
+                0: FlexColumnWidth(4),
+                1: FlexColumnWidth(4),
+                2: FlexColumnWidth(2),
               },
-              child: const Text(
-                'Submit',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18.0,
-                ),
+              border: TableBorder.symmetric(
+                inside: BorderSide(color: Colors.grey.shade300, width: 1),
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  bool validateDocuments(String docType) {
-    if (docType == 'cNIC') {
-      // Special case: Check if both cNIC_front and cNIC_back exist
-      return globalController.documents.containsKey('cNIC_front') &&
-          globalController.documents['cNIC_front'] != null &&
-          globalController.documents.containsKey('cNIC_back') &&
-          globalController.documents['cNIC_back'] != null;
-    }
-
-    // General case: Only check if `docType_0` exists
-    return globalController.documents.containsKey("${docType}_0") &&
-        globalController.documents["${docType}_0"] != null;
-  }
-
-  /// **Function to build collapsible sections with animation**
-  Widget _buildCollapsibleSection(
-      String title, RxBool isExpanded, Widget content,
-      {String? docType}) {
-    return Obx(() => Stack(
-      children: [
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          margin: EdgeInsets.all(12),
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              color: Color(0xffffead1),
-              border: Border.all(
-                  color: validateDocuments(docType!)
-                      ? Colors.green
-                      : Colors.transparent,
-                  width: 2)),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  isExpanded.value =
-                  !isExpanded.value; // Toggle expand/collapse
-                },
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+              children: [
+                // Header row
+                TableRow(
+                  decoration: BoxDecoration(color: Color(0xffffead1)),
                   children: [
-                    Expanded(
-                      child: Text(title,
-                          softWrap: true,
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20,
-                              color: Colors.brown)),
-                    ),
-                    AnimatedRotation(
-                      turns: isExpanded.value
-                          ? 0.5
-                          : 0.0, // Rotates 180° when expanded
-                      duration: Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                      child: Icon(
-                        Icons
-                            .keyboard_arrow_down, // Keep only one icon and rotate it
-                        color: Colors.brown,
-                      ),
-                    ),
+                    _buildHeaderCell('Document'),
+                    _buildHeaderCell('Status'),
+                    _buildHeaderCell('Actions'),
                   ],
                 ),
-              ),
-              Divider(height: 10, color: Colors.white, thickness: 2),
-              AnimatedSize(
-                alignment: Alignment.topCenter,
-                duration: Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                child: isExpanded.value ? content : SizedBox.shrink(),
-              ),
-            ],
-          ),
-        ),
-        if (validateDocuments(docType))
-          Positioned(
-            top: 0,
-            right: 25,
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.green,
-                borderRadius: BorderRadius.all(Radius.circular(50)),
-              ),
-              child: Text(
-                "Completed",
-                style: TextStyle(color: Colors.white, fontSize: 12),
-              ),
+
+                // Data rows
+                for (var req in _requirements)
+                  TableRow(
+                    decoration: BoxDecoration(color: Colors.white),
+                    children: [
+                      // Document Name
+                      Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Text(req.name,
+                            style: const TextStyle(fontSize: 16)),
+                      ),
+
+                      // Status
+                      Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Obx(() {
+                          final doc = _global.documents[req.docType];
+                          if (doc == null) {
+                            return const Text('Not uploaded',
+                                style: TextStyle(color: Colors.grey));
+                          }
+                          final name =
+                              kIsWeb ? doc.fileName! : basename(doc.filePath!);
+                          return Row(
+                            children: [
+                              const Icon(Icons.insert_drive_file,
+                                  color: Colors.green),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                  child: Text(name,
+                                      overflow: TextOverflow.ellipsis)),
+                            ],
+                          );
+                        }),
+                      ),
+
+                      // Actions
+                      Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Obx(() {
+                          final isUploaded =
+                              _global.documents.containsKey(req.docType);
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ElevatedButton.icon(
+                                icon: Icon(
+                                  isUploaded
+                                      ? Icons.swap_horiz
+                                      : Icons.upload_file,
+                                  size: 16,
+                                  color: Colors.white,
+                                ),
+                                label: Text(
+                                  isUploaded ? 'Change' : 'Upload',
+                                  style: TextStyle(color: Colors.white),
+                                ),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.brown,
+                                  minimumSize: const Size(0, 36),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 12),
+                                ),
+                                onPressed: () => _pickAndUpload(req),
+                              ),
+                              if (isUploaded) ...[
+                                const SizedBox(width: 8),
+                                IconButton(
+                                  icon: const Icon(Icons.delete,
+                                      color: Colors.red),
+                                  onPressed: () => _remove(req),
+                                ),
+                              ],
+                            ],
+                          );
+                        }),
+                      ),
+                    ],
+                  ),
+              ],
             ),
           ),
-      ],
-    ));
-  }
-
-  Widget uploadSection(String docType, String ITS, String reqId, {int numItems = 1}) {
-    // Define specific names for multiple items if docType is "cNIC"
-    List<String> docTypesList;
-    if (docType == 'cNIC' && numItems == 2) {
-      docTypesList = ['cNIC_front', 'cNIC_back'];
-    } else {
-      docTypesList = List.generate(numItems, (index) => "${docType}_$index");
-    }
-
-    return Column(
-      children: docTypesList.map((specificDocType) {
-        return Container(
-          margin: EdgeInsets.symmetric(vertical: 8), // Adds spacing between sections
-          width: double.infinity,
-          height: 150,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            color: Color(0xfffffcf6),
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              GetX<GlobalStateController>(
-                builder: (controller) {
-                  var document = controller.documents[specificDocType]; // Fetch document for this specific docType
-
-                  if (document != null) {
-                    return ListTile(
-                      leading: Icon(
-                        Icons.insert_drive_file,
-                        size: 40,
-                        color: Constants().green,
-                      ),
-                      title: Text(
-                        basename(document.file!.path),
-                      ),
-                      trailing: IconButton(
-                        icon: Icon(Icons.remove_circle, color: Colors.red),
-                        onPressed: () {
-                          Api.removeDocument(specificDocType);
-                        },
-                      ),
-                    );
-                  } else {
-                    return Column(
-                      children: [
-                        IconButton(
-                          icon: Icon(
-                            Icons.upload_file_outlined,
-                            size: 50,
-                            color: Constants().green,
-                          ),
-                          onPressed: () async {
-                            await _pickFile(specificDocType);
-                            await Api.uploadDocument(specificDocType, ITS, reqId);
-                            validateDocuments(specificDocType);
-                          },
-                        ),
-                        Text("Click here to upload ${specificDocType.replaceAll('_', ' ').toUpperCase()}"),
-                        Text(
-                          "Supported Format: PDF",
-                          style: TextStyle(color: Colors.grey),
-                        ),
-                      ],
-                    );
-                  }
-                },
-              ),
-            ],
-          ),
         );
-      }).toList(),
+      },
     );
   }
 
-  Future<void> _pickFile(String docType) async {
-    // Check if a file is already picked for the docType, if yes, return
-    if (globalController.documents[docType] != null) {
+  void printUploadedDocuments() {
+    if (_global.documents.isEmpty) {
+      print('No documents uploaded yet.');
       return;
     }
 
-    // Use FilePicker to pick a single file
-    FilePickerResult? result = await FilePicker.platform.pickFiles(
-      allowMultiple: false, // Allow only one file
-      type: FileType
-          .any, // You can specify specific types (e.g., FileType.custom) if needed
+    _global.documents.forEach((docType, doc) {
+      final name = kIsWeb
+          ? doc?.fileName ?? 'Unnamed file'
+          : basename(doc?.filePath ?? 'Unknown path');
+      print('Uploaded Document: $docType, File Name: $name');
+    });
+  }
+
+  Widget _buildHeaderCell(String label) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+      child: Text(label,
+          style: const TextStyle(
+              fontWeight: FontWeight.bold, color: Colors.brown)),
     );
-
-    if (result != null) {
-      // Get the file path of the selected file
-      File selectedFile = File(result.files.single.path!);
-
-      // Update the documents map with the picked file
-      setState(() {
-        globalController.documents[docType] = Document(
-            file: selectedFile,
-            filePath: null); // Store the file object dynamically
-      });
-    } else {
-      print("No file selected for $docType");
-    }
   }
 }

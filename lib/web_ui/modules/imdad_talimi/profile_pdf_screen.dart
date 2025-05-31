@@ -12,6 +12,7 @@ import '../../../constants/custom_dialog.dart';
 import '../../../controller/profile_pdf_controller.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import '../../../model/family_model.dart';
+import '../../application_forms/application_form_web.dart';
 
 class ProfilePDFScreenW extends StatefulWidget {
   final UserProfile member;
@@ -236,62 +237,8 @@ class ProfilePDFScreenWState extends State<ProfilePDFScreenW> {
                     ),
                   ),
                   onPressed: () async {
-                    Get.toNamed(AppRoutes.request_form);
-
-                    // var data = await Api.fetchProxiedData(
-                    //     "https://paktalim.com/admin/ws_app/GetFamilyCompletionStatus/${gController.user.value.itsId}?access_key=622ae1838756026b9500e50e778f131ac180bf70&username=40459629");
-                    // print(data);
-                    // //data['profile_complete'] = "true";
-                    // //data['family_complete'] = "false";
-                    // if (data["profile_complete"] == "true" &&
-                    //     data["family_complete"] == "true") {
-                    //   Get.toNamed(AppRoutes.request_form);
-                    // } else {
-                    //   String message = "";
-                    //   if (data["profile_complete"] != "true") {
-                    //     message = "Kindly complete your Pak Talim profile.";
-                    //     showCustomDialog(
-                    //       title: "Incomplete Data",
-                    //       message: message,
-                    //       confirmText: "Update Profile",
-                    //       cancelText: "Cancel",
-                    //       onCancel: () {
-                    //         Get.back();
-                    //       },
-                    //       onConfirm: () {
-                    //         Family family = Family();
-                    //         Get.toNamed(AppRoutes.profile_preview);
-                    //         // Get.to(() => ProfilePreview(
-                    //         //     member: gController.user.value,
-                    //         //     family: family));
-                    //       },
-                    //     );
-                    //   } else {
-                    //     message =
-                    //         "Kindly complete your family’s Paktalim profile. Contact your mohallah UT committee for further guidance.";
-                    //     showCustomDialog(
-                    //       title: "Incomplete Data",
-                    //       message: message,
-                    //       confirmText: "Go to Paktalim",
-                    //       cancelText: "Cancel",
-                    //       onCancel: () {
-                    //         Get.back();
-                    //       },
-                    //       onConfirm: () async {
-                    //         final url =
-                    //             'https://paktalim.com/admin/profile/create';
-                    //         if (await canLaunchUrl(Uri.parse(url))) {
-                    //           await launchUrl(
-                    //             Uri.parse(url),
-                    //             mode: LaunchMode.externalApplication,
-                    //           );
-                    //         } else {
-                    //           throw 'Could not launch $url';
-                    //         }
-                    //       },
-                    //     );
-                    //   }
-                    // }
+                    stateController.intentCompleted.value = false;
+                    Get.toNamed(AppRoutes.application_form);
                   },
                   child: Text(
                     "Request Form",

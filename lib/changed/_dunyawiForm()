@@ -1,0 +1,498 @@
+Widget _dunyawiForm() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        color: const Color(0xffffead1),
+      ),
+      child: Column(
+        children: [
+          if (controller.selectedMarhala.value == 1)
+            Row(
+              spacing: 10,
+              children: [
+                Flexible(
+                  child: _buildDropdown2(
+                    label: "Standard",
+                    selectedValue: controller.standardIndex,
+                    items: [
+                      {"id": 0, "name": "Play Group"},
+                      {"id": 1, "name": "Nursery"},
+                      {"id": 2, "name": "Junior Kindergarten"},
+                      {"id": 3, "name": "Senior Kindergarten"},
+                    ],
+                    onChanged: (value) {
+                      controller.standardIndex.value = value;
+
+                      // ✅ Assigns the correct grade value dynamically
+                      if (value != null) {
+                        Map<int, String> gradeMapping = {
+                          0: "Play Group",
+                          1: "Nursery",
+                          2: "Junior Kindergarten",
+                          3: "Senior Kindergarten",
+                        };
+                        controller.grade.value = gradeMapping[value] ?? "";
+                      } else {
+                        controller.grade.value = ""; // Reset on null selection
+                      }
+                    },
+                    isEnabled: true,
+                  ),
+                ),
+
+                Flexible(
+                  child: CustomDropdownSearch<String>(
+                    label: "City",
+                    itemsLoader: (filter, _) async {
+                      return controller.cities
+                          .map((e) => e['name'] as String) // Extract city names
+                          .toList();
+                    },
+                    selectedItem:
+                        controller.selectedCity.value, // Bind selected city
+                    isEnabled: controller.cities
+                        .isNotEmpty, // Enable only if cities are available
+                    onChanged: (String? cityName) {
+                      if (cityName != null) {
+                        //controller.selectedCity.value = cityName;
+                        // Find city ID based on name and update selectedCityId
+                        final selectedCityData = controller.cities.firstWhere(
+                          (city) => city['name'] == cityName,
+                          orElse: () =>
+                              {"id": null}, // Ensure it returns a valid default
+                        );
+                        controller.selectCity(selectedCityData["id"]);
+                      }
+                    },
+                  ),
+                ),
+
+                // Flexible(
+                //     child: _buildDropdown2(
+                //   label: "City",
+                //   selectedValue: controller.selectedCityId,
+                //   items: controller.cities,
+                //   isEnabled: true,
+                //   onChanged: (int? cityId) => controller.selectCity(cityId),
+                // )),
+                Flexible(
+                    child: CustomDropdownSearch<String>(
+                  label: "Institute",
+                  itemsLoader: (filter, _) async {
+                    return controller.filteredInstitutes
+                        .map((e) => e['name'] as String)
+                        .toList();
+                  },
+                  selectedItem: controller.selectedInstituteName.value,
+                  isEnabled: controller.selectedCity.value.isNotEmpty &&
+                      controller.selectedCity.value != "Select City",
+                  onChanged: (String? institute) {
+                    controller.selectedInstituteName.value = institute ?? "";
+                  },
+                )),
+                Flexible(
+                    child: _buildField2(
+                  "CNIC No.",
+                  controller.cnicNo,
+                  isEnabled: true,
+                )),
+                Flexible(child: _buildField2("Year", controller.year)),
+              ],
+            ),
+          if (controller.selectedMarhala.value == 2)
+            Row(
+              spacing: 10,
+              children: [
+                Flexible(
+                  child: _buildDropdown2(
+                    label: "Standard",
+                    selectedValue: controller.standardIndex,
+                    items: [
+                      {"id": 2, "name": "Grade 1st"},
+                      {"id": 3, "name": "Grade 2nd"},
+                      {"id": 4, "name": "Grade 3rd"},
+                      {"id": 5, "name": "Grade 4th"},
+                    ],
+                    onChanged: (value) {
+                      controller.standardIndex.value = value;
+                      controller.grade.value = value != null
+                          ? controller.standardIndex.value != null
+                              ? [
+                                  "Grade 1st",
+                                  "Grade 2nd",
+                                  "Grade 3rd",
+                                  "Grade 4th"
+                                ][value - 2]
+                              : ""
+                          : "";
+                    },
+                    isEnabled: true,
+                  ),
+                ),
+                Flexible(
+                  child: CustomDropdownSearch<String>(
+                    label: "City",
+                    itemsLoader: (filter, _) async {
+                      return controller.cities
+                          .map((e) => e['name'] as String) // Extract city names
+                          .toList();
+                    },
+                    selectedItem:
+                        controller.selectedCity.value, // Bind selected city
+                    isEnabled: controller.cities
+                        .isNotEmpty, // Enable only if cities are available
+                    onChanged: (String? cityName) {
+                      if (cityName != null) {
+                        //controller.selectedCity.value = cityName;
+                        // Find city ID based on name and update selectedCityId
+                        final selectedCityData = controller.cities.firstWhere(
+                          (city) => city['name'] == cityName,
+                          orElse: () =>
+                              {"id": null}, // Ensure it returns a valid default
+                        );
+                        controller.selectCity(selectedCityData["id"]);
+                      }
+                    },
+                  ),
+                ),
+                Flexible(
+                    child: CustomDropdownSearch<String>(
+                  label: "Institute",
+                  itemsLoader: (filter, _) async {
+                    return controller.filteredInstitutes
+                        .map((e) => e['name'] as String)
+                        .toList();
+                  },
+                  selectedItem: controller.selectedInstituteName.value,
+                  isEnabled: controller.selectedCity.value.isNotEmpty &&
+                      controller.selectedCity.value != "Select City",
+                  onChanged: (String? institute) {
+                    controller.selectedInstituteName.value = institute ?? "";
+                  },
+                )),
+                Flexible(
+                    child: _buildField2(
+                  "CNIC No.",
+                  controller.cnicNo,
+                  isEnabled: true,
+                )),
+                Flexible(child: _buildField2("Year", controller.year)),
+              ],
+            ),
+          if (controller.selectedMarhala.value == 3)
+            Row(
+              spacing: 10,
+              children: [
+                Flexible(
+                  child: _buildDropdown2(
+                    label: "Standard",
+                    selectedValue: controller.standardIndex,
+                    items: [
+                      {"id": 6, "name": "Grade 5th"},
+                      {"id": 7, "name": "Grade 6th"},
+                      {"id": 8, "name": "Grade 7th"},
+                      {"id": 9, "name": "Grade 8th"},
+                    ],
+                    onChanged: (value) {
+                      controller.standardIndex.value = value;
+                      controller.grade.value = value != null
+                          ? [
+                              "Grade 5th",
+                              "Grade 6th",
+                              "Grade 7th",
+                              "Grade 8th"
+                            ][value - 6]
+                          : "";
+                    },
+                    isEnabled: true,
+                  ),
+                ),
+                Flexible(
+                  child: CustomDropdownSearch<String>(
+                    label: "City",
+                    itemsLoader: (filter, _) async {
+                      return controller.cities
+                          .map((e) => e['name'] as String) // Extract city names
+                          .toList();
+                    },
+                    selectedItem:
+                        controller.selectedCity.value, // Bind selected city
+                    isEnabled: controller.cities
+                        .isNotEmpty, // Enable only if cities are available
+                    onChanged: (String? cityName) {
+                      if (cityName != null) {
+                        //controller.selectedCity.value = cityName;
+                        // Find city ID based on name and update selectedCityId
+                        final selectedCityData = controller.cities.firstWhere(
+                          (city) => city['name'] == cityName,
+                          orElse: () =>
+                              {"id": null}, // Ensure it returns a valid default
+                        );
+                        controller.selectCity(selectedCityData["id"]);
+                      }
+                    },
+                  ),
+                ),
+                Flexible(
+                  child: Obx(() => CustomDropdownSearch<String>(
+                        label: "Institute",
+                        itemsLoader: (filter, _) async {
+                          return controller.filteredInstitutes
+                              .map((e) => e['name'] as String)
+                              .toList();
+                        },
+                        selectedItem: controller.selectedInstituteName.value,
+                        isEnabled: controller.selectedCity.value.isNotEmpty &&
+                            controller.selectedCity.value != "Select City",
+                        onChanged: (String? institute) {
+                          controller.selectedInstituteName.value =
+                              institute ?? "";
+                        },
+                      )),
+                ),
+                Flexible(
+                    child: _buildField2(
+                  "CNIC No.",
+                  controller.cnicNo,
+                  isEnabled: true,
+                )),
+                Flexible(child: _buildField2("Year", controller.year)),
+              ],
+            ),
+          if (controller.selectedMarhala.value == 4)
+            Column(
+              spacing: 10,
+              children: [
+                Row(
+                  spacing: 10,
+                  children: [
+                    Flexible(
+                        child: _buildDropdown2(
+                      label: "Field of Study",
+                      selectedValue: controller.fieldOfStudyIndex,
+                      items: [
+                        ...controller.studyOptions
+                            .map((e) => {"id": e["id"], "name": e["name"]})
+                      ],
+                      onChanged: (value) {
+                        controller.fieldOfStudyIndex.value = value;
+                        controller.courseIndexPoint.value = null;
+                        filterByMarhalaAndStudy(
+                            4, controller.fieldOfStudyIndex.value);
+                        // controller.marhala5Index.value = null;
+                        controller.filterFields(value!);
+                      },
+                      isEnabled: true,
+                    )),
+                    Flexible(
+                      child: _buildDropdown2(
+                        label: "Class",
+                        selectedValue: controller.marhala4Index,
+                        items: [
+                          ...controller.marhala4Class
+                              .map((e) => {"id": e["id"], "name": e["name"]})
+                        ],
+                        onChanged: (value) {
+                          controller.marhala4Index.value = value;
+                        },
+                        isEnabled: true,
+                      ),
+                    ),
+                    Flexible(
+                      child: _buildDropdown2(
+                        label: "Subject",
+                        selectedValue: controller.courseIndexPoint,
+                        items: [
+                          ...controller.courseOptions
+                              .map((e) => {"id": e["id"], "name": e["name"]})
+                        ],
+                        onChanged: (value) {
+                          controller.courseIndexPoint.value = value;
+                        },
+                        isEnabled: true,
+                      ),
+                    ),
+                  ],
+                ),
+                _buildLocationSelection(),
+              ],
+            ),
+          if (controller.selectedMarhala.value == 5)
+            Column(
+              spacing: 10,
+              children: [
+                Row(
+                  spacing: 10,
+                  children: [
+                    Flexible(
+                        child: _buildDropdown2(
+                      label: "Field of Study",
+                      selectedValue: controller.fieldOfStudyIndex,
+                      items: [
+                        ...controller.studyOptions
+                            .map((e) => {"id": e["id"], "name": e["name"]})
+                      ],
+                      onChanged: (value) {
+                        controller.fieldOfStudyIndex.value = value;
+                        controller.courseIndexPoint.value = null;
+                        filterByMarhalaAndStudy(
+                            5, controller.fieldOfStudyIndex.value);
+                        // controller.marhala5Index.value = null;
+                        controller.filterFields(value!);
+                      },
+                      isEnabled: true,
+                    )),
+                    Flexible(
+                      child: _buildDropdown2(
+                        label: "Class",
+                        selectedValue: controller.marhala5Index,
+                        items: [
+                          ...controller.marhala5Class
+                              .map((e) => {"id": e["id"], "name": e["name"]})
+                        ],
+                        onChanged: (value) {
+                          controller.marhala5Index.value = value;
+                        },
+                        isEnabled: true,
+                      ),
+                    ),
+                    Flexible(
+                      child: _buildDropdown2(
+                        label: "Subject",
+                        selectedValue: controller.courseIndexPoint,
+                        items: [
+                          ...controller.courseOptions
+                              .map((e) => {"id": e["id"], "name": e["name"]})
+                        ],
+                        onChanged: (value) {
+                          controller.courseIndexPoint.value = value;
+                        },
+                        isEnabled: true,
+                      ),
+                    ),
+                  ],
+                ),
+                _buildLocationSelection(),
+              ],
+            ),
+          if (controller.selectedMarhala.value == 6)
+            Column(
+              spacing: 10,
+              children: [
+                Row(
+                  spacing: 10,
+                  children: [
+                    Flexible(
+                      child: _buildDropdown2(
+                        label: "Degree Program",
+                        selectedValue: controller.degreeProgramIndex,
+                        items: [
+                          ...controller.degreePrograms
+                              .map((e) => {"id": e["id"], "name": e["name"]})
+                        ],
+                        onChanged: (value) {
+                          controller.degreeProgramIndex.value = value;
+                        },
+                        isEnabled: true,
+                      ),
+                    ),
+                    Flexible(
+                      child: _buildDropdown2(
+                        label: "Field of Study",
+                        selectedValue: controller.fieldOfStudyIndex,
+                        items: [
+                          ...controller.studyOptions
+                              .map((e) => {"id": e["id"], "name": e["name"]})
+                        ],
+                        onChanged: (value) {
+                          controller.fieldOfStudyIndex.value = value;
+                          controller.courseIndexPoint.value = null;
+                          filterByMarhalaAndStudy(
+                              6, controller.fieldOfStudyIndex.value);
+                          controller.filterFields(value!);
+                        },
+                        isEnabled: true,
+                      ),
+                    ),
+                    Flexible(
+                      child: _buildDropdown2(
+                        label: "Course",
+                        selectedValue: controller.courseIndexPoint,
+                        items: [
+                          ...controller.courseOptions
+                              .map((e) => {"id": e["id"], "name": e["name"]})
+                        ],
+                        onChanged: (value) {
+                          controller.courseIndexPoint.value = value;
+                        },
+                        isEnabled: true,
+                      ),
+                    ),
+                  ],
+                ),
+                _buildLocationSelection(),
+              ],
+            ),
+          if (controller.selectedMarhala.value == 7)
+            Column(
+              spacing: 10,
+              children: [
+                Row(
+                  spacing: 10,
+                  children: [
+                    Flexible(
+                      child: _buildDropdown2(
+                        label: "Degree Program",
+                        selectedValue: controller.degreeProgramIndex,
+                        items: [
+                          ...controller.degreePrograms
+                              .map((e) => {"id": e["id"], "name": e["name"]})
+                        ],
+                        onChanged: (value) {
+                          controller.degreeProgramIndex.value = value;
+                        },
+                        isEnabled: true,
+                      ),
+                    ),
+                    Flexible(
+                      child: _buildDropdown2(
+                        label: "Field of Study",
+                        selectedValue: controller.fieldOfStudyIndex,
+                        items: [
+                          ...controller.studyOptions
+                              .map((e) => {"id": e["id"], "name": e["name"]})
+                        ],
+                        onChanged: (value) {
+                          controller.fieldOfStudyIndex.value = value;
+                          controller.courseIndexPoint.value = null;
+                          filterByMarhalaAndStudy(
+                              7, controller.fieldOfStudyIndex.value);
+                          // controller.filterFields(value!);
+                        },
+                        isEnabled: true,
+                      ),
+                    ),
+                    Flexible(
+                      child: _buildDropdown2(
+                        label: "Course",
+                        selectedValue: controller.courseIndexPoint,
+                        items: [
+                          ...controller.courseOptions
+                              .map((e) => {"id": e["id"], "name": e["name"]})
+                        ],
+                        onChanged: (value) {
+                          controller.courseIndexPoint.value = value;
+                        },
+                        isEnabled: true,
+                      ),
+                    ),
+                  ],
+                ),
+                _buildLocationSelection(),
+              ],
+            ),
+        ],
+      ),
+    );
+  }

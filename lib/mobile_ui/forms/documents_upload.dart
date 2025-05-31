@@ -298,7 +298,7 @@ class _FormScreenState extends State<DocumentsFormScreen> {
                           ),
                           onPressed: () async {
                             await _pickFile(specificDocType);
-                            await Api.uploadDocument(specificDocType, ITS, reqId);
+                           // await Api.uploadDocument(specificDocType, ITS, reqId);
                             validateDocuments(specificDocType);
                           },
                         ),

@@ -50,15 +50,14 @@ class ReqFormController extends GetxController {
     'currentStatus'
   ].obs;
 
-  // ✅ Fetch Requests by Mohalla
-  Future<void> fetchRequests(
-      String mohalla, String org, String ITS, String role) async {
-    //isLoading(true);
+  // ✅ Fetch Requests for USER
+  Future<void> fetchRequests(String mohalla, String org, String ITS, String role) async {
+    print("FETCHING REQUESTS");
     errorMessage('');
     try {
-      var results = await Api.fetchRequestsByMohalla(mohalla, org, ITS, role);
-      reqForms.assignAll(results);
-      print(reqForms);
+      List<RequestFormModel> reqs = await Api.fetchFormsByITS(ITS);
+      print(reqs.first);
+      reqForms.assignAll(reqs);
     } catch (e) {
       errorMessage(e.toString());
     } finally {

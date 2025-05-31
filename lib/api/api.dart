@@ -1,31 +1,117 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:mime/mime.dart';
+import 'package:ows/constants/app_routes.dart';
 import 'package:ows/controller/state_management/state_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../mobile_ui/forms/documents_upload.dart';
-import '../model/document.dart';
+import '../model/admin_portal_model.dart';
 import '../model/funding_record_model.dart';
 import '../model/family_data2.dart';
 import '../model/family_model.dart';
+import '../model/instructions.dart';
 import '../model/member_model.dart';
+import '../model/pakTalimFuture.dart';
 import '../model/permission_model.dart';
 import '../model/request_form_model.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http_parser/http_parser.dart';
 
 import '../model/submit_application_form.dart';
+import '../web_ui/widgets/alert.dart';
 
 class Api {
-  static const String baseUrl =
-      //"http://36.50.12.171:3002";
-      // "http://172.16.109.94:3002";
-      "https://ows-backend.attalimiyah.com.pk:3002";
-  //"https://dev.imadiinnovations.com:3003";
-  //"http://localhost:3002";
+  static const String baseUrl = "https://one-login.attalimiyah.com.pk/ows";
+  // "http://localhost:3001";
+
+  static GlobalStateController stateController =
+      Get.find<GlobalStateController>();
+
+  static Future<List<Map<String, dynamic>>> getWorkInfo(String itsId) async {
+    final Uri url = Uri.parse('$baseUrl/occupationDetails');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'ITSID': itsId}),
+      );
+
+      if (response.statusCode == 200) {
+        final decoded = jsonDecode(response.body);
+
+        if (decoded is List && decoded.isNotEmpty) {
+          final first = decoded.first as Map;
+
+          final Map<String, dynamic> single = Map<String, dynamic>.from(
+            first.map((key, value) {
+              final sanitized =
+                  (value == null || value.toString().trim().isEmpty)
+                      ? 'None'
+                      : value;
+              return MapEntry(key.toString(), sanitized);
+            }),
+          );
+          return [single];
+        }
+
+        // Handle empty or structured error object
+        if (decoded is Map && decoded.containsKey('error')) {
+          return [
+            {
+              "strModeofWork": "",
+              "strNameOrg": "",
+              "strAddressOrg": "",
+              "strWorkPhone": "",
+              "strWorkEmail": "",
+              "AccountingSystem": "",
+              "InventoryManagement": "",
+              "BusinessWebsite": "",
+              "BusinessDetailedDescription": "",
+              "strLegalbusiness": ""
+            }
+          ];
+        }
+
+        // Fallback safety
+        return [
+          {
+            "strModeofWork": "",
+            "strNameOrg": "",
+            "strAddressOrg": "",
+            "strWorkPhone": "",
+            "strWorkEmail": "",
+            "AccountingSystem": "",
+            "InventoryManagement": "",
+            "BusinessWebsite": "",
+            "BusinessDetailedDescription": "",
+            "strLegalbusiness": ""
+          }
+        ];
+      } else {
+        throw Exception(
+            "Failed to fetch work info (Status: ${response.statusCode})");
+      }
+    } catch (e) {
+      return [
+        {
+          "strModeofWork": "",
+          "strNameOrg": "",
+          "strAddressOrg": "",
+          "strWorkPhone": "",
+          "strWorkEmail": "",
+          "AccountingSystem": "",
+          "InventoryManagement": "",
+          "BusinessWebsite": "",
+          "BusinessDetailedDescription": "",
+          "strLegalbusiness": ""
+        }
+      ];
+    }
+  }
 
   static final GlobalStateController permissionsController =
       Get.find<GlobalStateController>();
@@ -46,7 +132,6 @@ class Api {
         throw Exception("Failed to fetch version");
       }
     } catch (e) {
-      print("Error fetching version: $e");
       return "Unknown Version";
     }
   }
@@ -67,12 +152,12 @@ class Api {
         throw Exception("Failed to fetch records");
       }
     } catch (e) {
-      print("Error: $e");
       return [];
     }
   }
 
   static Future<List<FamilyMember>?> fetchFamilyData2(String itsId) async {
+    //String baseUrl = 'https://ows-backend.attalimiyah.com.pk:3002';
     final url = Uri.parse("$baseUrl/get-family-profile");
     final headers = {
       "Content-Type": "application/json",
@@ -83,14 +168,16 @@ class Api {
 
     try {
       final response = await http.post(url, headers: headers, body: body);
+      //h print(response.body);
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
 
-        if (jsonResponse['family_members'] != null) {
-          List<FamilyMember> familyList =
-              (jsonResponse['family_members'] as List)
-                  .map((member) => FamilyMember.fromJson(member))
-                  .toList();
+        if (jsonResponse['data'] != null &&
+            jsonResponse['data']['family'] != null) {
+          List familyListJson = jsonResponse['data']['family'];
+          List<FamilyMember> familyList = familyListJson
+              .map((memberJson) => FamilyMember.fromJson(memberJson))
+              .toList();
 
           FamilyMember? matchingMember = familyList.firstWhereOrNull(
               (member) => member.itsNumber.toString() == itsId);
@@ -100,27 +187,26 @@ class Api {
 
           return familyList;
         } else {
-          print("⚠️ No family members found.");
           return [];
         }
       } else {
-        print("❌ Failed to fetch family data: ${response.statusCode}");
         return null;
       }
     } catch (e) {
-      print("🚨 Error fetching family data: $e");
       return null;
     }
   }
 
   static Future<dynamic> fetchProxiedData(String targetUrl) async {
-    final encodedUrl = Uri.encodeComponent(targetUrl); // Proper encoding
     final Uri uri = Uri.parse('$baseUrl/get-url');
+
+    String token =
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpdHNfaWQiOiIzMDQ0NTEyNCIsInJvbGUiOiJhZG1pbiIsIm5hbWUiOiJBYmkgQWxpIiwiZW1haWwiOiJhYmlhbGlnYWRpQGdtYWlsLmNvbSIsIm1vaGFsbGEiOiJLSEkgKEFMLU1BSEFMQVQtVFVMLUJVUkhBTklZQUgpIiwidW1vb3IiOiIiLCJwZXJtaXNzaW9ucyI6W3sibW9kdWxlX2lkIjoyLCJtb2R1bGVfbmFtZSI6ImFkbWluX3BhbmVsIiwiZmVhdHVyZV9pZCI6NywiZmVhdHVyZV9uYW1lIjoiZWRpdF9yZXF1ZXN0In0seyJtb2R1bGVfaWQiOjEsIm1vZHVsZV9uYW1lIjoiZWR1X2Fzc2lzdGFuY2UiLCJmZWF0dXJlX2lkIjoyLCJmZWF0dXJlX25hbWUiOiJnZXQtZmFtaWx5LWRldGFpbHMifSx7Im1vZHVsZV9pZCI6MSwibW9kdWxlX25hbWUiOiJlZHVfYXNzaXN0YW5jZSIsImZlYXR1cmVfaWQiOjMsImZlYXR1cmVfbmFtZSI6ImdldC1zdHVkZW50LXBkZiJ9LHsibW9kdWxlX2lkIjoxLCJtb2R1bGVfbmFtZSI6ImVkdV9hc3Npc3RhbmNlIiwiZmVhdHVyZV9pZCI6NCwiZmVhdHVyZV9uYW1lIjoiZ2V0LW5leHQtcmVxLWNvdW50In0seyJtb2R1bGVfaWQiOjEsIm1vZHVsZV9uYW1lIjoiZWR1X2Fzc2lzdGFuY2UiLCJmZWF0dXJlX2lkIjo1LCJmZWF0dXJlX25hbWUiOiJnZXQtc3R1ZGVudC1wcm9maWxlIn0seyJtb2R1bGVfaWQiOjIsIm1vZHVsZV9uYW1lIjoiYWRtaW5fcGFuZWwiLCJmZWF0dXJlX2lkIjo2LCJmZWF0dXJlX25hbWUiOiJ2aWV3X3JlcXVlc3RzIn0seyJtb2R1bGVfaWQiOjIsIm1vZHVsZV9uYW1lIjoiYWRtaW5fcGFuZWwiLCJmZWF0dXJlX2lkIjo2LCJmZWF0dXJlX25hbWUiOiJ2aWV3X3JlcXVlc3RzIn0seyJtb2R1bGVfaWQiOjIsIm1vZHVsZV9uYW1lIjoiYWRtaW5fcGFuZWwiLCJmZWF0dXJlX2lkIjo2LCJmZWF0dXJlX25hbWUiOiJ2aWV3X3JlcXVlc3RzIn0seyJtb2R1bGVfaWQiOjIsIm1vZHVsZV9uYW1lIjoiYWRtaW5fcGFuZWwiLCJmZWF0dXJlX2lkIjo2LCJmZWF0dXJlX25hbWUiOiJ2aWV3X3JlcXVlc3RzIn1dLCJpYXQiOjE3NDY2MjYxMjQsImV4cCI6MTc0NjcxMjUyNH0.iYwILzoQNvT_X0hOQuAgpv--TAfmifpLCP81n6Uq0Ag';
 
     try {
       final response = await http.post(uri,
           headers: {
-            'Authorization': 'Bearer ${permissionsController.token.value}',
+            'Authorization': 'Bearer $token',
             'Content-Type': 'application/json',
           },
           body: json.encode({'url': targetUrl}));
@@ -133,6 +219,71 @@ class Api {
       }
     } catch (e) {
       throw Exception('Error: $e');
+    }
+  }
+
+  static Future<bool> submitFutureForm(FutureFormData formData) async {
+    try {
+      // Convert to Map and print the form data
+      final body = formData.toFormData();
+      print('Submitting Form Data: $body');
+
+      final response = await http.post(
+        Uri.parse('$baseUrl/api/submit-future-form'),
+        body: body,
+      );
+
+      if (response.statusCode == 200) {
+        Get.snackbar("Success", "Future Education Successfully Updated");
+        print(response.body);
+        return true;
+      } else {
+        Get.snackbar("Error",
+            "Future education not saved. Please contact system administrator.");
+        print('Error: ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      Get.snackbar("Error",
+          "Future education not saved. Please contact system administrator.");
+      return false;
+    }
+  }
+
+  static Future<Map<String, List<String>>> loadInstructionsByShortDesc() async {
+    //String baseUrl = 'http://localhost:3002';
+    final uri = Uri.parse('$baseUrl/api/get-instructions');
+    print('[DEBUG] Fetching instructions from: $uri');
+
+    final response = await http.get(uri);
+
+    print('[DEBUG] Status Code: ${response.statusCode}');
+
+    if (response.statusCode == 200) {
+      final responseBody = response.body;
+      print('[DEBUG] Raw response body: $responseBody');
+
+      final List data = jsonDecode(responseBody)['data'];
+      print('[DEBUG] Parsed data count: ${data.length}');
+
+      final instructions = data.map((e) => Instruction.fromJson(e)).toList();
+      print('[DEBUG] Parsed instructions: ${instructions.length}');
+
+      final Map<String, List<String>> grouped = {};
+
+      for (var instruction in instructions) {
+        print(
+            '[DEBUG] Processing instruction: ${instruction.shortDesc} → ${instruction.longDesc}');
+        grouped.putIfAbsent(instruction.shortDesc, () => []);
+        grouped[instruction.shortDesc]!.add(instruction.longDesc);
+      }
+
+      print('[DEBUG] Final grouped map: $grouped');
+      return grouped;
+    } else {
+      print(
+          '[ERROR] Failed to fetch instructions. Status: ${response.statusCode}');
+      throw Exception('Failed to load instructions');
     }
   }
 
@@ -151,17 +302,24 @@ class Api {
       );
 
       if (response.statusCode == 201) {
+        stateController.reqId.value =
+            jsonDecode(response.body)['data']['reqId'];
+        stateController.draftId.value =
+            jsonDecode(response.body)['data']['draft_id'];
         return 201;
-      } else {
+      } else if (response.statusCode == 202) {
+        return 202;
+      }else {
         return 500;
       }
     } catch (e) {
-      print("Error occurred: $e");
       return 500;
     }
   }
 
   static Future<UserProfile?> fetchUserProfile(String itsId) async {
+    //
+    // String baseUrl = 'https://ows-backend.attalimiyah.com.pk:3002';
     final String url = '$baseUrl/get-profile';
 
     try {
@@ -178,24 +336,20 @@ class Api {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = json.decode(response.body);
-
-        // ✅ Check for valid user profile data
         if (jsonResponse['error'] == null) {
           return UserProfile.fromJson(jsonResponse);
         } else {
-          print("Error: ${jsonResponse['error']}");
           return null;
         }
       } else {
         return null;
       }
     } catch (e) {
-      print("Error occurred while fetching profile: $e");
       return null;
     }
   }
 
-  static Future<Family?> fetchFamilyProfileOld(String itsId) async {
+  static Future<Family> fetchFamilyProfileOld(String itsId) async {
     //final String url = '$baseUrl/get-family-profile/$itsId';
     final String url = '$baseUrl/get-family-profile-old';
 
@@ -212,21 +366,21 @@ class Api {
       if (response.statusCode == 200) {
         final Map<String, dynamic> jsonResponse = json.decode(response.body);
         if (jsonResponse.isNotEmpty) {
-          return Family.fromJson(jsonResponse);
+          try {
+            return Family.fromJson(jsonResponse);
+          } catch (e) {}
         } else {
-          return null;
+          return Family();
         }
       } else if (response.statusCode == 401) {
-        print("Unauthorized: Check your authentication token.");
-        return null;
+        return Family();
       } else {
-        print("Failed to load family profile: ${response.statusCode}");
-        return null;
+        return Family();
       }
     } catch (e) {
-      print("Error occurred while fetching family profile: $e");
-      return null;
+      return Family();
     }
+    return Family();
   }
 
   // Function to fetch family profile
@@ -251,15 +405,12 @@ class Api {
         if (jsonResponse['error'] == null) {
           return Family.fromJson(jsonResponse);
         } else {
-          print("Error: ${jsonResponse['error']}");
           return null;
         }
       } else {
-        print("Failed to load family profile: ${response.statusCode}");
         return null;
       }
     } catch (e) {
-      print("Error occurred: $e");
       return null;
     }
   }
@@ -335,11 +486,9 @@ class Api {
         final pdfData = response.bodyBytes;
         return pdfData;
       } else {
-        print("Failed to load PDF: ${response.statusCode}");
         throw Exception('Failed to load PDF');
       }
     } catch (e) {
-      print("Error occurred while fetching the PDF: $e");
       throw Exception(e);
     }
   }
@@ -365,14 +514,11 @@ class Api {
       );
 
       if (response.statusCode == 200) {
-        print("✅ Email sent successfully!");
         return true;
       } else {
-        print("❌ Failed to send email: ${response.body}");
         return false;
       }
     } catch (e) {
-      print("❌ Error sending email: $e");
       return false;
     }
   }
@@ -388,11 +534,9 @@ class Api {
         List<dynamic> data = jsonDecode(response.body);
         return List<Map<String, dynamic>>.from(data);
       } else {
-        print("❌ Failed to fetch data: ${response.body}");
         return [];
       }
     } catch (e) {
-      print("❌ Error fetching requests: $e");
       return [];
     }
   }
@@ -408,14 +552,13 @@ class Api {
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       await GetStorage().write("token", data["token"]); // Store token
-      permissionsController.token.value = GetStorage().read("token");
-      List<dynamic> permissionsData = data['user']['permissions'];
-      List<Permission> permissions = permissionsData.map((perm) {
-        return Permission.fromJson(perm as Map<String, dynamic>);
-      }).toList();
-
-      permissionsController.setPermissions(permissions);
-
+      permissionsController.token.value = data["token"];
+      // List<dynamic> permissionsData = data['user']['permissions'];
+      // List<Permission> permissions = permissionsData.map((perm) {
+      //   return Permission.fromJson(perm as Map<String, dynamic>);
+      // }).toList();
+      //
+      // permissionsController.setPermissions(permissions);
       //print(data);
       return data;
     } else {
@@ -489,73 +632,120 @@ class Api {
   static Future<List<Map<String, dynamic>>> fetchGoods() async {
     final response = await http.get(Uri.parse("$baseUrl/fetch-goods"));
     if (response.statusCode == 200) {
-      print(List<Map<String, dynamic>>.from(json.decode(response.body)));
       return List<Map<String, dynamic>>.from(json.decode(response.body));
     } else {
       throw Exception("Failed to load goods");
     }
   }
 
-  static Future<void> uploadDocument(
-      String docType, String ITS, String reqId) async {
-    final String studentId = ITS;
-    final String reqid = reqId;
-    final uri = Uri.parse('http://172.16.109.94:3002/upload');
+  static Future<void> uploadDocument({
+    required String docType,
+    required String ITS,
+    required String reqId,
+    File? file, // for mobile/desktop
+    Uint8List? bytes, // for web
+    required String fileName,
+  }) async {
+    final uri = Uri.parse('$baseUrl/upload');
     var request = http.MultipartRequest('POST', uri)
-      ..fields['studentId'] = studentId;
+      ..fields['studentId'] = ITS
+      ..fields['reqId'] = reqId;
 
-    // Get the specific document (File object) for the given docType
-    final document = permissionsController.documents[docType];
-    if (document?.file != null) {
-      try {
-        // Read the file bytes
-        var fileBytes = await document!.file!.readAsBytes();
-        var fileName = '${studentId}_$docType';
-        var mimeType =
-            lookupMimeType(document.file!.path) ?? 'application/octet-stream';
+    try {
+      String mimeType = lookupMimeType(fileName) ?? 'application/octet-stream';
 
-        // Add the file to the request using the correct field name
+      if (file != null) {
+        final fileBytes = await file.readAsBytes();
+
         request.files.add(http.MultipartFile.fromBytes(
-          docType, // Use the document type as the field name dynamically
+          docType,
           fileBytes,
           filename: fileName,
           contentType: MediaType.parse(mimeType),
         ));
-
-        try {
-          // Send the request
-          var response = await request.send();
-
-          if (response.statusCode == 200) {
-            final responseData = await http.Response.fromStream(response);
-
-            // Decode the JSON response
-            Map<String, dynamic> responseJson = json.decode(responseData.body);
-
-            // Access the full file path returned by the backend
-            String uploadedFilePath = responseJson['file']['filePath'];
-
-            // Store the file path in the documents map for the current docType
-            permissionsController.documents[docType] = Document(
-              file: permissionsController.documents[docType]?.file,
-              // Keep the file object as is
-              filePath:
-                  uploadedFilePath, // Store the file path returned by the backend
-            );
-
-            print("File uploaded successfully for $docType!");
-          } else {
-            print("Failed to upload file: ${response.statusCode}");
-          }
-        } catch (e) {
-          print("Error during upload: $e");
-        }
-      } catch (e) {
-        print("Error reading file for $docType: $e");
+      } else if (bytes != null) {
+        request.files.add(http.MultipartFile.fromBytes(
+          docType,
+          bytes,
+          filename: fileName,
+          contentType: MediaType.parse(mimeType),
+        ));
+      } else {
+        return;
       }
-    } else {
-      print("No file selected for $docType");
+
+      var response = await request.send();
+
+      if (response.statusCode == 200) {
+        final responseData = await http.Response.fromStream(response);
+        final responseJson = json.decode(responseData.body);
+
+        String uploadedFilePath = responseJson['file']['filePath'];
+      } else {}
+    } catch (e) {}
+  }
+
+  static Future<RequestFormModel?> fetchRequestById(int reqId) async {
+    final url = Uri.parse('$baseUrl/api/getByReqId');
+
+    try {
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({'reqId': reqId}),
+      );
+
+      if (response.statusCode == 200) {
+        final jsonMap = jsonDecode(response.body);
+        return RequestFormModel.fromJson(jsonMap);
+      } else if (response.statusCode == 404) {
+        // Not found
+        return null;
+      } else {
+        throw Exception('Failed to load request form: ${response.statusCode}');
+      }
+    } catch (e) {
+      rethrow;
     }
+  }
+
+  static Future<List<RequestFormModel>> fetchFormsByITS(String its) async {
+    final url = Uri.parse('$baseUrl/api/request-form/$its');
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final jsonBody = jsonDecode(response.body);
+        //print(jsonBody);
+        if (jsonBody['success'] == true && jsonBody['data'] is List) {
+          return (jsonBody['data'] as List)
+              .map((e) => RequestFormModel.fromJson(e))
+              .toList();
+        }
+      } else {}
+    } catch (e) {}
+
+    return [];
+  }
+
+  static Future<int?> createDraftAndGetId(int reqId) async {
+    final url = Uri.parse('$baseUrl/api/create-draft/$reqId');
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true) {
+          return data['draftId']; // ✅ Return draftId
+        } else {}
+      } else {}
+    } catch (e) {}
+
+    return null; // return null on error
   }
 
   static Future<void> removeDocument(String docType) async {
@@ -580,10 +770,7 @@ class Api {
       permissionsController.documents[docType] =
           null; // Remove the file object locally
       // Optionally, show a success message or handle deletion
-      print("File removed successfully for $docType.");
-    } else {
-      print("Error removing file: ${response.body}");
-    }
+    } else {}
   }
 
   static Future<Map<String, dynamic>> updateProfile({
@@ -646,7 +833,6 @@ class Api {
         throw Exception("Failed to update profile: ${response.body}");
       }
     } catch (error) {
-      print("Error updating profile: $error");
       return {"error": error.toString()};
     }
   }
@@ -692,6 +878,8 @@ class Api {
               "imani": imani,
               "i_id": iId,
               "sub_id": subId,
+              "qardan": qardan,
+              "scholar": scholar,
               "scholarship_taken": scholarshipTaken,
               "class_id": className,
               "s_id": sId,
@@ -723,15 +911,9 @@ class Api {
 
       if (response.statusCode == 200) {
         // Successful submission.
-        print('Form submitted successfully!');
         final responseData = jsonDecode(response.body);
-        print('Inserted ID: ${responseData['id']}');
-      } else {
-        print('Error submitting form: ${response.body}');
-      }
-    } catch (error) {
-      print('Error: $error');
-    }
+      } else {}
+    } catch (error) {}
   }
 
   Future<void> fetchApplicationData(String its, String reqId) async {
@@ -742,13 +924,8 @@ class Api {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        print("Application Data: $data");
-      } else {
-        print("Error: ${jsonDecode(response.body)['error']}");
-      }
-    } catch (e) {
-      print("Network Error: $e");
-    }
+      } else {}
+    } catch (e) {}
   }
 
   static Future<Map<String, dynamic>> updateGuardian({
@@ -800,12 +977,11 @@ class Api {
   }
 
   static Future<void> postDraftUpdateToBackend(
-      Map<String, dynamic> data) async {
-    final appId = '1';
+      Map<String, dynamic> data, String draftId) async {
     final uri = Uri.parse('$baseUrl/save-draft');
 
     final payload = {
-      'application_id': appId,
+      'application_id': draftId,
       'draft_data': data,
     };
 
@@ -815,11 +991,86 @@ class Api {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(payload),
       );
-      if (response.statusCode != 200) {
-        print("❌ Failed to save draft: ${response.body}");
+      if (response.statusCode != 200) {}
+    } catch (e) {}
+  }
+
+  static Future<bool> deleteDraft(int draftId) async {
+    final url = Uri.parse('$baseUrl/delete-draft/$draftId');
+
+    try {
+      final response = await http.delete(url);
+
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+        return jsonResponse['success'] == true;
+      } else {
+        return false;
       }
     } catch (e) {
-      print("❌ Error saving draft: $e");
+      return false;
+    }
+  }
+
+  static Future<UserPermission?> fetchUserPermissions(String its) async {
+    final url = Uri.parse('$baseUrl/api/user-permissions/$its');
+
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final jsonBody = json.decode(response.body);
+        if (jsonBody['success'] == true) {
+          return UserPermission.fromJson(jsonBody['data']);
+        } else {
+          return null;
+        }
+      } else {
+        return null;
+      }
+    } catch (e) {
+      return null;
+    }
+  }
+
+  static Future<bool> uploadApplicationPdf({
+    required Uint8List pdfBytes,
+    required String its,
+    required String reqId,
+    String endpoint = '$baseUrl/api/upload-application-pdf',
+  }) async {
+    try {
+      //endpoint = 'http://localhost:3005/api/upload-application-pdf';
+      // prepare the multipart request
+      final uri = Uri.parse(endpoint);
+      final req = http.MultipartRequest('POST', uri)
+        // text fields
+        ..fields['its'] = its
+        ..fields['reqId'] = reqId
+        // the PDF file field must match multer.single('file')
+        ..files.add(
+          http.MultipartFile.fromBytes(
+            'file',
+            pdfBytes,
+            filename: '${its}_$reqId.pdf',
+            contentType: MediaType('application', 'pdf'),
+          ),
+        );
+
+      // send
+      final streamed = await req.send();
+      final resp = await http.Response.fromStream(streamed);
+
+      if (resp.statusCode == 200) {
+        // success JSON: { message: "...", path: "uploads/application_pdf/ITS_REQ.pdf" }
+        return true;
+      } else {
+        print('Upload failed (${resp.statusCode}): ${resp.body}');
+        return false;
+      }
+    } catch (e) {
+      print('Error uploading PDF: $e');
+      return false;
     }
   }
 }

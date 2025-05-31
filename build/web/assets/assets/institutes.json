@@ -2329,7 +2329,7 @@
   },
   {
     "id": 300,
-    "name": "Education trust Nasra School\u00a0",
+    "name": "Education trust Nasra School ",
     "city_id": 8,
     "city_name": "Karachi",
     "marhala_id": 5,
@@ -2809,7 +2809,7 @@
   },
   {
     "id": 363,
-    "name": "Metropolis Academy\u00a0",
+    "name": "Metropolis Academy ",
     "city_id": 8,
     "city_name": "Karachi",
     "marhala_id": 5,
@@ -3073,7 +3073,7 @@
   },
   {
     "id": 396,
-    "name": "St.Paul\u2019s Convent High School",
+    "name": "St.Paul’s Convent High School",
     "city_id": 8,
     "city_name": "Karachi",
     "marhala_id": 5,
@@ -3329,7 +3329,7 @@
   },
   {
     "id": 429,
-    "name": "The Times School\u00a0",
+    "name": "The Times School ",
     "city_id": 8,
     "city_name": "Karachi",
     "marhala_id": 5,
@@ -3945,7 +3945,7 @@
   },
   {
     "id": 506,
-    "name": "Rockford Cambridge school\u00a0",
+    "name": "Rockford Cambridge school ",
     "city_id": 124,
     "city_name": "Hyderabad Sindh",
     "marhala_id": 5,
@@ -5136,14 +5136,6 @@
     "is_imani": 0
   },
   {
-    "id": 2252,
-    "name": "MSB",
-    "city_id": 124,
-    "city_name": "Hyderabad Sindh",
-    "marhala_id": 5,
-    "is_imani": 1
-  },
-  {
     "id": 2288,
     "name": "Tabba Heart Institute ",
     "city_id": 8,
@@ -5256,14 +5248,6 @@
     "is_imani": 0
   },
   {
-    "id": 2418,
-    "name": "Al Madrasah Taheriyah",
-    "city_id": 124,
-    "city_name": "Hyderabad Sindh",
-    "marhala_id": 5,
-    "is_imani": 1
-  },
-  {
     "id": 2444,
     "name": "CMS Govt. Boys Higher Secondary School",
     "city_id": 8,
@@ -5289,7 +5273,7 @@
   },
   {
     "id": 2472,
-    "name": "YMCAS Young Men\u2019s Christian Association",
+    "name": "YMCAS Young Men’s Christian Association",
     "city_id": 8,
     "city_name": "Karachi",
     "marhala_id": 5,
@@ -6305,7 +6289,7 @@
   },
   {
     "id": 4098,
-    "name": "Tabani\u2019s School of Accountancy",
+    "name": "Tabani’s School of Accountancy",
     "city_id": 8,
     "city_name": "Karachi",
     "marhala_id": 5,
@@ -8929,7 +8913,7 @@
   },
   {
     "id": 7610,
-    "name": "PIMSAT \u2013 Institute of Higher Education",
+    "name": "PIMSAT – Institute of Higher Education",
     "city_id": 8,
     "city_name": "Karachi",
     "marhala_id": 7,
@@ -8945,7 +8929,7 @@
   },
   {
     "id": 7633,
-    "name": "St. Mary\u2019s Academy",
+    "name": "St. Mary’s Academy",
     "city_id": 16,
     "city_name": "Rawalpindi",
     "marhala_id": 5,
@@ -10657,11 +10641,11 @@
   },
   {
     "id": 10250,
-    "name": "Saifiyah High School",
+    "name": "Saifiya High School",
     "city_id": 124,
     "city_name": "Hyderabad Sindh",
     "marhala_id": 5,
-    "is_imani": 1
+    "is_imani": 0
   },
   {
     "id": 10252,
@@ -10731,7 +10715,7 @@
     "id": 10321,
     "name": "Saarland University",
     "city_id": 474,
-    "city_name": "Saarbr\u00fccken",
+    "city_name": "Saarbrücken",
     "marhala_id": 7,
     "is_imani": 0
   },
@@ -11417,7 +11401,7 @@
   },
   {
     "id": 11276,
-    "name": "SIUT \u2013 Sindh Institute Of Urology And Transplantation",
+    "name": "SIUT – Sindh Institute Of Urology And Transplantation",
     "city_id": 8,
     "city_name": "Karachi",
     "marhala_id": 7,
@@ -12033,7 +12017,7 @@
   },
   {
     "id": 12163,
-    "name": "Oasys\u00a0School",
+    "name": "Oasys School",
     "city_id": 8,
     "city_name": "Karachi",
     "marhala_id": 5,
@@ -12297,7 +12281,7 @@
   },
   {
     "id": 12467,
-    "name": "Manar islamic Language\u00a0school",
+    "name": "Manar islamic Language school",
     "city_id": 28,
     "city_name": "Cairo",
     "marhala_id": 5,
@@ -12449,7 +12433,7 @@
   },
   {
     "id": 12664,
-    "name": "Memon Anjuman Boys\/Girls High School",
+    "name": "Memon Anjuman Boys/Girls High School",
     "city_id": 124,
     "city_name": "Hyderabad Sindh",
     "marhala_id": 5,
@@ -13585,7 +13569,7 @@
   },
   {
     "id": 13953,
-    "name": "University of California at Los\u00a0Angeles",
+    "name": "University of California at Los Angeles",
     "city_id": 467,
     "city_name": "Los Angeles",
     "marhala_id": 7,
@@ -14089,7 +14073,7 @@
   },
   {
     "id": 14544,
-    "name": "Verge O\/A Level Academy",
+    "name": "Verge O/A Level Academy",
     "city_id": 8,
     "city_name": "Karachi",
     "marhala_id": 5,
@@ -14353,7 +14337,7 @@
   },
   {
     "id": 14952,
-    "name": "Mary Immaculate Girls\u2019 High School",
+    "name": "Mary Immaculate Girls’ High School",
     "city_id": 34,
     "city_name": "Mumbai",
     "marhala_id": 5,
@@ -15065,7 +15049,7 @@
   },
   {
     "id": 16015,
-    "name": "Lyc\u00e9e fran\u00e7ais Sadi-Carnot",
+    "name": "Lycée français Sadi-Carnot",
     "city_id": 638,
     "city_name": "Antsiranana",
     "marhala_id": 5,
@@ -16425,7 +16409,7 @@
   },
   {
     "id": 17724,
-    "name": "UWE Bristol\/ Lincoln\u2019s Inn",
+    "name": "UWE Bristol/ Lincoln’s Inn",
     "city_id": 686,
     "city_name": "Bristol",
     "marhala_id": 7,
@@ -16905,7 +16889,7 @@
   },
   {
     "id": 18496,
-    "name": "KOI \u2013 King's Own Institute",
+    "name": "KOI – King's Own Institute",
     "city_id": 22,
     "city_name": "Sydney",
     "marhala_id": 5,
@@ -17296,14 +17280,6 @@
     "is_imani": 0
   },
   {
-    "id": 19160,
-    "name": "Govt Saifiya Girls high school",
-    "city_id": 8,
-    "city_name": "Karachi",
-    "marhala_id": 5,
-    "is_imani": 0
-  },
-  {
     "id": 19178,
     "name": "Central Institute of Arts and Crafts (CIAC)",
     "city_id": 8,
@@ -17345,7 +17321,7 @@
   },
   {
     "id": 19208,
-    "name": "St Patrick\u2019s School ",
+    "name": "St Patrick’s School ",
     "city_id": 8,
     "city_name": "Karachi",
     "marhala_id": 5,
@@ -17649,7 +17625,7 @@
   },
   {
     "id": 19411,
-    "name": "St Patrick\u2019s College ",
+    "name": "St Patrick’s College ",
     "city_id": 67,
     "city_name": "London",
     "marhala_id": 5,
@@ -17841,7 +17817,7 @@
   },
   {
     "id": 19539,
-    "name": "Kotwal\u2019s Casa Karachi",
+    "name": "Kotwal’s Casa Karachi",
     "city_id": 8,
     "city_name": "Karachi",
     "marhala_id": 5,
@@ -18057,7 +18033,7 @@
   },
   {
     "id": 19750,
-    "name": "St Aldgate\u2019s College",
+    "name": "St Aldgate’s College",
     "city_id": 793,
     "city_name": "Oxford",
     "marhala_id": 5,
@@ -18289,7 +18265,7 @@
   },
   {
     "id": 19902,
-    "name": "IBS \u2013 Institute of Behavioral Sciences",
+    "name": "IBS – Institute of Behavioral Sciences",
     "city_id": 8,
     "city_name": "Karachi",
     "marhala_id": 7,
@@ -18377,7 +18353,7 @@
   },
   {
     "id": 19939,
-    "name": "St. Mary\u2019s Catholic High School",
+    "name": "St. Mary’s Catholic High School",
     "city_id": 62,
     "city_name": "Dubai",
     "marhala_id": 5,
@@ -19017,7 +18993,7 @@
   },
   {
     "id": 20505,
-    "name": "Trent\u00a0university",
+    "name": "Trent university",
     "city_id": 823,
     "city_name": "Oshawa",
     "marhala_id": 7,
@@ -20324,6 +20300,934 @@
     "name": "Govt. Dehli College",
     "city_id": 8,
     "city_name": "Karachi",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22102,
+    "name": "Rubrics Academy",
+    "city_id": 16,
+    "city_name": "Rawalpindi",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22115,
+    "name": "Preston University",
+    "city_id": 16,
+    "city_name": "Rawalpindi",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22124,
+    "name": "St. John's High School",
+    "city_id": 16,
+    "city_name": "Rawalpindi",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22129,
+    "name": "Government Degree College",
+    "city_id": 16,
+    "city_name": "Rawalpindi",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22132,
+    "name": "Government College Asghar Mall",
+    "city_id": 16,
+    "city_name": "Rawalpindi",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22144,
+    "name": "King Edwards Medical College",
+    "city_id": 9,
+    "city_name": "Lahore",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22147,
+    "name": "Mariam Child Development Centre",
+    "city_id": 8,
+    "city_name": "Karachi",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22164,
+    "name": "Pakistan Institute of Management",
+    "city_id": 8,
+    "city_name": "Karachi",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22181,
+    "name": "Sir syed college",
+    "city_id": 8,
+    "city_name": "Karachi",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22194,
+    "name": "Hamdard University",
+    "city_id": 16,
+    "city_name": "Rawalpindi",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22197,
+    "name": "Sunshine Grammer School",
+    "city_id": 24,
+    "city_name": "Chittagong",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22198,
+    "name": "South Bhurshi High School",
+    "city_id": 24,
+    "city_name": "Chittagong",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22206,
+    "name": "Nawabshah Medical College",
+    "city_id": 8,
+    "city_name": "Karachi",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22209,
+    "name": "Lady Maclagan Girls High School",
+    "city_id": 9,
+    "city_name": "Lahore",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22212,
+    "name": "FAST - National University of Computer and Emerging Sciences",
+    "city_id": 6,
+    "city_name": "Islamabad",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22220,
+    "name": "Private",
+    "city_id": 8,
+    "city_name": "Karachi",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22274,
+    "name": "The Paragon Academy",
+    "city_id": 8,
+    "city_name": "Karachi",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22282,
+    "name": "Chand Sultana High School",
+    "city_id": 41,
+    "city_name": "Pune",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22286,
+    "name": "Government Urdu College",
+    "city_id": 8,
+    "city_name": "Karachi",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22290,
+    "name": "Lourdes Convent High School",
+    "city_id": 35,
+    "city_name": "Surat",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22292,
+    "name": "Sir K. P. College of Commerce",
+    "city_id": 35,
+    "city_name": "Surat",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22302,
+    "name": "The City Foundation School",
+    "city_id": 8,
+    "city_name": "Karachi",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22308,
+    "name": "Fatima Jinnah School",
+    "city_id": 14,
+    "city_name": "Quetta",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22314,
+    "name": "Al Falah Schools",
+    "city_id": 8,
+    "city_name": "Karachi",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22321,
+    "name": "Private",
+    "city_id": 124,
+    "city_name": "Hyderabad Sindh",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22331,
+    "name": "Tameer-e-Nau Public School",
+    "city_id": 8,
+    "city_name": "Karachi",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22341,
+    "name": "Marvel Academy",
+    "city_id": 8,
+    "city_name": "Karachi",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22343,
+    "name": "College of Aeronautical Engineering (CAE), NUST",
+    "city_id": 655,
+    "city_name": "Risalpur",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22346,
+    "name": "Cranfield University",
+    "city_id": 69,
+    "city_name": "Bradford",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22349,
+    "name": "Ideal Degree College",
+    "city_id": 8,
+    "city_name": "Karachi",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22366,
+    "name": "Himayat-e-Islam College for Women",
+    "city_id": 124,
+    "city_name": "Hyderabad Sindh",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22392,
+    "name": "Indus University of Health Sciences",
+    "city_id": 8,
+    "city_name": "Karachi",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22421,
+    "name": "White House Grammar School",
+    "city_id": 8,
+    "city_name": "Karachi",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22422,
+    "name": "SOAR STEM Schools",
+    "city_id": 9,
+    "city_name": "Lahore",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22423,
+    "name": "Edina Early Learning Center",
+    "city_id": 873,
+    "city_name": "Minnesota",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22426,
+    "name": "Concord Elementary School",
+    "city_id": 254,
+    "city_name": "Philadelphia",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22430,
+    "name": "Capital Lyceum",
+    "city_id": 16,
+    "city_name": "Rawalpindi",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22433,
+    "name": "Zaini Madrasa",
+    "city_id": 124,
+    "city_name": "Hyderabad Sindh",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22453,
+    "name": "MSB",
+    "city_id": 44,
+    "city_name": "Nairobi",
+    "marhala_id": 5,
+    "is_imani": 1
+  },
+  {
+    "id": 22455,
+    "name": "The Cambridge International Institute Of Science And Technology",
+    "city_id": 44,
+    "city_name": "Nairobi",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22463,
+    "name": "Sir Ellis Kadoorie Secondary School",
+    "city_id": 379,
+    "city_name": "Kowloon Tong",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22479,
+    "name": "International Centre of Excellence - ICE",
+    "city_id": 8,
+    "city_name": "Karachi",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22483,
+    "name": "Mehran University of Engineering & Technology",
+    "city_id": 8,
+    "city_name": "Karachi",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22484,
+    "name": "Arts & Science Academy",
+    "city_id": 8,
+    "city_name": "Karachi",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22485,
+    "name": "Alifya Early Years",
+    "city_id": 9,
+    "city_name": "Lahore",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22487,
+    "name": "Private",
+    "city_id": 9,
+    "city_name": "Lahore",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22488,
+    "name": "Al Sadiq Islamic English School",
+    "city_id": 62,
+    "city_name": "Dubai",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22489,
+    "name": "Concepts School Of Science",
+    "city_id": 16,
+    "city_name": "Rawalpindi",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22497,
+    "name": "Association for Supply Chain Management",
+    "city_id": 22,
+    "city_name": "Sydney",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22498,
+    "name": "Faizan Islamic School SystemFaizan Islamic School System",
+    "city_id": 8,
+    "city_name": "Karachi",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22522,
+    "name": "M.P Shah English High School",
+    "city_id": 34,
+    "city_name": "Mumbai",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22537,
+    "name": "Neuville Nursery School",
+    "city_id": 9,
+    "city_name": "Lahore",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22539,
+    "name": "House of Education School",
+    "city_id": 9,
+    "city_name": "Lahore",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22540,
+    "name": "TNS Beachonhouse DHA",
+    "city_id": 9,
+    "city_name": "Lahore",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22542,
+    "name": "North City School of Arts",
+    "city_id": 8,
+    "city_name": "Karachi",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22560,
+    "name": "Beaconhouse College",
+    "city_id": 19,
+    "city_name": "Sialkot",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22563,
+    "name": "American Lyceum Group of School",
+    "city_id": 9,
+    "city_name": "Lahore",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22567,
+    "name": "Mrs. Ahmed's Montessori & Primary School",
+    "city_id": 8,
+    "city_name": "Karachi",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22586,
+    "name": "Silver Oaks School & College",
+    "city_id": 16,
+    "city_name": "Rawalpindi",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22587,
+    "name": "Jack & Jill Montessori & High School",
+    "city_id": 16,
+    "city_name": "Rawalpindi",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22600,
+    "name": "University Of Balochistan",
+    "city_id": 14,
+    "city_name": "Quetta",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22622,
+    "name": "Keynesian Institute Of Management And Sciences",
+    "city_id": 9,
+    "city_name": "Lahore",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22633,
+    "name": "PAF School For Special Education",
+    "city_id": 16,
+    "city_name": "Rawalpindi",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22636,
+    "name": "Westminster Academy",
+    "city_id": 6,
+    "city_name": "Islamabad",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22649,
+    "name": "Lahore Grammer School (LGS)",
+    "city_id": 9,
+    "city_name": "Lahore",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22658,
+    "name": "Swedish Institute Of Technology",
+    "city_id": 16,
+    "city_name": "Rawalpindi",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22659,
+    "name": "Punjab Institute of Science & Technology",
+    "city_id": 16,
+    "city_name": "Rawalpindi",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22661,
+    "name": "Private",
+    "city_id": 44,
+    "city_name": "Nairobi",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22667,
+    "name": "Nixor O Levels",
+    "city_id": 8,
+    "city_name": "Karachi",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22680,
+    "name": "Private",
+    "city_id": 278,
+    "city_name": "Sanaa",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22681,
+    "name": "Government Girls High School",
+    "city_id": 14,
+    "city_name": "Quetta",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22684,
+    "name": "Emma's Preschool",
+    "city_id": 8,
+    "city_name": "Karachi",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22686,
+    "name": "St. Michael's Convent School",
+    "city_id": 190,
+    "city_name": "Mirpur Khas",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22687,
+    "name": "Ibn e Rushd Girls College",
+    "city_id": 190,
+    "city_name": "Mirpur Khas",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22690,
+    "name": "Virtual University",
+    "city_id": 14,
+    "city_name": "Quetta",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22691,
+    "name": "Hayat Girls Higher Secondary School",
+    "city_id": 190,
+    "city_name": "Mirpur Khas",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22695,
+    "name": "SBK Women's University",
+    "city_id": 14,
+    "city_name": "Quetta",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22696,
+    "name": "Pakistan Urdu School",
+    "city_id": 87,
+    "city_name": "Manama",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22717,
+    "name": "Rawal Institute of Health Sciences (RIHS)",
+    "city_id": 16,
+    "city_name": "Rawalpindi",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22720,
+    "name": "The Educators",
+    "city_id": 14,
+    "city_name": "Quetta",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22726,
+    "name": "St. Anthony's Higher Secondary School",
+    "city_id": 9,
+    "city_name": "Lahore",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22727,
+    "name": "Sacred Heart Convent School",
+    "city_id": 9,
+    "city_name": "Lahore",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22732,
+    "name": "Grand Folk's Paradise High School",
+    "city_id": 8,
+    "city_name": "Karachi",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22733,
+    "name": "Elevation Grammar School",
+    "city_id": 8,
+    "city_name": "Karachi",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22734,
+    "name": "Hailey College of Commerce",
+    "city_id": 9,
+    "city_name": "Lahore",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22736,
+    "name": "University of San Francisco",
+    "city_id": 880,
+    "city_name": "San Francisco",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22740,
+    "name": "Cambridge International School",
+    "city_id": 62,
+    "city_name": "Dubai",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22749,
+    "name": "University of Stirling",
+    "city_id": 881,
+    "city_name": "Stirling",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22752,
+    "name": "Kharkiv National University",
+    "city_id": 883,
+    "city_name": "Kharkiv",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22753,
+    "name": "Farooqi Grammar School",
+    "city_id": 9,
+    "city_name": "Lahore",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22756,
+    "name": "The Agha Khan School",
+    "city_id": 695,
+    "city_name": "Dhaka",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22757,
+    "name": "Shri Shikshayatan College",
+    "city_id": 884,
+    "city_name": "Kolkata",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22760,
+    "name": "Calcutta Girls' High School (CGHS)",
+    "city_id": 884,
+    "city_name": "Kolkata",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22761,
+    "name": "Loretto House School",
+    "city_id": 9,
+    "city_name": "Lahore",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22770,
+    "name": "Georgia Institute of Technology",
+    "city_id": 79,
+    "city_name": "Atlanta",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22771,
+    "name": "Rochester Institute of Technology",
+    "city_id": 62,
+    "city_name": "Dubai",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22776,
+    "name": "Cedar Drive Middle School",
+    "city_id": 25,
+    "city_name": "Toronto",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22780,
+    "name": "University of Wollongong",
+    "city_id": 236,
+    "city_name": "Wollongong",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22781,
+    "name": "FAST - National University of Computer and Emerging Sciences",
+    "city_id": 9,
+    "city_name": "Lahore",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22783,
+    "name": "St. Joseph's Convent School",
+    "city_id": 124,
+    "city_name": "Hyderabad Sindh",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22786,
+    "name": "Government Gen Musa Degree College",
+    "city_id": 14,
+    "city_name": "Quetta",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22811,
+    "name": "Allama Iqbal Open University",
+    "city_id": 12,
+    "city_name": "Multan",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22812,
+    "name": "The University of Lahore",
+    "city_id": 12,
+    "city_name": "Multan",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22816,
+    "name": "Kids Zone Play School",
+    "city_id": 8,
+    "city_name": "Karachi",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22818,
+    "name": "Martin Luther University Halle-Wittenberg",
+    "city_id": 889,
+    "city_name": "Halle",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22828,
+    "name": "Jawahir Al-Riyadh International School",
+    "city_id": 56,
+    "city_name": "Jeddah",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22831,
+    "name": "Govt. Alamdar Hussain Islamia Graduate College",
+    "city_id": 12,
+    "city_name": "Multan",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22844,
+    "name": "Dehli Govt School",
+    "city_id": 8,
+    "city_name": "Karachi",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22845,
+    "name": "Elite School",
+    "city_id": 8,
+    "city_name": "Karachi",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22851,
+    "name": "Westfield High School",
+    "city_id": 84,
+    "city_name": "Virginia",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22852,
+    "name": "HN Science School",
+    "city_id": 12,
+    "city_name": "Multan",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22861,
+    "name": "Govt. Willayat Hussain Islamia College",
+    "city_id": 12,
+    "city_name": "Multan",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22862,
+    "name": "Govt. Willayat Hussain Islamia College",
+    "city_id": 12,
+    "city_name": "Multan",
+    "marhala_id": 7,
+    "is_imani": 0
+  },
+  {
+    "id": 22888,
+    "name": "Emerson College",
+    "city_id": 12,
+    "city_name": "Multan",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22889,
+    "name": "Islamia High School",
+    "city_id": 12,
+    "city_name": "Multan",
+    "marhala_id": 5,
+    "is_imani": 0
+  },
+  {
+    "id": 22907,
+    "name": "South Lake Primary School",
+    "city_id": 86,
+    "city_name": "Perth",
     "marhala_id": 5,
     "is_imani": 0
   }

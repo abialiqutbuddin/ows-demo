@@ -1,26 +1,200 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:ows/api/api.dart';
+import 'package:ows/constants/app_routes.dart';
+import '../../controller/state_management/state_manager.dart';
 import '../../model/request_form_model.dart';
 
-class ReqFormTableUI extends StatelessWidget {
+GlobalStateController statecontroller = Get.find<GlobalStateController>();
+
+class ReqFormResponsiveUI extends StatelessWidget {
   final List<RequestFormModel> requests;
   final ScrollController scrollController;
-  final bool allowEditStatus;
-  final Function(RequestFormModel, String) onStatusChanged;
-  final Function(RequestFormModel) onViewDetails;
+  final Function(RequestFormModel) onEditForms;
+  final Function(RequestFormModel) onViewPdf;
 
-  const ReqFormTableUI({
+  const ReqFormResponsiveUI({
     super.key,
     required this.requests,
     required this.scrollController,
-    required this.allowEditStatus,
-    required this.onStatusChanged,
-    required this.onViewDetails,
+    required this.onViewPdf,
+    required this.onEditForms,
   });
 
+  // If you still need admin‐only stats, keep admin toggle:
   final bool admin = false;
 
   @override
   Widget build(BuildContext context) {
+    // Use MediaQuery to switch between table (desktop) and card (mobile)
+    final double width = MediaQuery.of(context).size.width;
+    final bool isMobile = width < 600;
+
+    if (isMobile) {
+      return _buildMobileCardList();
+    } else {
+      return _buildTableView();
+    }
+  }
+
+  /// ─── MOBILE CARD VIEW ─────────────────────────────────────────────────────
+  Widget _buildMobileCardList() {
+    if (requests.isEmpty) {
+      return const Center(child: Text("No Request Data"));
+    }
+
+    return ListView.builder(
+      controller: scrollController,
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+      itemCount: requests.length,
+      itemBuilder: (context, index) {
+        final req = requests[index];
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: Card(
+            color: Colors.white,
+            elevation: 2,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Top row: Index + Action Icons
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      // Serial number
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          "${index + 1}",
+                          style: const TextStyle(
+                              fontSize: 14, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                      const Spacer(),
+                      // Edit icon
+                      IconButton(
+                        icon: const Icon(Icons.edit, color: Color(0xFF795548)),
+                        onPressed: () async {
+                          if (req.appId == null) {
+                            if (req.draftId != null) {
+                              statecontroller.draftId.value = req.draftId!;
+                              statecontroller.reqId.value = req.reqId!;
+                              statecontroller.intentCompleted.value = true;
+                              Get.toNamed(AppRoutes.application_form);
+                            } else {
+                              int? draftId =
+                              await Api.createDraftAndGetId(req.reqId!);
+                              statecontroller.draftId.value = draftId!;
+                              statecontroller.reqId.value = req.reqId!;
+                              statecontroller.intentCompleted.value = true;
+                              Get.toNamed(AppRoutes.application_form);
+                            }
+                          }
+                        },
+                        tooltip: "Edit",
+                      ),
+                      // View icon
+                      IconButton(
+                        icon:
+                        const Icon(Icons.remove_red_eye, color: Color(0xFF795548)),
+                        onPressed: () => onViewPdf(req),
+                        tooltip: "View PDF",
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  // Status Badge
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: _statusBadge(req.currentStatus),
+                  ),
+
+                  const SizedBox(height: 12),
+
+                  // Details: ITS, Name, Contact, Organization, Funds, Mohalla
+                  _buildDetailRow("ITS", req.toJson()["ITS"] ?? ""),
+                  _buildDetailRow("Name", req.toJson()["reqByName"] ?? ""),
+                  _buildDetailRow("Contact", req.toJson()["contactNo"] ?? ""),
+                  _buildDetailRow("Organization", req.toJson()["organization"] ?? ""),
+                  _buildDetailRow(
+                    "Funds",
+                    req.toJson()["fundAsking"].toString(),
+                  ),
+                  _buildDetailRow("Mohalla", req.toJson()["mohalla"] ?? ""),
+
+                  // (Optional) Add spacing between cards
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 4,
+            child: Text(
+              "$label:",
+              style: const TextStyle(
+                  fontSize: 13, fontWeight: FontWeight.w600, color: Colors.black87),
+            ),
+          ),
+          Expanded(
+            flex: 7,
+            child: Text(
+              value,
+              style: const TextStyle(fontSize: 13, color: Colors.black87),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _statusBadge(String status) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.brown),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            status,
+            style: const TextStyle(
+              color: Colors.brown,
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// ─── DESKTOP TABLE VIEW (EXISTING) ────────────────────────────────────────
+  Widget _buildTableView() {
     int totalRequests = requests.length;
     int totalAIUT =
         requests.where((r) => r.toJson()["organization"] == "AIUT").length;
@@ -29,14 +203,16 @@ class ReqFormTableUI extends StatelessWidget {
     int totalAMBT =
         requests.where((r) => r.toJson()["organization"] == "AMBT").length;
     int totalDeeni = requests.where((r) {
-      String org = r.toJson()["organization"] ?? ""; // Ensure null safety
-      return org.isNotEmpty && org != "AIUT" && org != "STSMF" && org != "AMBT";
+      String org = r.toJson()["organization"] ?? "";
+      return org.isNotEmpty &&
+          org != "AIUT" &&
+          org != "STSMF" &&
+          org != "AMBT";
     }).length;
 
     return Container(
       padding: const EdgeInsets.all(8),
       child: Column(
-        spacing: 10,
         children: [
           if (admin == true)
             _buildStatsRow(
@@ -50,28 +226,27 @@ class ReqFormTableUI extends StatelessWidget {
           requests.isEmpty
               ? const Center(child: Text("No Request Data"))
               : Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(8),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withValues(alpha: 0.2),
-                          blurRadius: 0,
-                          spreadRadius: 1,
-                          //offset: const Offset(0, 3),
-                        ),
-                      ],
-                    ),
-                    child: ListView.builder(
-                      controller: scrollController,
-                      itemCount: requests.length,
-                      itemBuilder: (context, index) {
-                        return _buildTableRow(context, requests[index], index);
-                      },
-                    ),
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.2),
+                    blurRadius: 0,
+                    spreadRadius: 1,
                   ),
-                ),
+                ],
+              ),
+              child: ListView.builder(
+                controller: scrollController,
+                itemCount: requests.length,
+                itemBuilder: (context, index) {
+                  return _buildTableRow(context, requests[index], index);
+                },
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -113,7 +288,7 @@ class ReqFormTableUI extends StatelessWidget {
         ),
         _StatBox(
           title: "Deeni Requests",
-          value: totalAMBT,
+          value: totalDeeni,
           icon: Icons.domain,
           color: Colors.brown,
         ),
@@ -121,12 +296,11 @@ class ReqFormTableUI extends StatelessWidget {
     );
   }
 
-  /// **🔹 Custom Table Header**
   Widget _buildTableHeader() {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
       decoration: BoxDecoration(
-        color: Color(0xffdbbb99),
+        color: const Color(0xffdbbb99),
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(12),
           topRight: Radius.circular(12),
@@ -135,7 +309,7 @@ class ReqFormTableUI extends StatelessWidget {
       child: Row(
         children: const [
           _TableHeaderCell(text: "S.#", flex: 1),
-          _TableHeaderCell(text: "View", flex: 2),
+          _TableHeaderCell(text: "Actions", flex: 3),
           _TableHeaderCell(text: "Status", flex: 4),
           _TableHeaderCell(text: "ITS", flex: 3),
           _TableHeaderCell(text: "Name", flex: 5),
@@ -148,9 +322,6 @@ class ReqFormTableUI extends StatelessWidget {
     );
   }
 
-  /// **🔹 Custom Table Row**
-  /// **🔹 Custom Table Row with Hover Effect**
-  /// **🔹 Custom Table Row with Hover Effect**
   Widget _buildTableRow(BuildContext context, RequestFormModel req, int index) {
     final ValueNotifier<bool> isHovered = ValueNotifier(false);
 
@@ -164,16 +335,16 @@ class ReqFormTableUI extends StatelessWidget {
             duration: const Duration(milliseconds: 200),
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 8),
             decoration: BoxDecoration(
-              color: hovered ? Colors.white : Color(0xfffff7ec),
+              color: hovered ? Colors.white : const Color(0xfffff7ec),
               boxShadow: hovered
                   ? [
-                      BoxShadow(
-                        color: Colors.grey.withValues(alpha: 0.4),
-                        spreadRadius: 2,
-                        blurRadius: 6,
-                        offset: const Offset(0, 3),
-                      ),
-                    ]
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.4),
+                  spreadRadius: 2,
+                  blurRadius: 6,
+                  offset: const Offset(0, 3),
+                ),
+              ]
                   : [],
               border: Border(
                 bottom: BorderSide(color: Colors.grey.shade300, width: 1),
@@ -183,22 +354,54 @@ class ReqFormTableUI extends StatelessWidget {
             child: Row(
               children: [
                 _TableCell(text: (index + 1).toString(), flex: 1),
-                _TableIconCell(
-                  icon: Icons.remove_red_eye,
-                  color: const Color(0xFF795548),
-                  onTap: () => onViewDetails(req),
-                  flex: 2,
-                ),
                 _TableCell(
-                  flex: 4,
-                  child: _statusBadge(req.currentStatus),
+                  flex: 3,
+                  child: Row(
+                    children: [
+                      Flexible(
+                        child: _TableIconCell(
+                          icon: Icons.edit,
+                          color: const Color(0xFF795548),
+                          onTap: () async {
+                            if (req.appId == null) {
+                              if (req.draftId != null) {
+                                statecontroller.draftId.value = req.draftId!;
+                                statecontroller.reqId.value = req.reqId!;
+                                statecontroller.intentCompleted.value = true;
+                                Get.toNamed(AppRoutes.application_form);
+                              } else {
+                                int? draftId =
+                                await Api.createDraftAndGetId(req.reqId!);
+                                statecontroller.draftId.value = draftId!;
+                                statecontroller.reqId.value = req.reqId!;
+                                statecontroller.intentCompleted.value = true;
+                                Get.toNamed(AppRoutes.application_form);
+                              }
+                            }
+                          },
+                          flex: 1,
+                        ),
+                      ),
+                      Flexible(
+                        child: _TableIconCell(
+                          icon: Icons.remove_red_eye,
+                          color: const Color(0xFF795548),
+                          onTap: () {},
+                          flex: 1,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+                _TableCell(flex: 4, child: _statusBadge(req.currentStatus)),
                 _TableCell(text: req.toJson()["ITS"] ?? "", flex: 3),
                 _TableCell(text: req.toJson()["reqByName"] ?? "", flex: 5),
                 _TableCell(text: req.toJson()["contactNo"] ?? "", flex: 3),
                 _TableCell(text: req.toJson()["organization"] ?? "", flex: 3),
                 _TableCell(
-                    text: req.toJson()["fundAsking"].toString(), flex: 3),
+                  text: req.toJson()["fundAsking"].toString(),
+                  flex: 3,
+                ),
                 _TableCell(text: req.toJson()["mohalla"] ?? "", flex: 5),
               ],
             ),
@@ -207,33 +410,8 @@ class ReqFormTableUI extends StatelessWidget {
       ),
     );
   }
-
-  /// **🔹 Polished Status Badge UI**
-  Widget _statusBadge(String status) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.brown),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            status,
-            style: TextStyle(
-              color: Colors.brown,
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
-/// **🔹 Custom Table Header Cell**
 class _TableHeaderCell extends StatelessWidget {
   final String text;
   final int flex;
@@ -261,7 +439,6 @@ class _TableHeaderCell extends StatelessWidget {
   }
 }
 
-/// **🔹 Custom Table Cell**
 class _TableCell extends StatelessWidget {
   final String? text;
   final Widget? child;
@@ -279,8 +456,8 @@ class _TableCell extends StatelessWidget {
           alignment: Alignment.center,
           child: child ??
               Text(
-                textAlign: TextAlign.center,
                 text ?? "",
+                textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 13, color: Colors.black),
               ),
         ),
@@ -289,7 +466,6 @@ class _TableCell extends StatelessWidget {
   }
 }
 
-/// **🔹 Custom Table Icon Cell**
 class _TableIconCell extends StatelessWidget {
   final IconData icon;
   final Color color;
@@ -305,14 +481,11 @@ class _TableIconCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Flexible(
-      flex: flex,
-      child: Container(
-        alignment: Alignment.center,
-        child: IconButton(
-          icon: Icon(icon, color: color),
-          onPressed: onTap,
-        ),
+    return Container(
+      alignment: Alignment.center,
+      child: IconButton(
+        icon: Icon(icon, color: color),
+        onPressed: onTap,
       ),
     );
   }
@@ -338,11 +511,11 @@ class _StatBox extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         margin: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(
-          color: Color(0xffffead1),
+          color: const Color(0xffffead1),
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withValues(alpha: 0.2),
+              color: Colors.grey.withOpacity(0.2),
               blurRadius: 0,
               spreadRadius: 1,
             ),

@@ -1,0 +1,209 @@
+  Widget updateEducation() {
+    return Container(
+      padding: const EdgeInsets.all(20.0),
+      width: 450,
+      child: Column(
+        spacing: 10,
+        children: [
+          Row(
+            spacing: 8,
+            children: [
+              Flexible(
+                child: _buildDropdown2(
+                  label: "Select Marhala",
+                  selectedValue: controller.selectedMarhala,
+                  // Using Rxn<int>
+                  items: List.generate(7, (index) => index + 1)
+                      .map((marhala) =>
+                          {"id": marhala, "name": "Marhala $marhala"})
+                      .toList(),
+                  onChanged: (value) {
+                    controller.selectedMarhala.value = value;
+                    controller.resetFields();
+                    controller.classId = Rxn<int>();
+                    filterStudyOptions(value!);
+                  },
+                  isEnabled: true,
+                ),
+              ),
+              // Dropdown for selecting Class (filtered by Marhala)
+              Flexible(
+                child: Obx(() {
+                  List<Map<String, dynamic>> filteredClasses = controller
+                      .getClassesByMarhala(controller.selectedMarhala.value);
+                  return _buildDropdown2(
+                    label: "Select Class",
+                    selectedValue: controller.classId,
+                    items: filteredClasses,
+                    onChanged: (value) {
+                      controller.classId.value = value;
+                      if (controller.selectedMarhala.value! > 0 &&
+                          controller.selectedMarhala.value! < 4) {
+                        controller.sId.value = filteredClasses
+                            .firstWhere(
+                              (element) => element['id'] == value,
+                              orElse: () => {},
+                            )['standard_id']
+                            .toString();
+                      }
+                    },
+                    isEnabled: controller.selectedMarhala.value != null,
+                  );
+                }),
+              ),
+            ],
+          ),
+          Row(
+            spacing: 8,
+            children: [
+              Flexible(
+                child: Obx(
+                  () => CustomDropdownSearch<String>(
+                    height: 50,
+                    label: "City",
+                    itemsLoader: (filter, _) async {
+                      return controller.cities
+                          .map((e) => e['name'] as String) // Extract city names
+                          .toList();
+                    },
+                    selectedItem:
+                        controller.selectedCity.value, // Bind selected city
+                    isEnabled: controller.cities
+                        .isNotEmpty, // Enable only if cities are available
+                    onChanged: (String? cityName) {
+                      if (cityName != null) {
+                        //controller.selectedCity.value = cityName;
+                        // Find city ID based on name and update selectedCityId
+                        final selectedCityData = controller.cities.firstWhere(
+                          (city) => city['name'] == cityName,
+                          orElse: () =>
+                              {"id": null}, // Ensure it returns a valid default
+                        );
+                        controller.selectCity(selectedCityData["id"]);
+                        controller.updateCityAndCountryIds();
+                      }
+                    },
+                  ),
+                ),
+              ),
+              Flexible(
+                child: Obx(
+                  () => CustomDropdownSearch<String>(
+                    height: 50,
+                    label: "Institute",
+                    itemsLoader: (filter, _) async {
+                      return controller.filteredInstitutes
+                          .map((e) => e['name'] as String)
+                          .toList();
+                    },
+                    selectedItem: controller.selectedInstituteName.value,
+                    isEnabled: controller.selectedCity.value.isNotEmpty &&
+                        controller.selectedCity.value != "Select City",
+                    onChanged: (String? institute) {
+                      controller.selectedInstituteName.value = institute ?? "";
+
+                      var selectedInstitute =
+                          controller.filteredInstitutes.firstWhere(
+                        (element) => element['name'] == institute,
+                        orElse: () => {},
+                      );
+
+                      controller.iId.value = selectedInstitute['id'].toString();
+                      controller.imani.value =
+                          selectedInstitute["is_imani"] == 0 ? "O" : "I";
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Obx(
+            () => Visibility(
+              //visible: true,
+              visible: controller.selectedMarhala.value != null &&
+                  controller.selectedMarhala.value! > 3,
+              child: Row(
+                spacing: 10,
+                children: [
+                  Flexible(
+                      child: Obx(
+                    () => _buildDropdown2(
+                      label: "Field of Study",
+                      selectedValue: controller.fieldOfStudyIndex,
+                      items: [
+                        ...controller.studyOptions
+                            .map((e) => {"id": e["id"], "name": e["name"]})
+                      ],
+                      onChanged: (value) {
+                        controller.sId.value = value.toString();
+                        controller.fieldOfStudyIndex.value = value;
+                        controller.courseIndexPoint.value = null;
+                        filterByMarhalaAndStudy(
+                            controller.selectedMarhala.value,
+                            controller.fieldOfStudyIndex.value);
+                        controller.filterFields(value!);
+                      },
+                      isEnabled: true,
+                    ),
+                  )),
+                  Flexible(
+                    child: Obx(
+                      () => _buildDropdown2(
+                        label: "Subject",
+                        selectedValue: controller.courseIndexPoint,
+                        items: [
+                          ...controller.courseOptions
+                              .map((e) => {"id": e["id"], "name": e["name"]})
+                        ],
+                        onChanged: (value) {
+                          controller.subId.value = [value.toString()];
+                          controller.courseIndexPoint.value = value;
+                        },
+                        isEnabled: true,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          Row(
+            spacing: 8,
+            children: [
+              Text(
+                "Scholarship Taken",
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+              ),
+              _radioOption("Yes", controller.scholarshipTaken),
+              _radioOption("No", controller.scholarshipTaken),
+            ],
+          ),
+          Row(
+            spacing: 8,
+            children: [
+              Flexible(
+                  child: Constants()
+                      .buildField("Qardan:", controller.qardan, controller)),
+              Flexible(child: _buildField2("Scholarship", controller.scholar)),
+            ],
+          ),
+          Row(
+            spacing: 8,
+            children: [
+              Flexible(child: _buildField2("Start Date:", controller.sdate)),
+              Flexible(child: _buildField2("End Date:", controller.edate)),
+            ],
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              controller.submitForm();
+              // UpdateProfileRequest profileData = await controller.getProfileData();
+              //
+              // printProfileData(profileData);
+            },
+            child: Text("Update"),
+          ),
+        ],
+      ),
+    );
+  }

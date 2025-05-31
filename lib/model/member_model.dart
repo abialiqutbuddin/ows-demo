@@ -1,3 +1,5 @@
+import '../web_ui/application_forms/application_form_web.dart';
+
 class UserProfile {
   int? id;
   int? itsId;
@@ -51,8 +53,10 @@ class UserProfile {
   String? approvedOn;
   int? approvedBy;
   int? isDelete;
-  List<FuturePlan>? future;
+  List<FuturePlan>? future; // single FuturePlan, not a list
   List<Education>? education;
+  Education? currentEducation;
+
 
   UserProfile({
     this.id,
@@ -165,13 +169,13 @@ class UserProfile {
       approvedOn: json['approved_on'] ?? "-",
       approvedBy: json['approved_by'] ?? 0,
       isDelete: json['is_delete'] ?? 0,
-      future: (json['future'] as List<dynamic>?)?.map((item) => FuturePlan.fromJson(item)).toList() ?? [],
+      future: (json['future'] as List<dynamic>?)
+          ?.map((item) => FuturePlan.fromJson(item))
+          .toList(),
       education: (json['education'] as List<dynamic>?)
           ?.map((item) => Education.fromJson(item))
+          .where((edu) => edu.marhalaId != null)
           .toList()
-          .where((edu) => edu.marhalaId != null) // Ensure marhalaId is not null
-          .toList()
-          .cast<Education>()
         ?..sort((a, b) => (b.marhalaId ?? 0).compareTo(a.marhalaId ?? 0)), // Sort in descending order
         );
   }
@@ -234,9 +238,29 @@ class UserProfile {
       'education': education?.map((item) => item.toJson()).toList() ?? [],
     };
   }
+
   int? _parseInt(dynamic value) {
     if (value == null || value == "" || value.toString().trim().isEmpty) return null;
-    return int.tryParse(value.toString()); // Convert safely
+    return int.tryParse(value.toString());
+  }
+
+  void setCurrentEducation() {
+
+    ///REMOVE
+    currentMarhala = stateController.user.value.currentMarhala;
+    currentClass = stateController.user.value.currentClass;
+
+
+    if (education == null || education!.isEmpty) {
+      currentEducation = null;
+      return;
+    }
+    currentEducation = education!.cast<Education?>().firstWhere(
+          (edu) =>
+      edu!.marhalaId == currentMarhala &&
+          edu.className?.toLowerCase() == currentClass?.toLowerCase(),
+      orElse: () => null,
+    );
   }
 }
 

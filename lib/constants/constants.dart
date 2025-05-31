@@ -7,7 +7,8 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:super_tooltip/super_tooltip.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'dart:html' as html; // Only works for Flutter Web
+import 'web_helper_stub.dart'
+if (dart.library.html) 'web_helper_web.dart';
 
 class Constants {
   Color green = Color(0xFF008759);
@@ -58,26 +59,22 @@ class Constants {
     // Redirect to external website
     const String url = "https://www.its52.com";
     if (GetPlatform.isWeb) {
-      // Get.to(() => AppRoutes.login);
-      html.window.location.href = url;
+      redirectToUrl(url); // Uses safe conditional redirect
     } else {
-      launchUrl(Uri.parse(url),
-          mode: LaunchMode.inAppWebView); // Opens inside the app (Mobile)
+      launchUrl(Uri.parse(url), mode: LaunchMode.inAppWebView);
     }
   }
 
-  Widget buildField(
-    String label,
-    RxString rxValue,
-    controller, {
-    double? height,
-    bool? isEnabled,
-    Function()? function,
-    String? Function(String?)? validator,
-    String? validatorKey,
-    Function(String)? onChanged,
-    String? hint,
-  }) {
+  Widget buildField(String label, RxString rxValue, controller,
+      {double? height,
+      Text? text,
+      bool? isEnabled,
+      Function()? function,
+      String? Function(String?)? validator,
+      String? validatorKey,
+      Function(String)? onChanged,
+      String? hint,
+      bool? showtitle = true}) {
     String fieldType = validatorKey ?? 'text';
     TextInputType inputType = TextInputType.text;
     List<TextInputFormatter> inputFormatters = [];
@@ -140,11 +137,11 @@ class Constants {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 15),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        color: const Color(0xfffff7ec),
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
+      // decoration: BoxDecoration(
+      //   borderRadius: BorderRadius.circular(8),
+      //   color: const Color(0xfffff7ec),
+      // ),
       child: Obx(() {
         String? error;
         try {
@@ -157,19 +154,21 @@ class Constants {
         bool isValid = error == null && !isEmpty;
 
         return Column(
-          spacing: 10,
+          spacing: 5,
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              label,
-              style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                  color: Colors.black),
-            ),
+            if (text != null) text,
+            if (text == null && showtitle != false)
+              Text(
+                label,
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Colors.black),
+              ),
             SizedBox(
-              height: height ?? 40,
+              height: height ?? 30,
               child: TextFormField(
                 enabled: isEnabled ?? true,
                 keyboardType: inputType,
@@ -281,39 +280,43 @@ class Constants {
     );
   }
 
-  Widget buildDropdown2({
-    required String label,
-    required Rxn<int> selectedValue,
-    required List<Map<String, dynamic>> items,
-    required ValueChanged<int?> onChanged,
-    required bool isEnabled,
-  }) {
+  Widget buildDropdown2(
+      {required String label,
+      required Rxn<int> selectedValue,
+      required List<Map<String, dynamic>> items,
+      required ValueChanged<int?> onChanged,
+      required bool isEnabled,
+      Text? text,
+      bool? showtitle = true}) {
     SuperTooltipController tooltipController = SuperTooltipController();
     String? error = 'This field is required';
     Timer? hoverTimer;
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 15),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        color: const Color(0xfffff7ec),
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
+      // decoration: BoxDecoration(
+      //   borderRadius: BorderRadius.circular(8),
+      //   color: const Color(0xfffff7ec),
+      // ),
       child: Obx(() => Column(
-            spacing: 10,
+            spacing: 5,
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                label,
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                    color: Colors.black),
-              ),
+              if(text!=null)
+                text,
+              if (text==null && showtitle != false)
+                Text(
+                  label,
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: Colors.black),
+                ),
               SizedBox(
                 width: double.infinity,
-                height: 40,
+                height: 30,
                 child: Center(
                   child: DropdownButtonFormField2<int>(
                     style: TextStyle(
@@ -373,7 +376,7 @@ class Constants {
                                 ),
                               ),
                             ),
-                      floatingLabelBehavior: FloatingLabelBehavior.always,
+                      //floatingLabelBehavior: FloatingLabelBehavior.always,
                       // label: Text(''),
                       // labelStyle: TextStyle(
                       //     fontWeight: FontWeight.bold, color: Colors.brown),
@@ -400,6 +403,7 @@ class Constants {
                       //contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                     ),
                     dropdownStyleData: DropdownStyleData(
+                        padding: EdgeInsets.zero,
                         maxHeight: 200,
                         decoration: BoxDecoration(
                             color: Color(0xfffffcf6),

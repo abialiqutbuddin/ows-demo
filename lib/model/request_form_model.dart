@@ -27,8 +27,14 @@ class RequestFormModel {
   String applyDate;
   String mohalla;
   String cnic;
+  String fatherCnic;
+  String motherCnic;
+  bool hasGuardian;
+  String gender;
   String? address;
   String? dob;
+  int? draftId;
+  int? appId;
 
   RequestFormModel({
     this.reqId,
@@ -58,6 +64,12 @@ class RequestFormModel {
     required this.applyDate,
     required this.mohalla,
     required this.cnic,
+    required this.fatherCnic,
+    required this.motherCnic,
+    required this.hasGuardian,
+    required this.gender,
+    this.draftId,
+    this.appId,
     this.address,
     this.dob,
   });
@@ -90,8 +102,14 @@ class RequestFormModel {
     String? applyDate,
     String? mohalla,
     String? address,
+    String? fatherCnic,
+    String? motherCnic,
+    bool? hasGuardian,
+    String? gender,
     String? dob,
     String? cnic,
+    int? draftId,
+    int? appId,
   }) {
     return RequestFormModel(
       reqId: reqId ?? this.reqId,
@@ -121,8 +139,14 @@ class RequestFormModel {
       applyDate: applyDate ?? this.applyDate,
       mohalla: mohalla ?? this.mohalla,
       address: address ?? this.address,
+      hasGuardian: hasGuardian ?? this.hasGuardian,
+      gender: gender ?? this.gender,
+      fatherCnic: fatherCnic ?? this.fatherCnic,
+      motherCnic: motherCnic ?? this.motherCnic,
       cnic: cnic ?? this.cnic,
       dob: dob ?? this.dob,
+      draftId: draftId ?? this.draftId,
+      appId: appId ?? this.appId,
     );
   }
 
@@ -157,6 +181,12 @@ class RequestFormModel {
       cnic: json['cnic'] ?? '',
       studentFirstName: json['studentFirstName'] ?? '',
       studentFullName: json['studentFullName'] ?? '',
+      fatherCnic: json['fatherCnic'] ?? '',
+      motherCnic: json['motherCnic'] ?? '',
+      hasGuardian: json['hasGuardian'] ?? '',
+      gender: json['gender'] ?? '',
+      draftId: json['draft_id'],
+      appId: json['app_id'],
     );
   }
 
@@ -189,8 +219,14 @@ class RequestFormModel {
       'applyDate': applyDate,
       'mohalla': mohalla,
       'address': address,
+      'fatherCnic': fatherCnic,
+      'motherCnic': motherCnic,
+      'gender': gender,
+      'hasGuardian': hasGuardian,
       'cnic': cnic,
       'dob': dob,
+      'draft_id': draftId,
+      'application_id': appId,
     };
   }
 
@@ -226,6 +262,10 @@ RequestFormModel(
   address: $address
   dob: $dob
   cnic: $cnic
+  fatherCnic: $fatherCnic
+  motherCnic: $motherCnic
+  hasGuardian: $hasGuardian
+  gender: $gender
 )
     ''';
   }
